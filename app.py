@@ -6,6 +6,7 @@ command = 'python relay_control.py'
 ssh = None
 stdin = None
 
+#Test
 # Function to establish the SSH connection
 def establish_ssh_connection():
     global ssh, stdin
