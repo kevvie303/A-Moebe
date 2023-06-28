@@ -1,25 +1,36 @@
 from flask import Flask, render_template, request
 import paramiko
+import atexit
+
 
 app = Flask(__name__)
 command = 'python relay_control.py'
 ssh = None
 stdin = None
 
-#Test
-# Function to establish the SSH connection
+
+def turn_on_api():
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect('192.168.1.19', username='pi', password='VerkoopBrood312')
+    ssh.exec_command('python status.py')
+    establish_ssh_connection()
+
 def establish_ssh_connection():
     global ssh, stdin
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect('192.168.1.19', username='pi', password='VerkoopBrood312')
-    ssh.exec_command('python read.py')
-    ssh.exec_command('python keypad.py')
     stdin = ssh.exec_command(command)[0]
 
-#def execute_status_script():
-    #ssh.exec_command('python status.py')
-# Function to turn on the maglock
+# Function to execute the delete-locks.py script
+def execute_delete_locks_script():
+    ssh.exec_command('python delete-locks.py')
+
+def start_scripts():
+    ssh.exec_command('python read.py')
+    ssh.exec_command('python keypad.py')
+
 def turn_on_maglock(maglock):
 
     if maglock == '1':
@@ -62,8 +73,17 @@ def turn_off():
     maglock = request.form['maglock']
     return turn_off_maglock(maglock)
 
+def cleanup():
+    execute_delete_locks_script()
+    ssh.exec_command('pkill -f status.py')
+    ssh.exec_command('pkill -f keypad.py')
+    ssh.exec_command('pkill -f read.py')
+    ssh.close()
+
 if __name__ == '__main__':
-    establish_ssh_connection()
+    turn_on_api()
+    start_scripts()
+    atexit.register(cleanup)
     #execute_status_script()
 
     app.run(port = 8000)
