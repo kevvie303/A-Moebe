@@ -1,0 +1,137 @@
+/* styles.css */
+
+body {
+    background-color: #92d1e0; 
+    font-family: "CustomFont";
+  }
+
+@font-face {
+    font-family: "CustomFont"; 
+    src: url('Toadler.ttf') format('truetype'); /
+}
+  
+button {
+    font-family: "CustomFont";
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+    display: block;
+    width: 100%;
+}
+
+button.turn-off-button {
+    background-color: #FF0000;
+}
+
+button:hover {
+    background-color: black;
+}
+
+h1 {
+    text-align: center;
+    margin-top: 20px;
+}
+.button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.column {
+    margin: 10px;
+}
+
+h2 {
+    text-align: center;
+}
+.status {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 12px;
+}
+.game-container {
+    display: flex;
+    flex-direction: column; /* Align buttons vertically */
+    align-items: center; /* Center buttons horizontally */
+    margin-top: 20px;
+}
+.timer-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 20px;
+    margin-right: 20px;
+    font-size: 40px;
+  }
+  
+.timer-container div {
+    margin-bottom: 10px;
+}
+
+#speed-display {
+    position: absolute;
+    text-align: center; 
+    top: 0;
+    right: 0;
+    margin-top: 125px;
+    margin-right: 58px;
+    font-size: 40px;
+}
+
+.logo-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex; /* Use flexbox to align items horizontally */
+    flex-direction: column; /* Arrange items vertically */
+    align-items: center; /* Center items horizontally */
+  }
+  
+  .logo-container img {
+    width: 200px; /* Adjust the width to your preference */
+    height: auto; /* Maintain the image's aspect ratio */
+    margin-bottom: 10px; /* Add some spacing between the image and text */
+  }
+  
+  .logo-container span {
+    font-size: 18px; /* Adjust the font size to your preference */
+    font-weight: bold;
+    color: black; /* Set the text color to white */
+  }
+  
+  #start-game-button,
+  #end-game-button {
+      background-color: #007bff; /* Change the button's background color */
+      margin: 10px;
+      margin-top: 20px;
+      width: 150px; /* Adjust the button width as desired */
+  }
+  #start-game-button:hover,
+  #end-game-button:hover {
+    background-color: black;
+  }
+  #slow-down-button {
+    position: absolute;
+    top: 175px;
+    right: 0;
+    width: 150px; /* Adjust the button width as desired */
+    margin: 10px;
+  }
+  #speed-up-button {
+    position: absolute;
+    top: 175px;
+    right: 185px;
+    width: 150px; /* Adjust the button width as desired */
+    margin: 10px;
+  }
+  #reset-button {
+    position: absolute;
+    top: 225px;
+    right: 92.5px;
+    width: 150px; /* Adjust the button width as desired */
+    margin: 10px;
+  }

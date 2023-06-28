@@ -1,0 +1,190 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Maglock Control</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="static/favicon.png" type="image/png">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <div class="logo-container">
+        <img src="static/favicon.png" alt="Logo">
+        <span>A-Moebe Beta</span>
+    </div>
+</head>
+<body>
+
+    <h1>Maglock Control</h1>
+    <div class="button-container">
+        <div class="column">
+            <h2>Lock</h2>
+            <button class="turn-on-button" data-maglock="1">entrance-door-lock</button>
+            <button class="turn-on-button" data-maglock="2">doghouse-lock</button>
+        </div>
+        <div class="column">
+            <h2>Unlock</h2>
+            <button class="turn-off-button" data-maglock="0">entrance-door-lock</button>
+            <button class="turn-off-button" data-maglock="-1">doghouse-lock</button>
+        </div>
+    </div>
+    <div class="game-container">
+        <button id="start-game-button">Start Game</button>
+        <button id="end-game-button">End game</button>
+        <div class="timer-container">
+            <div>
+                <span>Time Played:</span>
+                <span id="time-played">0:00</span>
+            </div>
+            <div>
+                <span>Time Left:</span>
+                <span id="time-left">60:00</span>
+            </div>
+        </div>
+        <div class="button-container">
+            <button id="speed-up-button">Speed Up</button>
+            <button id="slow-down-button">Slow Down</button>
+        </div>
+        <div class="button-container">
+            <button id="reset-button">Reset Speed</button>
+            <div id="speed-display">Timer Speed: 1x</div>
+        </div>
+        <div>
+            <h3>Maglock 1 Status: <span id="maglock1-status"></span></h3>
+          </div>
+          
+          <div>
+            <h3>Maglock 2 Status: <span id="maglock2-status"></span></h3>
+          </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            // Handle turn on button click
+            $('.turn-on-button').click(function() {
+                var maglock = $(this).data('maglock');
+                $.ajax({
+                    type: 'POST',
+                    url: '/turn_on',
+                    data: {maglock: maglock},
+                    success: function(response) {
+                        console.log(response);
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            });
+
+            // Handle turn off button click
+            $('.turn-off-button').click(function() {
+                var maglock = $(this).data('maglock');
+                $.ajax({
+                    type: 'POST',
+                    url: '/turn_off',
+                    data: {maglock: maglock},
+                    success: function(response) {
+                        console.log(response);
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
+<script>
+$(document).ready(function() {
+  function updateMaglockStatus(maglockNumber) {
+    $.ajax({
+      type: 'GET',
+      url: 'http://192.168.1.19:5000/maglock/status/' + maglockNumber,
+      success: function(response) {
+        var maglockStatus = response.status;
+        var maglockStatusText = maglockStatus === 'locked' ? 'Locked' : 'Unlocked';
+
+        if (maglockNumber === 1) {
+          $('#maglock1-status').text(maglockStatusText);
+        } else if (maglockNumber === 2) {
+          $('#maglock2-status').text(maglockStatusText);
+        }
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
+  }
+
+  // Update maglock status on page load
+  updateMaglockStatus(1);
+  updateMaglockStatus(2);
+
+    // Update maglock statuses periodically
+    setInterval(function() {
+        updateMaglockStatus(1);
+        updateMaglockStatus(2);
+    }, 500); // Update every 2 seconds
+});
+</script>
+    <script>
+        $(document).ready(function() {
+            var timePlayed = 0;
+            var timeLeft = 3600; // 60 minutes in seconds
+            var intervalId;
+            var speed = 1;
+
+            function updateTimers() {
+                var formattedTimePlayed = formatTime(timePlayed);
+                var formattedTimeLeft = formatTime(timeLeft);
+
+                $('#time-played').text(formattedTimePlayed);
+                $('#time-left').text(formattedTimeLeft);
+            }
+
+            function formatTime(seconds) {
+                var minutes = Math.floor(seconds / 60);
+                var remainingSeconds = seconds % 60;
+                return minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds.toFixed(0);
+            }
+
+            function updateSpeedDisplay() {
+                $('#speed-display').text('Timer Speed: ' + speed + 'x');
+            }
+
+            $('#start-game-button').click(function() {
+                intervalId = setInterval(function() {
+                    timePlayed++;
+                    timeLeft = Math.max(0, timeLeft - speed);
+                    updateTimers();
+                }, 1000);
+            });
+
+            $('#speed-up-button').click(function() {
+                speed += 0.1;
+                updateSpeedDisplay();
+            });
+
+            $('#slow-down-button').click(function() {
+                speed -= 0.1;
+                updateSpeedDisplay();
+            });
+
+            $('#reset-button').click(function() {
+                speed = 1;
+                updateSpeedDisplay();
+            });
+            var gameEnded = false; // Track if game is already ended
+
+            // Handle end game button click
+            $('#end-game-button').click(function() {
+                if (!gameEnded) {
+                    clearInterval(intervalId); // Stop the timer
+                    gameEnded = true; // Set game ended flag
+                } else {
+                    timePlayed = 0; // Reset the time played
+                    timeLeft = 3600; // Reset the time left to 60 minutes
+                    updateTimers(); // Update the displayed timers
+                    gameEnded = false; // Reset game ended flag
+                }
+            });
+        });
+    </script>
+</body>
+</html>
