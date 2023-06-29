@@ -47,6 +47,11 @@
             <button id="reset-button">Reset Speed</button>
             <div id="speed-display">Timer Speed: 1x</div>
         </div>
+        <div class="button-container">
+            <button id="select-file-button">Select Song</button>
+            <button id="stop-music-button">Stop Music</button>
+            <button id="add-music-button">Add media to the PI</button>
+        </div>
         <div>
             <h3>Maglock 1 Status: <span id="maglock1-status"></span></h3>
           </div>
@@ -55,157 +60,6 @@
             <h3>Maglock 2 Status: <span id="maglock2-status"></span></h3>
           </div>
     </div>
-    <script>
-        $(document).ready(function() {
-            // Handle turn on button click
-            $('.turn-on-button').click(function() {
-                var maglock = $(this).data('maglock');
-                $.ajax({
-                    type: 'POST',
-                    url: '/turn_on',
-                    data: {maglock: maglock},
-                    success: function(response) {
-                        console.log(response);
-                    },
-                    error: function(error) {
-                        console.log(error);
-                    }
-                });
-            });
-
-            // Handle turn off button click
-            $('.turn-off-button').click(function() {
-                var maglock = $(this).data('maglock');
-                $.ajax({
-                    type: 'POST',
-                    url: '/turn_off',
-                    data: {maglock: maglock},
-                    success: function(response) {
-                        console.log(response);
-                    },
-                    error: function(error) {
-                        console.log(error);
-                    }
-                });
-            });
-        });
-    </script>
-<script>
-$(document).ready(function() {
-  function updateMaglockStatus(maglockNumber) {
-    $.ajax({
-      type: 'GET',
-      url: 'http://192.168.1.19:5000/maglock/status/' + maglockNumber,
-      success: function(response) {
-        var maglockStatus = response.status;
-        var maglockStatusText = maglockStatus === 'locked' ? 'Locked' : 'Unlocked';
-
-        if (maglockNumber === 1) {
-          $('#maglock1-status').text(maglockStatusText);
-        } else if (maglockNumber === 2) {
-          $('#maglock2-status').text(maglockStatusText);
-        }
-      },
-      error: function(error) {
-        console.log(error);
-      }
-    });
-  }
-
-  // Update maglock status on page load
-  updateMaglockStatus(1);
-  updateMaglockStatus(2);
-
-    // Update maglock statuses periodically
-    setInterval(function() {
-        updateMaglockStatus(1);
-        updateMaglockStatus(2);
-    }, 500); // Update every 2 seconds
-});
-</script>
-    <script>
-        $(document).ready(function() {
-            var timePlayed = 0;
-            var timeLeft = 3600; // 60 minutes in seconds
-            var intervalId;
-            var speed = 1;
-
-            function updateTimers() {
-                var formattedTimePlayed = formatTime(timePlayed);
-                var formattedTimeLeft = formatTime(timeLeft);
-
-                $('#time-played').text(formattedTimePlayed);
-                $('#time-left').text(formattedTimeLeft);
-            }
-
-            function formatTime(seconds) {
-                var minutes = Math.floor(seconds / 60);
-                var remainingSeconds = seconds % 60;
-                return minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds.toFixed(0);
-            }
-
-            function updateSpeedDisplay() {
-                $('#speed-display').text('Timer Speed: ' + speed + 'x');
-            }
-
-            $('#start-game-button').click(function() {
-                        // Add an AJAX request to trigger the command on the server side
-                $.ajax({
-                    type: 'POST',
-                    url: '/play_music',
-                success: function(response) {
-                    console.log(response);
-                },
-                error: function(error) {
-                    console.log(error);
-                }
-            });
-                intervalId = setInterval(function() {
-                    timePlayed++;
-                    timeLeft = Math.max(0, timeLeft - speed);
-                    updateTimers();
-                }, 1000);
-            });
-
-            $('#speed-up-button').click(function() {
-                speed += 0.1;
-                updateSpeedDisplay();
-            });
-
-            $('#slow-down-button').click(function() {
-                speed -= 0.1;
-                updateSpeedDisplay();
-            });
-
-            $('#reset-button').click(function() {
-                $.ajax({
-                    type: 'POST',
-                    url: '/pause_music',
-                    success: function(response) {
-                        console.log(response);
-                    },
-                    error: function(error) {
-                        console.log(error);
-                    }
-                });
-                speed = 1;
-                updateSpeedDisplay();
-            });
-            var gameEnded = false; // Track if game is already ended
-
-            // Handle end game button click
-            $('#end-game-button').click(function() {
-                if (!gameEnded) {
-                    clearInterval(intervalId); // Stop the timer
-                    gameEnded = true; // Set game ended flag
-                } else {
-                    timePlayed = 0; // Reset the time played
-                    timeLeft = 3600; // Reset the time left to 60 minutes
-                    updateTimers(); // Update the displayed timers
-                    gameEnded = false; // Reset game ended flag
-                }
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='sketch.js') }}"></script>
 </body>
 </html>

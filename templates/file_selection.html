@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Selection</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>File Selection</h1>
+    <ul>
+        {% for file in music_files %}
+            <li>
+                {{ file }}
+                <button class="play-button" data-file="{{ file }}">Play</button>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <script src="{{ url_for('static', filename='sketch.js') }}"></script>
+</body>
+</html>

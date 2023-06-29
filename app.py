@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import paramiko
 import atexit
-
+import os
 
 app = Flask(__name__)
 command = 'python relay_control.py'
@@ -35,15 +35,59 @@ def start_scripts():
     ssh.exec_command('python read.py')
     ssh.exec_command('python keypad.py')
 
+@app.route('/add_music', methods=['POST'])
+def add_music():
+    file = request.files['file']
+    if file:
+        try:
+            # Create an SFTP client to transfer the file
+            sftp = pi2.open_sftp()
+            
+            # Get the file name and extension
+            filename, file_extension = os.path.splitext(file.filename)
+            
+            # Modify the file path to be relative to the Flask application
+            local_path = os.path.join(app.root_path, 'uploads', file.filename)
+            
+            # Save the file to the modified local path
+            file.save(local_path)
+            
+            # Save the file to the Music folder on the Pi
+            remote_path = '/home/pi/Music/' + filename + file_extension
+            sftp.put(local_path, remote_path)
+            
+            # Close the SFTP client
+            sftp.close()
+            
+            # Delete the local file after transferring
+            os.remove(local_path)
+            
+            return 'Music added successfully!'
+        except IOError as e:
+            return f'Error: {str(e)}'
+        finally:
+            # Close the SSH connection
+            print("h")
+    else:
+        return 'No file selected.'
+
+@app.route('/file_selection')
+def file_selection():
+    stdin, stdout, stderr = pi2.exec_command('ls ~/Music')
+    music_files = stdout.read().decode().splitlines()
+    return render_template('file_selection.html', music_files=music_files)
+
 @app.route('/play_music', methods=['POST'])
 def play_music():
-    pi2.exec_command('mpg123 Music/fox.mp3')
-    return 'Music played on pi2'
+    selected_file = request.form['file']
+    pi2.exec_command(f'mpg123 Music/{selected_file} &')
+    return 'Music started on pi2'
 
-@app.route('/pause_music', methods=['POST'])
-def pause_music():
-    pi2.exec_command('pkill -STOP mpg123')
+@app.route('/stop_music', methods=['POST'])
+def stop_music():
+    stdin, stdout, stderr = pi2.exec_command('pkill -9 mpg123')
     return 'Music stopped on pi2'
+
 
 def turn_on_maglock(maglock):
 
