@@ -149,6 +149,17 @@ $(document).ready(function() {
             }
 
             $('#start-game-button').click(function() {
+                        // Add an AJAX request to trigger the command on the server side
+                $.ajax({
+                    type: 'POST',
+                    url: '/play_music',
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
                 intervalId = setInterval(function() {
                     timePlayed++;
                     timeLeft = Math.max(0, timeLeft - speed);
@@ -167,6 +178,16 @@ $(document).ready(function() {
             });
 
             $('#reset-button').click(function() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/pause_music',
+                    success: function(response) {
+                        console.log(response);
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
                 speed = 1;
                 updateSpeedDisplay();
             });

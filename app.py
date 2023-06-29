@@ -21,6 +21,7 @@ def establish_ssh_connection():
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect('192.168.1.19', username='pi', password='VerkoopBrood312')
+    stdin = ssh.exec_command(command)[0]
     global pi2
     pi2 = paramiko.SSHClient()
     pi2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -31,9 +32,18 @@ def execute_delete_locks_script():
     ssh.exec_command('python delete-locks.py')
 
 def start_scripts():
-    pi2.exec_command('sudo reboot')
     ssh.exec_command('python read.py')
     ssh.exec_command('python keypad.py')
+
+@app.route('/play_music', methods=['POST'])
+def play_music():
+    pi2.exec_command('mpg123 Music/fox.mp3')
+    return 'Music played on pi2'
+
+@app.route('/pause_music', methods=['POST'])
+def pause_music():
+    pi2.exec_command('pkill -STOP mpg123')
+    return 'Music stopped on pi2'
 
 def turn_on_maglock(maglock):
 
