@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 import paramiko
 import atexit
 import os
+import requests
 
 app = Flask(__name__)
 command = 'python relay_control.py'
@@ -32,6 +33,7 @@ def execute_delete_locks_script():
     ssh.exec_command('python delete-locks.py')
 
 def start_scripts():
+    pi2.exec_command('python status.py')
     ssh.exec_command('python read.py')
     ssh.exec_command('python keypad.py')
 
@@ -128,6 +130,20 @@ def stop_music():
     stdin, stdout, stderr = pi2.exec_command('pkill -9 mpg123')
     return 'Music stopped on pi2'
 
+@app.route('/pause_music', methods=['POST'])
+def pause_music():
+    # Execute the command to pause the music using mpg123
+    command = 'mpg123 -s'
+    stdin, stdout, stderr = pi2.exec_command(command)
+    
+    output = stdout.read().decode()
+    error = stderr.read().decode()
+    
+    print('Command output:', output)
+    print('Command error:', error)
+    
+    return 'Music paused on the Pi'
+
 
 def turn_on_maglock(maglock):
 
@@ -157,6 +173,23 @@ def turn_off_maglock(maglock):
 
     return 'Maglock turned off'
 
+
+API_URL = 'http://192.168.1.28:5001/current_state'
+
+@app.route('/get_state', methods=['GET'])
+def get_state():
+    try:
+        # Make a GET request to the API to fetch the current state
+        response = requests.get(API_URL)
+        if response.status_code == 200:
+            state = response.json().get('state')
+        else:
+            state = 'unknown'
+    except requests.exceptions.RequestException:
+        state = 'unknown'
+    
+    return jsonify({'state': state})
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -174,6 +207,7 @@ def turn_off():
 def cleanup():
     execute_delete_locks_script()
     ssh.exec_command('pkill -f status.py')
+    pi2.exec_command('pkill -f status.py')
     ssh.exec_command('pkill -f keypad.py')
     ssh.exec_command('pkill -f read.py')
     ssh.close()

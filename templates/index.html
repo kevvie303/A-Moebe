@@ -50,8 +50,9 @@
         <div class="button-container">
             <button id="select-file-button">Select Song</button>
             <button id="stop-music-button">Stop Music</button>
+            <button id="pause-music-button">Pause Music</button>
             <button id="add-music-button">Add media to the PI</button>
-            <button onclick="location.href='/media_control'">Control Media</button>
+            <button onclick="openMediaControlPage()">Control Media</button>
         </div>
         <div>
             <h3>Maglock 1 Status: <span id="maglock1-status"></span></h3>
@@ -60,6 +61,9 @@
           <div>
             <h3>Maglock 2 Status: <span id="maglock2-status"></span></h3>
           </div>
+    </div>
+    <div id="current-state">
+        <p>Walkman: {{ state }}</p>
     </div>
     <script src="{{ url_for('static', filename='sketch.js') }}"></script>
 </body>

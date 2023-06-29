@@ -230,4 +230,37 @@ $(document).ready(function() {
                 }
             });
         });
-    
+function openMediaControlPage() {
+    window.open('/media_control', '_blank', 'height=400,width=400');
+}
+$(document).ready(function() {
+    $('#pause-music-button').click(function() {
+        $.ajax({
+            type: 'POST',
+            url: '/pause_music',
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
+});
+
+function updateState() {
+    $.ajax({
+        url: "/get_state", // Endpoint in your app.py to fetch the state
+        type: "GET",
+        success: function(response) {
+            var state = response.state;
+            $("#current-state").text("Walkman: " + state);
+        },
+        error: function() {
+            $("#current-state").text("Walkman: unknown");
+        }
+    });
+}
+
+// Update the state every 5 seconds (5000 milliseconds)
+setInterval(updateState, 5000);
