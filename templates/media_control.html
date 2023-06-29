@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Media Control</title>
+</head>
+<body>
+    <h1>Media Control</h1>
+    <h2>Available MP3 Files:</h2>
+    <ul>
+        {% for file in mp3_files %}
+            <li>{{ file }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Delete MP3 Files:</h2>
+    <form action="/delete_music" method="post">
+        <select name="file">
+            {% for file in mp3_files %}
+                <option value="{{ file }}">{{ file }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Delete">
+    </form>
+</body>
+</html>

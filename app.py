@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 import paramiko
 import atexit
 import os
@@ -70,6 +70,46 @@ def add_music():
             print("h")
     else:
         return 'No file selected.'
+
+@app.route('/media_control')
+def media_control():
+    try:
+        # Create an SFTP client to list files in the Music folder
+        sftp = pi2.open_sftp()
+        
+        # List all MP3 files in the Music folder
+        remote_path = '/home/pi/Music'
+        mp3_files = [file for file in sftp.listdir(remote_path) if file.endswith('.mp3')]
+        
+        return render_template('media_control.html', mp3_files=mp3_files)
+    except IOError as e:
+        return f'Error: {str(e)}'
+    finally:
+        # Close the SFTP client and SSH connection
+        sftp.close()
+
+@app.route('/delete_music', methods=['POST'])
+def delete_music():
+    file = request.form.get('file')
+    if file:
+
+        try:
+            # Create an SFTP client to delete the selected file
+            sftp = pi2.open_sftp()
+            
+            # Delete the selected file from the Music folder
+            remote_path = '/home/pi/Music/' + file
+            sftp.remove(remote_path)
+            
+            return redirect('/media_control')
+        except IOError as e:
+            return f'Error: {str(e)}'
+        finally:
+            # Close the SFTP client and SSH connection
+            sftp.close()
+    else:
+        return 'No file selected.'
+
 
 @app.route('/file_selection')
 def file_selection():
