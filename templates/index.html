@@ -1,70 +1,80 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Maglock Control</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="icon" href="static/favicon.png" type="image/png">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Retriever</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="static/img/favicon.png" type="image/png">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <div class="logo-container">
-        <img src="static/favicon.png" alt="Logo">
-        <span>A-Moebe Beta</span>
-    </div>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='addons/bootstrap.css')}}">
 </head>
 <body>
 
-    <h1>Maglock Control</h1>
-    <div class="button-container">
-        <div class="column">
-            <h2>Lock</h2>
-            <button class="turn-on-button" data-maglock="1">entrance-door-lock</button>
-            <button class="turn-on-button" data-maglock="2">doghouse-lock</button>
+    <div class="container">
+        <div class="row">
+        <div class="col-12 col-lg-4 spacing">
+            <figure class="logo-container">
+                <img src="static/img/favicon.png" alt="Logo">
+                <figcaption>A-Moebe Beta</figcaption>
+            </figure>
         </div>
-        <div class="column">
-            <h2>Unlock</h2>
-            <button class="turn-off-button" data-maglock="0">entrance-door-lock</button>
-            <button class="turn-off-button" data-maglock="-1">doghouse-lock</button>
-        </div>
-    </div>
-    <div class="game-container">
-        <button id="start-game-button">Start Game</button>
-        <button id="end-game-button">End game</button>
-        <div class="timer-container">
-            <div>
-                <span>Time Played:</span>
-                <span id="time-played">0:00</span>
+
+        <div class="col-12 col-lg-4 spacing">
+            <h1>Retriever</h1>
+
+            <div class="container locks">
+                <div class="row">
+                    <div class="col-6">
+                        <h2>Lock</h2>
+                        <button class="turn-on-button" data-maglock="1">entrance-door-lock</button>
+                        <button class="turn-on-button" data-maglock="2">doghouse-lock</button>
+                    </div>
+                    <div class="col-6">
+                        <h2>Unlock</h2>
+                        <button class="turn-off-button" data-maglock="0">entrance-door-lock</button>
+                        <button class="turn-off-button" data-maglock="-1">doghouse-lock</button>
+                    </div>
+                </div>
             </div>
-            <div>
-                <span>Time Left:</span>
-                <span id="time-left">60:00</span>
+
+            <div class="container game-buttons">
+                <button id="start-game-button">Start Game</button>
+                <button id="end-game-button">End game</button>
+            </div>
+
+            <div class="container media-buttons">
+                <button id="select-file-button">Select Song</button>
+                <button id="stop-music-button">Stop Music</button>
+                <button id="pause-music-button">Pause Music</button>
+                <button id="add-music-button">Add media to the PI</button>
+                <button onclick="openMediaControlPage()">Control Media</button>
+            </div>
+
+            <h3>Maglock 1 Status: <strong id="maglock1-status"></strong></h3>
+            <h3>Maglock 2 Status: <strong id="maglock2-status"></strong></h3>
+        </div>
+
+        <div class="col-12 col-lg-4 spacing">
+            <h3>Time Played: <strong id="time-played">0:00</strong></h3>
+            <h3>Time Left: <strong id="time-left">60:00</strong></h3>
+            <h3 id="speed-display">Timer Speed: 1x</h3>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-4">
+                        <button id="speed-up-button">Speed Up</button>
+                        <button id="slow-down-button">Slow Down</button>
+                        <button id="reset-button">Reset Speed</button>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="button-container">
-            <button id="speed-up-button">Speed Up</button>
-            <button id="slow-down-button">Slow Down</button>
         </div>
-        <div class="button-container">
-            <button id="reset-button">Reset Speed</button>
-            <div id="speed-display">Timer Speed: 1x</div>
-        </div>
-        <div class="button-container">
-            <button id="select-file-button">Select Song</button>
-            <button id="stop-music-button">Stop Music</button>
-            <button id="pause-music-button">Pause Music</button>
-            <button id="add-music-button">Add media to the PI</button>
-            <button onclick="openMediaControlPage()">Control Media</button>
-        </div>
-        <div>
-            <h3>Maglock 1 Status: <span id="maglock1-status"></span></h3>
-          </div>
-          
-          <div>
-            <h3>Maglock 2 Status: <span id="maglock2-status"></span></h3>
-          </div>
     </div>
     <div id="current-state">
         <p>Walkman: {{ state }}</p>
     </div>
-    <script src="{{ url_for('static', filename='sketch.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
 </body>
 </html>

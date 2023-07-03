@@ -1,13 +1,18 @@
-/* styles.css */
+/* variables */
+
+:root {
+  --primary-color: #92d1e0;
+
+}
 
 body {
-    background-color: #92d1e0; 
+    background-color: var(--primary-color); 
     font-family: "CustomFont";
   }
 
 @font-face {
     font-family: "CustomFont"; 
-    src: url('Toadler.ttf') format('truetype'); /
+    src: url('../fonts/Toadler.ttf') format('truetype'); /
 }
   
 button {

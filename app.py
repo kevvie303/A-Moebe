@@ -9,7 +9,7 @@ command = 'python relay_control.py'
 ssh = None
 stdin = None
 pi2 = None
-romy = True
+romy = False
 
 if romy == False:
 
@@ -220,4 +220,3 @@ if __name__ == '__main__':
     #execute_status_script()
 
     app.run(port = 8000)
-# gychfg
