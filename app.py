@@ -245,5 +245,5 @@ if __name__ == '__main__':
         atexit.register(cleanup)
     #execute_status_script()
 
-    app.run(port = 8000)
+    app.run(host='0.0.0.0', port=8000)
 # gychf
