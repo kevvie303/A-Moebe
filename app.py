@@ -2,14 +2,20 @@ from flask import Flask, render_template, request, redirect, jsonify
 import paramiko
 import atexit
 import os
+import time
 import requests
+import signal
 
 app = Flask(__name__)
 command = 'python relay_control.py'
 ssh = None
 stdin = None
 pi2 = None
-romy = True
+romy = False
+fade_duration = 3  # Fade-out duration in seconds
+fade_interval = 0.1  # Interval between volume adjustments in seconds
+fade_steps = int(fade_duration / fade_interval)  # Number of fade steps
+
 
 if romy == False:
 
@@ -45,29 +51,34 @@ if romy == False:
         file = request.files['file']
         if file:
             try:
-                # Create an SFTP client to transfer the file
-                sftp = pi2.open_sftp()
-                
-                # Get the file name and extension
+                # Get the file extension
                 filename, file_extension = os.path.splitext(file.filename)
                 
-                # Modify the file path to be relative to the Flask application
-                local_path = os.path.join(app.root_path, 'uploads', file.filename)
-                
-                # Save the file to the modified local path
-                file.save(local_path)
-                
-                # Save the file to the Music folder on the Pi
-                remote_path = '/home/pi/Music/' + filename + file_extension
-                sftp.put(local_path, remote_path)
-                
-                # Close the SFTP client
-                sftp.close()
-                
-                # Delete the local file after transferring
-                os.remove(local_path)
-                
-                return 'Music added successfully!'
+                # Check if the file extension is allowed
+                allowed_extensions = ['.mp3', '.wav', '.ogg']
+                if file_extension.lower() in allowed_extensions:
+                    # Create an SFTP client to transfer the file
+                    sftp = pi2.open_sftp()
+                    
+                    # Modify the file path to be relative to the Flask application
+                    local_path = os.path.join(app.root_path, 'uploads', file.filename)
+                    
+                    # Save the file to the modified local path
+                    file.save(local_path)
+                    
+                    # Save the file to the Music folder on the Pi
+                    remote_path = '/home/pi/Music/' + filename + file_extension
+                    sftp.put(local_path, remote_path)
+                    
+                    # Close the SFTP client
+                    sftp.close()
+                    
+                    # Delete the local file after transferring
+                    os.remove(local_path)
+                    
+                    return 'Music added successfully!'
+                else:
+                    return 'Invalid file type. Only .mp3, .wav, and .ogg files are allowed.'
             except IOError as e:
                 return f'Error: {str(e)}'
             finally:
@@ -75,6 +86,7 @@ if romy == False:
                 print("h")
         else:
             return 'No file selected.'
+
 
     @app.route('/media_control')
     def media_control():
@@ -122,30 +134,44 @@ if romy == False:
         music_files = stdout.read().decode().splitlines()
         return render_template('file_selection.html', music_files=music_files)
 
+    # Global variable to keep track of the currently playing music file
+    current_file = None
+
+    @app.route('/pause_music', methods=['POST'])
+    def pause_music():
+        global current_file
+        if current_file:
+            # Pause the music by sending the SIGSTOP signal to the mpg123 process
+            command = f'pkill -STOP -f "mpg123 Music/{current_file}"'
+            pi2.exec_command(command)
+            return 'Music paused on pi2'
+        else:
+            return 'No music is currently playing'
+
+    @app.route('/resume_music', methods=['POST'])
+    def resume_music():
+        global current_file
+        if current_file:
+            # Resume the music by sending the SIGCONT signal to the mpg123 process
+            command = f'pkill -CONT -f "mpg123 Music/{current_file}"'
+            pi2.exec_command(command)
+            return 'Music resumed on pi2'
+        else:
+            return 'No music is currently playing'
+
     @app.route('/play_music', methods=['POST'])
     def play_music():
+        global current_file
         selected_file = request.form['file']
-        pi2.exec_command(f'mpg123 Music/{selected_file} &')
+        current_file = selected_file
+        command = f'mpg123 Music/{selected_file} &'
+        pi2.exec_command(command)
         return 'Music started on pi2'
 
     @app.route('/stop_music', methods=['POST'])
     def stop_music():
         stdin, stdout, stderr = pi2.exec_command('pkill -9 mpg123')
         return 'Music stopped on pi2'
-
-    @app.route('/pause_music', methods=['POST'])
-    def pause_music():
-        # Execute the command to pause the music using mpg123
-        command = 'mpg123 -s'
-        stdin, stdout, stderr = pi2.exec_command(command)
-        
-        output = stdout.read().decode()
-        error = stderr.read().decode()
-        
-        print('Command output:', output)
-        print('Command error:', error)
-        
-        return 'Music paused on the Pi'
 
 
     def turn_on_maglock(maglock):

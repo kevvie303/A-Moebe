@@ -2,7 +2,7 @@
         $(document).ready(function() {
             $('#add-music-button').click(function() {
                 // Open a file selection dialog when the button is clicked
-                var fileInput = $('<input type="file">');
+                var fileInput = $('<input type="file" accept=".mp3,.ogg,.wav">');
                 fileInput.on('change', function() {
                     var file = fileInput[0].files[0];
                     // Send the selected file to the server
@@ -16,7 +16,7 @@
                         contentType: false,
                         success: function(response) {
                             console.log(response);
-                            alert('Music added successfully!');
+                            //alert('Music added successfully!');
                         },
                         error: function(error) {
                             console.log(error);
@@ -64,11 +64,11 @@ $(document).ready(function() {
             }
         }, 1000); // Adjust the interval as needed
     });
-    $('#stop-music-button').click(function() {
+    $('#pause-music-button').click(function() {
         // Send a request to the server to stop the music
         $.ajax({
             type: 'POST',
-            url: '/stop_music',
+            url: '/pause_music',
             success: function(response) {
                 console.log(response);
             },
@@ -173,17 +173,6 @@ $(document).ready(function() {
             }
 
             $('#start-game-button').click(function() {
-                        // Add an AJAX request to trigger the command on the server side
-            //     $.ajax({
-            //         type: 'POST',
-            //         url: '/play_music',
-            //     success: function(response) {
-            //         console.log(response);
-            //     },
-            //     error: function(error) {
-            //         console.log(error);
-            //     }
-            // });
                 intervalId = setInterval(function() {
                     timePlayed++;
                     timeLeft = Math.max(0, timeLeft - speed);
@@ -234,10 +223,25 @@ function openMediaControlPage() {
     window.open('/media_control', '_blank', 'height=400,width=400');
 }
 $(document).ready(function() {
-    $('#pause-music-button').click(function() {
+    $('#resume-music-button').click(function() {
         $.ajax({
             type: 'POST',
-            url: '/pause_music',
+            url: '/resume_music',
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
+});
+
+$(document).ready(function() {
+    $('#stop-music-button').click(function() {
+        $.ajax({
+            type: 'POST',
+            url: '/stop_music',
             success: function(response) {
                 console.log(response);
             },
