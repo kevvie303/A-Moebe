@@ -6,6 +6,8 @@ import time
 import requests
 import subprocess
 import signal
+from pydub import AudioSegment
+from pydub.playback import _play_with_pyaudio
 
 app = Flask(__name__)
 command = 'python relay_control.py'
@@ -140,22 +142,71 @@ current_file = None
 @app.route('/pause_music', methods=['POST'])
 def pause_music():
     global current_file
+
     if current_file:
-        # Pause the music by sending the SIGSTOP signal to the mpg123 process
-        command = f'pkill -STOP -f "mpg123 Music/{current_file}"'
-        pi2.exec_command(command)
-        return 'Music paused on pi2'
+        # Fade out the music gradually
+        fade_duration = 2  # Adjust the fade duration as needed
+        fade_interval = 0.1  # Adjust the fade interval as needed
+        max_volume = 100
+
+        # Calculate the step size for volume reduction
+        step_size = max_volume / (fade_duration / fade_interval)
+
+        # Get the process ID of the mpg123 process
+        command = f'pgrep -f "mpg123 Music/{current_file}"'
+        stdin, stdout, stderr = pi2.exec_command(command)
+        process_id = stdout.read().decode().strip()
+
+        if process_id:
+            # Reduce the volume gradually
+            for volume in reversed(range(0, max_volume, int(step_size))):
+                command = f'amixer set Master {volume}%'
+                pi2.exec_command(command)
+                time.sleep(fade_interval)
+
+                # Check if the volume reached 0
+                if volume <= 0:
+                    # Pause the music by sending a SIGSTOP signal to the mpg123 process
+                    command = f'pkill -STOP -f "mpg123 Music/{current_file}"'
+                    pi2.exec_command(command)
+
+            return 'Music paused on pi2'
+        else:
+            return 'No music is currently playing'
     else:
         return 'No music is currently playing'
 
 @app.route('/resume_music', methods=['POST'])
 def resume_music():
     global current_file
+
     if current_file:
-        # Resume the music by sending the SIGCONT signal to the mpg123 process
-        command = f'pkill -CONT -f "mpg123 Music/{current_file}"'
-        pi2.exec_command(command)
-        return 'Music resumed on pi2'
+        # Fade in the music gradually
+        fade_duration = 2  # Adjust the fade duration as needed
+        fade_interval = 0.1  # Adjust the fade interval as needed
+        target_volume = 100  # Adjust the desired volume level
+
+        # Calculate the step size for volume increase
+        step_size = target_volume / (fade_duration / fade_interval)
+
+        # Get the process ID of the mpg123 process
+        command = f'pgrep -f "mpg123 Music/{current_file}"'
+        stdin, stdout, stderr = pi2.exec_command(command)
+        process_id = stdout.read().decode().strip()
+
+        if process_id:
+            # Increase the volume gradually
+            for volume in range(0, target_volume + 1, int(step_size)):
+                command = f'amixer set Master {volume}%'
+                pi2.exec_command(command)
+                time.sleep(fade_interval)
+
+                command = f'pkill -CONT -f "mpg123 Music/{current_file}"'
+                pi2.exec_command(command)
+
+            return 'Music resumed on pi2'
+        else:
+            return 'No music is currently playing'
     else:
         return 'No music is currently playing'
 
