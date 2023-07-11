@@ -1,7 +1,14 @@
 /* custom variables */
 
 :root {
-  --primary-color: #92d1e0;
+  --background-color: #92d1e0;
+
+  --primary-button-color: #4CAF50;
+  --secondary-button-color: #FF0000;
+  --tertiary-button-color: #007bff;
+
+  --text-color: #000000;
+  --secondary-text-color: #ffffff;
 
   --sm: 576px;
   --md: 768px;
@@ -18,15 +25,16 @@
 }
 
 figure {
-  margin-bottom: 0; /* doesn't work */
+  margin-bottom: 0;
 }
 
 h1, h2, h3 {
   font-family: 'Titan One', sans-serif;
 }
 
-p, button, a, figcaption {
+p, button, a, figcaption, strong {
   font-family: 'Averia Serif Libre', sans-serif;
+  font-size: 16px;
 }
 
 img {
@@ -36,7 +44,47 @@ img {
 }
 
 body {
-  background: var(--primary-color); /* doesn't work */
+  background: var(--background-color);
+}
+
+h1 {
+  font-size: 26px;
+}
+
+h2 {
+  font-size: 22px;
+}
+
+h3 {
+  font-size: 20px;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* buttons */
+
+button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  color: var(--secondary-text-color);
+  align-items: center;
+}
+
+.main-button {
+  background: var(--primary-button-color);
+}
+
+.secondary-button {
+  background: var(--secondary-button-color);
+}
+
+.tertiary-button {
+  background: var(--tertiary-button-color);
 }
 
 /* header */
@@ -59,8 +107,59 @@ header .logo-container figcaption {
 
 /* main */
 
-.controls {
+.control-container, .time-container {
   text-align: center;
+}
+
+.control-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0 15px;
+}
+
+.time-container {
+  display: flex;
+  flex-direction: column;
+  margin: 0 15px;
+  gap: 5px;
+}
+
+.control-container .lock-container, .game-buttons, .media-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.control-container .lock-container div, .game-buttons button, .media-buttons button {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.control-container .media-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.time-container .speed-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.time-container .speed-buttons button {
+  width: 100%;
+}
+
+/* footer */
+
+footer {
+  text-align: center;
+  font-style: italic;
+  margin: 20px 0 15px 0;
+
 }
 
 
