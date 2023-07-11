@@ -2,25 +2,30 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Retriever</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fonts/fonts.css')}}">
+    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='addons/bootstrap.css')}}"> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="icon" href="static/img/favicon.png" type="image/png">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='addons/bootstrap.css')}}">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous"> -->
+    
 </head>
 <body>
 
-    <div class="container">
-        <div class="row">
-        <div class="col-12 col-lg-4 spacing">
-            <figure class="logo-container">
-                <img src="static/img/favicon.png" alt="Logo">
-                <figcaption>A-Moebe Beta</figcaption>
-            </figure>
-        </div>
+    <header class="logo">
+        <figure class="logo-container">
+            <img src="static/img/logo.png" alt="Logo">
+            <figcaption>A-Moebe Beta</figcaption>
+        </figure>
+    </header>
 
-        <div class="col-12 col-lg-4 spacing">
+    <div class="container-fluid">
+        <div class="row">
+
+        <div class="col-12 col-lg-6 spacing controls">
             <h1>Retriever</h1>
 
             <div class="container locks">
@@ -38,24 +43,28 @@
                 </div>
             </div>
 
-            <div class="container game-buttons">
+            <section class="container game-buttons">
                 <button id="start-game-button">Start Game</button>
                 <button id="end-game-button">End game</button>
-            </div>
+            </section>
 
             <div class="container media-buttons">
+                <div class="row">
+                    <div class="col-12 col-lg-4">
                 <button id="select-file-button">Select Song</button>
                 <button id="stop-music-button">Stop Music</button>
                 <button id="pause-music-button">Pause Music</button>
                 <button id="add-music-button">Add media to the PI</button>
                 <button onclick="openMediaControlPage()">Control Media</button>
+                    </div>
+                </div>
             </div>
 
-            <h3>Maglock 1 Status: <strong id="maglock1-status"></strong></h3>
-            <h3>Maglock 2 Status: <strong id="maglock2-status"></strong></h3>
+            <h3>Maglock 1 Status: <strong id="maglock1-status">Locked</strong></h3>
+            <h3>Maglock 2 Status: <strong id="maglock2-status">Locked</strong></h3>
         </div>
 
-        <div class="col-12 col-lg-4 spacing">
+        <div class="col-12 col-lg-6 spacing time">
             <h3>Time Played: <strong id="time-played">0:00</strong></h3>
             <h3>Time Left: <strong id="time-left">60:00</strong></h3>
             <h3 id="speed-display">Timer Speed: 1x</h3>
@@ -76,5 +85,6 @@
         <p>Walkman: {{ state }}</p>
     </div>
     <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 </body>
 </html>

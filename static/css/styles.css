@@ -1,10 +1,70 @@
-/* variables */
+/* custom variables */
 
 :root {
   --primary-color: #92d1e0;
 
+  --sm: 576px;
+  --md: 768px;
+  --lg: 992px;
+  --xl: 1200px;
+  --xxl: 1400px;
 }
 
+/* reset */
+
+*, html, ul {
+  margin: 0;
+  padding: 0;
+}
+
+figure {
+  margin-bottom: 0; /* doesn't work */
+}
+
+h1, h2, h3 {
+  font-family: 'Titan One', sans-serif;
+}
+
+p, button, a, figcaption {
+  font-family: 'Averia Serif Libre', sans-serif;
+}
+
+img {
+  height: auto;
+  max-width: 100%;
+  width: auto;
+}
+
+body {
+  background: var(--primary-color); /* doesn't work */
+}
+
+/* header */
+
+header {
+  height: 4rem;
+}
+
+header .logo-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 1rem;
+  height: 100%;
+}
+
+header .logo-container figcaption {
+  align-self: center;
+}
+
+/* main */
+
+.controls {
+  text-align: center;
+}
+
+
+/*
 body {
     background-color: var(--primary-color); 
     font-family: "CustomFont";
@@ -12,7 +72,7 @@ body {
 
 @font-face {
     font-family: "CustomFont"; 
-    src: url('../fonts/Toadler.ttf') format('truetype'); /
+    src: url('../fonts/Toadler.ttf') format('truetype');
 }
   
 button {
@@ -60,8 +120,8 @@ h2 {
 }
 .game-container {
     display: flex;
-    flex-direction: column; /* Align buttons vertically */
-    align-items: center; /* Center buttons horizontally */
+    flex-direction: column;
+    align-items: center;
     margin-top: 20px;
 }
 .timer-container {
@@ -91,29 +151,29 @@ h2 {
     position: absolute;
     top: 0;
     left: 0;
-    display: flex; /* Use flexbox to align items horizontally */
-    flex-direction: column; /* Arrange items vertically */
-    align-items: center; /* Center items horizontally */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   
   .logo-container img {
-    width: 200px; /* Adjust the width to your preference */
-    height: auto; /* Maintain the image's aspect ratio */
-    margin-bottom: 10px; /* Add some spacing between the image and text */
+    width: 200px;
+    height: auto;
+    margin-bottom: 10px;
   }
   
   .logo-container span {
-    font-size: 18px; /* Adjust the font size to your preference */
+    font-size: 18px;
     font-weight: bold;
-    color: black; /* Set the text color to white */
+    color: black;
   }
   
   #start-game-button,
   #end-game-button {
-      background-color: #007bff; /* Change the button's background color */
+      background-color: #007bff; 
       margin: 10px;
       margin-top: 20px;
-      width: 150px; /* Adjust the button width as desired */
+      width: 150px;
   }
   #start-game-button:hover,
   #end-game-button:hover {
@@ -123,20 +183,20 @@ h2 {
     position: absolute;
     top: 175px;
     right: 0;
-    width: 150px; /* Adjust the button width as desired */
+    width: 150px; 
     margin: 10px;
   }
   #speed-up-button {
     position: absolute;
     top: 175px;
     right: 185px;
-    width: 150px; /* Adjust the button width as desired */
+    width: 150px; 
     margin: 10px;
   }
   #reset-button {
     position: absolute;
     top: 225px;
     right: 92.5px;
-    width: 150px; /* Adjust the button width as desired */
+    width: 150px; 
     margin: 10px;
-  }
+  } */
