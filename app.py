@@ -6,6 +6,8 @@ import time
 import requests
 import subprocess
 import signal
+import sys
+import threading
 from pydub import AudioSegment
 from pydub.playback import _play_with_pyaudio
 
@@ -18,8 +20,8 @@ romy = False
 fade_duration = 3  # Fade-out duration in seconds
 fade_interval = 0.1  # Interval between volume adjustments in seconds
 fade_steps = int(fade_duration / fade_interval)  # Number of fade steps
-
-
+sensor_1_triggered = False
+sensor_2_triggered = False
 
 def turn_on_api():
     ssh = paramiko.SSHClient()
@@ -30,14 +32,19 @@ def turn_on_api():
 
 def establish_ssh_connection():
     global ssh, stdin
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect('192.168.1.19', username='pi', password='VerkoopBrood312')
-    stdin = ssh.exec_command(command)[0]
+    
+    if ssh is None or not ssh.get_transport().is_active():
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect('192.168.1.19', username='pi', password='VerkoopBrood312')
+        stdin = ssh.exec_command(command)[0]
+    
     global pi2
-    pi2 = paramiko.SSHClient()
-    pi2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    pi2.connect('192.168.1.28', username='pi', password='VerkoopBrood312')
+    
+    if pi2 is None or not pi2.get_transport().is_active():
+        pi2 = paramiko.SSHClient()
+        pi2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        pi2.connect('192.168.1.28', username='pi', password='VerkoopBrood312')
 
 # Function to execute the delete-locks.py script
 def execute_delete_locks_script():
@@ -303,8 +310,55 @@ def send_script():
         return 'Script sent successfully!'
     except subprocess.CalledProcessError as e:
         return f'Error occurred while sending script: {e}'
+    
+def reset_sensors():
+    global sensor_1_triggered, sensor_2_triggered
+    if sensor_2_triggered or sensor_1_triggered:
+        time.sleep(1)
+        sensor_1_triggered = False
+        sensor_2_triggered = False
+        print("Trigger flags reset.")
 
+def continuous_reset_sensors():
+    while True:
+        reset_sensors()
+def execute_code():
+    stdin.write('0\n')
+    stdin.flush()
+    print("Code executed on the server Pi.")
 
+@app.route('/reboot-maglock-pi', methods=['POST'])
+def reboot_mag_pi():
+    # ssh.exec_command('sudo reboot')
+    # time.sleep(60)
+    # establish_ssh_connection()
+    # time.sleep(3)
+    # ssh.exec_command('python delete-locks.py')
+    # ssh.exec_command('python read.py')
+    # ssh.exec_command('python keypad.py')
+    return "Magpi reset succesfully!"
+
+@app.route('/trigger', methods=['POST'])
+def handle_trigger():
+    global sensor_1_triggered, sensor_2_triggered
+
+    sensor_data = request.get_json()
+    # print("Sensor triggered:", sensor_data["sensor"])
+
+    if sensor_data["sensor"] == "Sensor 1":
+        sensor_1_triggered = True
+    elif sensor_data["sensor"] == "Sensor 2":
+        sensor_2_triggered = True
+    elif sensor_data["sensor"] == "turn off":
+        sensor_1_triggered = False
+        sensor_2_triggered = False
+    if sensor_1_triggered and sensor_2_triggered:
+        execute_code()
+    return "Trigger handled."
+def handle_interrupt(signal, frame):
+    print("Interrupt received. Shutting down...")
+    # Add any additional cleanup or termination logic here
+    sys.exit()
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -313,6 +367,6 @@ if __name__ == '__main__':
         turn_on_api()
         start_scripts()
         atexit.register(cleanup)
-
+    signal.signal(signal.SIGINT, handle_interrupt)
     app.run(host='0.0.0.0', port=8000)
 # gychf

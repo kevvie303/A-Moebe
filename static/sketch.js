@@ -250,6 +250,18 @@ $(document).ready(function() {
             }
         });
     });
+    $('#reboot-pi-mag').click(function() {
+        $.ajax({
+            type: 'POST',
+            url: '/reboot-maglock-pi',
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    });
 });
 
 function updateState() {
@@ -265,6 +277,5 @@ function updateState() {
         }
     });
 }
-
 // Update the state every 5 seconds (5000 milliseconds)
 setInterval(updateState, 5000);
