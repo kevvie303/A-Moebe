@@ -8,6 +8,7 @@ A-Moebe is a gamerunner which is used for an escaperoom made with Python and Jav
 * Creating a system with which you can add, control, play, pause, resume and delete media files (playing works with bluetooth);
 * Making sure it's possible to use buttons on the localhost in your browser that can control the magnets and the bluetooth speaker;
 * Making the basic styling.
+  
 @romyjkk makes sure the HTML is semantic and the CSS is done the 'right' way.
 
 Both of us are students who are doing this as a side project to learn more about the topics we're interested in and use our skills to help our friend who's dream it is to make his own escaperoom.
