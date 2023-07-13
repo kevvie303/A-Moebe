@@ -122,13 +122,62 @@ header .logo-container figcaption {
   display: flex;
   flex-direction: column;
   margin: 0 15px;
-  gap: 5px;
+  gap: 20px;
 }
 
-.control-container .lock-container, .game-buttons, .media-buttons {
+.control-container .lock-container, .game-buttons, .media-control, .media-play, .pi-reboot {
   display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.control-container .lock-container {
   gap: 10px;
 }
+
+.control-container .lock-container div {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.control-container .game-buttons, .media-control, .media-play, .pi-reboot {
+  flex-direction: column;
+}
+
+.control-container .game-buttons div, .media-control div, .media-play div, .pi-reboot div {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.buttons button {
+  width: 100%;
+}
+
+.control-container .media-play .buttons {
+  flex-direction: column; 
+}
+
+.time-container .speed-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.time-container .speed-buttons button {
+  width: 100%;
+}
+
+
+/* .control-container .game-buttons, .media-control, .media-play, .pi-reboot div button {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+} */
+
+/*
 
 .control-container .lock-container div, .game-buttons button, .media-buttons button {
   display: flex;
@@ -151,7 +200,7 @@ header .logo-container figcaption {
 
 .time-container .speed-buttons button {
   width: 100%;
-}
+} */
 
 /* footer */
 

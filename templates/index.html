@@ -39,24 +39,54 @@
         </article>
 
         <article class="game-buttons">
-            <button id="start-game-button" class="tertiary-button">Start Game</button>
-            <button id="end-game-button" class="tertiary-button">End game</button>
+            <h2>Game</h2>
+
+            <div class="buttons">
+                <button id="start-game-button" class="tertiary-button">Start Game</button>
+                <button id="end-game-button" class="tertiary-button">End game</button>
+            </div>
         </article>
 
-        <article class="media-buttons">
-            <button id="select-file-button" class="main-button">Select Song</button>
-            <button id="pause-music-button" class="main-button">Pause Music</button>
-            <button id="resume-music-button" class="main-button">Resume Music</button>
-            <button id="stop-music-button" class="main-button">Force stop music</button>
-            <button id="add-music-button" class="main-button">Add media to the PI</button>
-            <button id="reboot-pi-mag" class="main-button">Reboot maglock pi</button>
-            <button id="reboot-pi-music" class="main-button">Reboot music pi</button>
-            <button onclick="openMediaControlPage()" class="main-button">Control Media</button>
+        <article class="media-control">
+            <h2>Control media</h2>
+
+            <div class="buttons">
+                <button id="add-music-button" class="main-button">Add media to the PI</button>
+                <button onclick="openMediaControlPage()" class="main-button">Control Media</button>           
+            </div>
+        </article>
+
+        <article class="media-play">
+            <h2>Play media</h2>
+
+            <div class="buttons">
+
+                <div class="button-container">
+                    <button id="select-file-button" class="main-button">Select Song</button>
+                    <button id="pause-music-button" class="main-button">Pause Music</button>
+                </div>
+                <div class="button-container">
+                    <button id="resume-music-button" class="main-button">Resume Music</button>
+                    <button id="stop-music-button" class="main-button">Force stop music</button>
+                </div>
+            </div>
+        </article>
+
+        <article class="pi-reboot">
+            <h2>Pi reboot</h2>
+
+            <div class="buttons">
+                <button id="reboot-pi-mag" class="main-button">Reboot maglock pi</button>
+                <button id="reboot-pi-music" class="main-button">Reboot music pi</button>
+            </div>
         </article>
 
         <article class="lock-status">
-            <p>Maglock 1 Status: <strong id="maglock1-status">Locked</strong></p>
-            <p>Maglock 2 Status: <strong id="maglock2-status">Locked</strong></p>
+            <h2>Maglock status</h2>
+            <div>
+                <p>Maglock 1 Status: <strong id="maglock1-status">Locked</strong></p>
+                <p>Maglock 2 Status: <strong id="maglock2-status">Locked</strong></p>
+            </div>
         </article>
 
         <article id="current-state">
@@ -67,9 +97,13 @@
 
     <section class="time-container">
 
-        <p>Time Played: <strong id="time-played">0:00</strong></p>
-        <p>Time Left: <strong id="time-left">60:00</strong></p>
-        <p id="speed-display">Timer Speed: 1x</p>
+        <h2>Time controls</h2>
+
+        <article class="time">
+            <p>Time Played: <strong id="time-played">0:00</strong></p>
+            <p>Time Left: <strong id="time-left">60:00</strong></p>
+            <p id="speed-display">Timer Speed: 1x</p>
+        </article>
 
         <article class="speed-buttons">
             <button id="speed-up-button" class="main-button">Speed Up</button>
