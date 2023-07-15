@@ -189,12 +189,16 @@ $(document).ready(function() {
             console.log(data);
         }).done(function() {
         });
+        intervalId = setInterval(function() {
+            updateTimers();
+        }, 1000);    
         $('#continue-button').hide();
         $('#pause-button').show();
     });
 
     $('#end-game-button').click(function() {
         clearInterval(intervalId);
+        updateTimers();
         $.post('/timer/stop', function(data) {
             console.log(data);
         });
