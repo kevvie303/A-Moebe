@@ -104,14 +104,18 @@ h2 {
   }
   
   #start-game-button,
-  #end-game-button {
+  #end-game-button,
+  #pause-button,
+  #continue-button {
       background-color: #007bff; /* Change the button's background color */
       margin: 10px;
       margin-top: 20px;
       width: 150px; /* Adjust the button width as desired */
   }
   #start-game-button:hover,
-  #end-game-button:hover {
+  #end-game-button:hover,
+  #pause-button:hover,
+  #continue-button:hover {
     background-color: black;
   }
   #slow-down-button {

@@ -148,77 +148,131 @@ $(document).ready(function() {
 });
 
     
-        $(document).ready(function() {
-            var timePlayed = 0;
-            var timeLeft = 3600; // 60 minutes in seconds
-            var intervalId;
-            var speed = 1;
+$(document).ready(function() {
+    var intervalId;
+    var speed = 2;
+    intervalId = setInterval(function() {
+        updateTimers();
+    }, 1000);
 
-            function updateTimers() {
-                var formattedTimePlayed = formatTime(timePlayed);
-                var formattedTimeLeft = formatTime(timeLeft);
-
-                $('#time-played').text(formattedTimePlayed);
-                $('#time-left').text(formattedTimeLeft);
-            }
-
-            function formatTime(seconds) {
-                var minutes = Math.floor(seconds / 60);
-                var remainingSeconds = seconds % 60;
-                return minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds.toFixed(0);
-            }
-
-            function updateSpeedDisplay() {
-                $('#speed-display').text('Timer Speed: ' + speed + 'x');
-            }
-
-            $('#start-game-button').click(function() {
-                intervalId = setInterval(function() {
-                    timePlayed++;
-                    timeLeft = Math.max(0, timeLeft - speed);
-                    updateTimers();
-                }, 1000);
-            });
-
-            $('#speed-up-button').click(function() {
-                speed += 0.1;
-                updateSpeedDisplay();
-            });
-
-            $('#slow-down-button').click(function() {
-                speed -= 0.1;
-                updateSpeedDisplay();
-            });
-
-            $('#reset-button').click(function() {
-                // $.ajax({
-                //     type: 'POST',
-                //     url: '/pause_music',
-                //     success: function(response) {
-                //         console.log(response);
-                //     },
-                //     error: function(error) {
-                //         console.log(error);
-                //     }
-                // });
-                speed = 1;
-                updateSpeedDisplay();
-            });
-            var gameEnded = false; // Track if game is already ended
-
-            // Handle end game button click
-            $('#end-game-button').click(function() {
-                if (!gameEnded) {
-                    clearInterval(intervalId); // Stop the timer
-                    gameEnded = true; // Set game ended flag
-                } else {
-                    timePlayed = 0; // Reset the time played
-                    timeLeft = 3600; // Reset the time left to 60 minutes
-                    updateTimers(); // Update the displayed timers
-                    gameEnded = false; // Reset game ended flag
-                }
-            });
+    function updateTimers() {
+        $.get('/timer/value', function(data) {
+            var timeLeft = parseInt(data);
+            var timePlayed = 3600 - timeLeft
+            var formattedTimeLeft = formatTime(timeLeft);
+            var formattedTimePlayed = formatTime(timePlayed);
+            $('#time-left').text(formattedTimeLeft);
+            $('#time-played').text(formattedTimePlayed);
         });
+    }
+
+    function formatTime(seconds) {
+        var minutes = Math.floor(seconds / 60);
+        var remainingSeconds = seconds % 60;
+        return minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds.toFixed(0);
+    }
+
+    function updateSpeedDisplay() {
+        var formattedSpeed = speed.toFixed(1);
+        $('#speed-display').text('Timer Speed: ' + formattedSpeed + 'x');
+    }
+
+    function getTimerSpeed() {
+        $.get('/timer/get-speed', function(data) {
+            speed = parseFloat(data);
+            updateSpeedDisplay();
+        });
+    }
+
+    $('#start-game-button').click(function() {
+        $.post('/timer/start', function(data) {
+            console.log(data);
+        }).done(function() {
+        });
+        $('#continue-button').hide();
+        $('#pause-button').show();
+    });
+
+    $('#end-game-button').click(function() {
+        clearInterval(intervalId);
+        $.post('/timer/stop', function(data) {
+            console.log(data);
+        });
+    });
+
+    $('#speed-up-button').click(function() {
+        $.post('/timer/speed', { change: 0.1 }, function(data) {
+            speed += 0.1
+            console.log(data);
+            updateSpeedDisplay()
+        });
+    });
+    
+    $('#slow-down-button').click(function() {
+        $.post('/timer/speed', { change: -0.1 }, function(data) {
+            speed -= 0.1
+            console.log(data);
+            updateSpeedDisplay()
+        });
+    });
+
+    $('#reset-button').click(function() {
+        $.post('/timer/reset-speed', function(data) {
+            console.log(data);
+            speed = 1;
+            updateSpeedDisplay();
+        });
+    });
+    function updateButtonState(pauseState) {
+        if (pauseState) {
+            $('#pause-button').hide();
+            $('#continue-button').show();
+        } else {
+            $('#pause-button').show();
+            $('#continue-button').hide();
+        }
+    }
+    function getButtonState() {
+        $.get('/timer/pause-state', function(data) {
+            var pauseState = (!data);
+            updateButtonState(pauseState);
+            console.log(data)
+        });
+    }
+
+    $('#pause-button').click(function() {
+        $.post('/timer/pause', function(data) {
+            console.log(data);
+            if (data === 'Timer paused') {
+                $('#pause-button').hide();
+                $('#continue-button').show();
+            }
+        });
+    });
+
+    $('#continue-button').click(function() {
+        $.post('/timer/continue', function(data) {
+            console.log(data);
+            if (data === 'Timer continued') {
+                $('#continue-button').hide();
+                $('#pause-button').show();
+            }
+        });
+    });
+    
+
+    function initializeTimer() {
+        updateTimers();
+        updateSpeedDisplay();
+    }
+
+    initializeTimer();
+    getTimerSpeed();
+    getButtonState();
+});
+
+
+
 function openMediaControlPage() {
     window.open('/media_control', '_blank', 'height=400,width=400');
 }

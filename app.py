@@ -359,6 +359,105 @@ def handle_interrupt(signal, frame):
     print("Interrupt received. Shutting down...")
     # Add any additional cleanup or termination logic here
     sys.exit()
+TIMER_FILE = 'timer_value.txt'  # File to store the timer value
+timer_value = 3600  # Initial timer value in seconds
+timer_thread = None  # Reference to the timer thread
+speed = 1
+timer_running = False  # Flag to indicate if the timer is running
+def read_timer_value():
+    try:
+        with open(TIMER_FILE, 'r') as file:
+            return float(file.read().strip())
+    except FileNotFoundError:
+        return timer_value  # Default timer value if the file doesn't exist
+
+def write_timer_value(value):
+    with open(TIMER_FILE, 'w') as file:
+        file.write(str(value))
+
+def update_timer():
+    global timer_value, speed, timer_running
+    while timer_value > 0 and timer_running:
+        timer_value = max(timer_value - speed, 0)
+        write_timer_value(timer_value)
+        threading.Event().wait(1)
+
+@app.route('/timer/start', methods=['POST'])
+def start_timer():
+    global timer_thread, timer_value, speed, timer_running
+
+    if timer_thread is None or not timer_thread.is_alive():
+        timer_value = 3600  # Reset timer value to 60 minutes
+        write_timer_value(timer_value)
+        timer_running = True
+        timer_thread = threading.Thread(target=update_timer)
+        timer_thread.daemon = True
+        timer_thread.start()
+
+    return 'Timer started'
+
+@app.route('/timer/stop', methods=['POST'])
+def stop_timer():
+    global timer_thread, timer_running, timer_value
+
+    if timer_thread is not None and timer_thread.is_alive():
+        timer_value = 0
+        write_timer_value(timer_value)
+        timer_thread = threading.Thread(target=update_timer)
+        timer_running = False
+        timer_thread = None  # Stop the timer thread
+
+    return 'Timer stopped'
+
+@app.route('/timer/speed', methods=['POST'])
+def update_timer_speed():
+    global speed
+    change = float(request.form['change'])  # Get the change in timer speed from the request
+    speed += change
+    return 'Timer speed updated'
+
+@app.route('/timer/reset-speed', methods=['POST'])
+def reset_timer_speed():
+    global speed
+    speed = 1
+    return 'Timer speed reset'
+
+@app.route('/timer/value', methods=['GET'])
+def get_timer_value():
+    return str(read_timer_value())
+
+@app.route('/timer/get-speed', methods=['GET'])
+def get_timer_speed():
+    global speed
+    return str(speed)
+
+@app.route('/timer/pause', methods=['POST'])
+def pause_timer():
+    global timer_thread, timer_running
+
+    if timer_thread is not None and timer_thread.is_alive() and timer_running:
+        timer_running = False
+        return 'Timer paused'
+    else:
+        return 'Timer is not running or already paused'
+
+@app.route('/timer/continue', methods=['POST'])
+def continue_timer():
+    global timer_thread, timer_running
+
+    if timer_thread is not None and not timer_thread.is_alive() and not timer_running:
+        timer_running = True
+        timer_thread = threading.Thread(target=update_timer)
+        timer_thread.daemon = True
+        timer_thread.start()
+        return 'Timer continued'
+    else:
+        return 'Timer is already running or not paused'
+@app.route('/timer/pause-state', methods=['GET'])
+def get_pause_state():
+    global timer_running
+    return jsonify(timer_running)
+
 @app.route('/')
 def index():
     return render_template('index.html')
