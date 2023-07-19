@@ -22,11 +22,15 @@ fade_interval = 0.1  # Interval between volume adjustments in seconds
 fade_steps = int(fade_duration / fade_interval)  # Number of fade steps
 sensor_1_triggered = False
 sensor_2_triggered = False
+ip1home = '192.168.1.19'
+ip1brink = '192.168.0.104'
+ip2home = '192.168.1.28'
+ip2brink = '192.168.0.105'
 
 def turn_on_api():
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect('192.168.1.19', username='pi', password='VerkoopBrood312')
+    ssh.connect(ip1brink, username='pi', password='VerkoopBrood312')
     ssh.exec_command('python status.py')
     establish_ssh_connection()
 
@@ -36,7 +40,7 @@ def establish_ssh_connection():
     if ssh is None or not ssh.get_transport().is_active():
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect('192.168.1.19', username='pi', password='VerkoopBrood312')
+        ssh.connect(ip1brink, username='pi', password='VerkoopBrood312')
         stdin = ssh.exec_command(command)[0]
     
     global pi2
@@ -44,7 +48,7 @@ def establish_ssh_connection():
     if pi2 is None or not pi2.get_transport().is_active():
         pi2 = paramiko.SSHClient()
         pi2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        pi2.connect('192.168.1.28', username='pi', password='VerkoopBrood312')
+        pi2.connect(ip2brink, username='pi', password='VerkoopBrood312')
 
 # Function to execute the delete-locks.py script
 def execute_delete_locks_script():
@@ -261,7 +265,7 @@ def turn_off_maglock(maglock):
     return 'Maglock turned off'
 
 
-API_URL = 'http://192.168.1.28:5001/current_state'
+API_URL = 'http://192.168.0.105:5001/current_state'
 
 @app.route('/get_state', methods=['GET'])
 def get_state():
