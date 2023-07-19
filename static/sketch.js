@@ -119,7 +119,7 @@ $(document).ready(function() {
   function updateMaglockStatus(maglockNumber) {
     $.ajax({
       type: 'GET',
-      url: 'http://192.168.1.19:5000/maglock/status/' + maglockNumber,
+      url: 'http://192.168.0.104:5000/maglock/status/' + maglockNumber,
       success: function(response) {
         var maglockStatus = response.status;
         var maglockStatusText = maglockStatus === 'locked' ? 'Locked' : 'Unlocked';
