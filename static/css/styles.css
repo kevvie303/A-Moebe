@@ -4,8 +4,11 @@
   --background-color: #92d1e0;
 
   --primary-button-color: #4CAF50;
+  --primary-button-color-darker: #39893b;
   --secondary-button-color: #FF0000;
+  --secondary-button-color-darker: #b20000;
   --tertiary-button-color: #007bff;
+  --tertiary-button-color-darker: #0065d0;
 
   --text-color: #000000;
   --secondary-text-color: #ffffff;
@@ -73,6 +76,7 @@ button {
   border-radius: 5px;
   color: var(--secondary-text-color);
   align-items: center;
+  cursor: pointer;
 }
 
 .main-button {
@@ -85,6 +89,25 @@ button {
 
 .tertiary-button {
   background: var(--tertiary-button-color);
+}
+
+/* states */
+
+.main-button:hover {
+  background: var(--primary-button-color-darker);
+}
+
+.secondary-button:hover {
+ background: var(--secondary-button-color-darker);
+}
+
+button:active {
+  border: 1px solid black;
+}
+
+button:focus {
+  border: 2px dotted black;
+  outline: none;
 }
 
 /* header */
@@ -149,6 +172,7 @@ header .logo-container figcaption {
 .control-container .game-buttons div, .media-control div, .media-play div, .pi-reboot div {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   gap: 10px;
 }
 
@@ -162,45 +186,137 @@ header .logo-container figcaption {
 
 .time-container .speed-buttons {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.time-container .speed-buttons .speed-up-slow-down {
+  display: flex;
   flex-direction: row;
+  justify-content: center;
   gap: 10px;
+}
+
+.time-container .speed-buttons .reset-speed button {
+  width: 50%;
 }
 
 .time-container .speed-buttons button {
   width: 100%;
 }
 
+/* media queries */
 
-/* .control-container .game-buttons, .media-control, .media-play, .pi-reboot div button {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-} */
+/* big phones/tablet screens */
 
-/*
+@media (min-width: 576px){
+  h1 {
+    font-size: 28px;
+  }
 
-.control-container .lock-container div, .game-buttons button, .media-buttons button {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
+  h2 {
+    font-size: 24px;
+  }
+
+  .control-container .lock-container {
+    gap: 20px;
+  }
+
+  .control-container .lock-container div {
+    width: 40%;
+  }
+
+  .control-container .game-buttons div, .media-control div, .media-play div, .pi-reboot div {
+    gap: 20px;
+  }
+
+  .buttons button {
+    width: 40%;
+  }
+
+  .lock-status {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .time-container .speed-buttons {
+    gap: 20px;
+  }
+
+  .time-container .speed-buttons .speed-up-slow-down {
+    gap: 20px;
+  }
+
+  .time-container .speed-up-slow-down button {
+    width: 40%;
+  }
+
+  .time-container .speed-buttons .reset-speed button {
+    width: 40%;
+  }
 }
 
-.control-container .media-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+/* tablets */
+
+@media (min-width: 768px){
+  body {
+    gap: 40px;
+  }
+
+  figcaption, p, button {
+    font-size: 18px;
+  }
+
+  .control-container {
+    gap: 40px;
+  }
+
+  .control-container .lock-container {
+    gap: 30px;
+  }
+
+  .control-container .lock-container div {
+    width: 30%;
+  }
+
+  .buttons button {
+    gap: 30px;
+    width: 30%;
+  }
+
+  .time-container .speed-buttons button {
+    width: 30%;
+  }
+
+  .time-container .speed-up-slow-down button {
+    width: 30%;
+  }
+
+  .time-container .speed-buttons .reset-speed button {
+    width: 30%;
+  }
 }
 
-.time-container .speed-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+@media (min-width: 992px){
+  header {
+    height: 100%;
+  }
+
+  header figure img {
+    width: 10%;
+    height: auto;
+  }
 }
 
-.time-container .speed-buttons button {
-  width: 100%;
-} */
+@media (min-width: 1200px){
+  
+}
+
+@media (min-width: 1400px){
+  
+}
 
 /* footer */
 
