@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Retriever</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fonts/fonts.css')}}">
+    <link rel="icon" href="static/img/favicon.png" type="image/png">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>    
+</head>
+<body>
+    <header class="logo">
+        <figure class="logo-container">
+            <img src="static/img/logo.png" alt="Logo">
+            <figcaption>A-Moebe Beta</figcaption>
+        </figure>
+    </header>
+
+    <section class="control-container">
+        <h1>Retriever</h1>
+
+        <section class="time-container">
+
+            <h2>Time controls</h2>
+    
+            <article class="time">
+                <p>Played<strong id="time-played">00:00</strong></p>
+                <p>Left: <strong id="time-left">60:00</strong></p>
+                <p id="speed-display">Speed: 1x</p>
+            </article>
+    
+            <article class="speed-buttons">
+                <div class="speed-up-slow-down">
+                    <button id="speed-up-button" class="button-style main-button">Speed Up</button>
+                    <button id="slow-down-button" class="button-style main-button">Slow Down</button>
+                </div>
+                <div class="reset-speed">
+                    <button id="reset-button" class="button-style main-button">Reset Speed</button>
+                </div>
+            </article>
+    
+        </section>
+
+        <article class="lock-container">
+                <div class="locked">
+                    <h2>Lock</h2>
+                    <button class="button-style turn-on-button main-button" data-maglock="1">entrance-door-lock</button>
+                    <button class="button-style turn-on-button main-button" data-maglock="2">doghouse-lock</button>
+                </div>
+                <div class="unlocked">
+                    <h2>Unlock</h2>
+                    <button class="button-style turn-off-button secondary-button" data-maglock="0">entrance-door-lock</button>
+                    <button class="button-style turn-off-button secondary-button" data-maglock="-1">doghouse-lock</button>
+                </div>
+        </article>
+
+        <article class="game-buttons">
+            <h2>Game</h2>
+
+            <div class="play-pause-buttons">
+                <button id="start-game-button"><img class="icon" src="static/img/start.svg" alt="Start game button"></button>
+                <button id="pause-button"><img class="icon" src="static/img/pause.svg" alt="Pause game button"></button>
+                <button id="continue-button" style="display: none;"><img src="static/img/pause.svg" alt="Pause game button"></button>
+                <button id="end-game-button"><img class="icon" src="static/img/abort.svg" alt="Abort game button"></button>
+            </div>
+        </article>
+
+        <article class="media-control">
+            <h2>Control media</h2>
+
+            <div class="buttons">
+                <button id="add-music-button" class="button-style main-button">Add media to the PI</button>
+                <button onclick="openMediaControlPage()" class="button-style main-button">Control Media</button>           
+            </div>
+        </article>
+
+        <article class="media-play">
+            <h2>Play media</h2>
+
+            <div class="buttons">
+
+                <div class="button-container">
+                    <button id="select-file-button" class="button-style main-button">Select Song</button>
+                    <button id="pause-music-button" class="button-style main-button">Pause Music</button>
+                </div>
+                <div class="button-container">
+                    <button id="resume-music-button" class="button-style main-button">Resume Music</button>
+                    <button id="stop-music-button" class="button-style main-button">Force stop music</button>
+                </div>
+            </div>
+        </article>
+
+        <article class="pi-reboot">
+            <h2>Pi reboot</h2>
+
+            <div class="buttons">
+                <button id="reboot-pi-mag" class="button-style main-button">Reboot maglock pi</button>
+                <button id="reboot-pi-music" class="button-style main-button">Reboot music pi</button>
+            </div>
+        </article>
+
+        <article class="lock-status">
+            <h2>Maglock status</h2>
+            <div>
+                <p>Maglock 1 Status: <strong id="maglock1-status">Locked</strong></p>
+                <p>Maglock 2 Status: <strong id="maglock2-status">Locked</strong></p>
+            </div>
+        </article>
+
+        <article id="current-state">
+            <p>Walkman: {{ state }}</p>
+        </article>
+
+    </section>
+    
+</body>
+</html>

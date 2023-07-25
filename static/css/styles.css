@@ -18,6 +18,11 @@
   --lg: 992px;
   --xl: 1200px;
   --xxl: 1400px;
+
+  --icon-sm: 20px;
+  --icon-md: 24px;
+  --icon-lg: 40px;
+  --icon-xl: 48px;
 }
 
 /* reset */
@@ -38,6 +43,8 @@ h1, h2, h3 {
 p, button, a, figcaption, strong {
   font-family: 'Averia Serif Libre', sans-serif;
   font-size: 16px;
+  text-decoration: none;
+  color: black;
 }
 
 img {
@@ -48,6 +55,9 @@ img {
 
 body {
   background: var(--background-color);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 h1 {
@@ -68,9 +78,43 @@ body {
   gap: 20px;
 }
 
+/* landing page */
+
+.landing-page .rooms .retriever-container {
+
+  margin: 0 20px;
+}
+
+.landing-page .rooms .retriever-container a {
+  display: flex;
+  justify-content: center;
+  height: fit-content;
+  background: #78c4d7;
+}
+
+.landing-page .rooms .retriever-container a img {
+  width: 40%;
+}
+
+.landing-page .rooms .retriever-container a .time-preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 15px;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.landing-page .rooms .retriever-container a .time-preview .timer {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  text-align: right;
+}
+
 /* buttons */
 
-button {
+button.button-style {
   padding: 5px 10px;
   border: none;
   border-radius: 5px;
@@ -178,6 +222,18 @@ header .logo-container figcaption {
 
 .buttons button {
   width: 100%;
+}
+
+.play-pause-buttons button {
+  cursor: pointer;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  background: none;
+  border: none;
+}
+
+.play-pause-buttons button .icon:hover {
+  fill: var(--tertiary-button-color-darker);
 }
 
 .control-container .media-play .buttons {
@@ -323,8 +379,8 @@ header .logo-container figcaption {
 footer {
   text-align: center;
   font-style: italic;
-  margin: 20px 0 15px 0;
-
+  margin-bottom: 15px;
+  margin-top: auto;
 }
 
 
