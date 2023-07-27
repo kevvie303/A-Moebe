@@ -100,7 +100,9 @@ def add_music():
     else:
         return 'No file selected.'
 
-
+@app.route('/retriever')
+def retriever():
+    return render_template('retriever.html')
 @app.route('/media_control')
 def media_control():
     try:

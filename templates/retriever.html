@@ -18,7 +18,9 @@
     </header>
 
     <section class="control-container">
-        <h1>Retriever</h1>
+        <figure>
+            <img src="static/img/retrieverlogo.svg" alt="Retriever logo">
+        </figure>
 
         <section class="time-container">
 
@@ -66,15 +68,6 @@
             </div>
         </article>
 
-        <article class="media-control">
-            <h2>Control media</h2>
-
-            <div class="buttons">
-                <button id="add-music-button" class="button-style main-button">Add media to the PI</button>
-                <button onclick="openMediaControlPage()" class="button-style main-button">Control Media</button>           
-            </div>
-        </article>
-
         <article class="media-play">
             <h2>Play media</h2>
 
@@ -114,5 +107,7 @@
 
     </section>
     
+    <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>

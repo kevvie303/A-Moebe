@@ -38,6 +38,7 @@ figure {
 
 h1, h2, h3 {
   font-family: 'Titan One', sans-serif;
+  text-align: center;
 }
 
 p, button, a, figcaption, strong {
@@ -80,16 +81,16 @@ body {
 
 /* landing page */
 
-.landing-page .rooms .retriever-container {
-
-  margin: 0 20px;
+.landing-page .rooms, .media {
+  margin: 0 15px;
 }
 
 .landing-page .rooms .retriever-container a {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   height: fit-content;
   background: #78c4d7;
+  border-radius: 15px;
 }
 
 .landing-page .rooms .retriever-container a img {
@@ -110,6 +111,12 @@ body {
   flex-direction: row;
   gap: 20px;
   text-align: right;
+}
+
+.landing-page .media {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 /* buttons */
@@ -190,6 +197,10 @@ header .logo-container figcaption {
   flex-direction: column;
   margin: 0 15px;
   gap: 20px;
+}
+
+.control-container figure img {
+  width: 30%;
 }
 
 .control-container .lock-container, .game-buttons, .media-control, .media-play, .pi-reboot {

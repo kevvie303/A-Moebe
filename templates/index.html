@@ -20,8 +20,10 @@
 
     <section class="rooms">
 
+        <h2>Escape rooms</h2>
+
         <article class="retriever-container">
-            <a href="/templates/retriever.html" class="retriever-link">
+            <a href="/retriever" id="retriever-link">
                 <img src="static/img/retrieverlogo.svg" alt="Retriever logo">
                 <div class="time-preview">
                     <div class="timer">
@@ -35,11 +37,23 @@
 
     </section>
 
+    <section class="media">
+        <h2>Media control</h2>
+
+        <article class="media-control">
+            <div class="buttons">
+                <button id="add-music-button" class="button-style main-button">Add media to the PI</button>
+                <button onclick="openMediaControlPage()" class="button-style main-button">Control Media</button>           
+            </div>
+        </article>
+    </section>
+
     <footer>
-        <p>The Brink Escaperooms</p>
+        <img src="static/img/thebrinkescaperooms.png" alt="The Brink Escaperooms">
     </footer>
 
     <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script> -->
 </body>
 </html>
