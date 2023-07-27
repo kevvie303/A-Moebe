@@ -56,7 +56,7 @@ def execute_delete_locks_script():
 
 def start_scripts():
     pi2.exec_command('python status.py')
-    pi2.exec_command('python distort.py')
+    # pi2.exec_command('python distort.py')
     ssh.exec_command('python read.py')
     ssh.exec_command('python keypad.py')
 
