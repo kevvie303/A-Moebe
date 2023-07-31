@@ -227,12 +227,21 @@ def resume_music():
     else:
         return 'No music is currently playing'
 
-@app.route('/play_music', methods=['POST'])
-def play_music():
+@app.route('/play_music_garden', methods=['POST'])
+def play_music_garden():
     global current_file
     selected_file = request.form['file']
     current_file = selected_file
-    command = f'mpg123 Music/{selected_file} &'
+    command = f'mpg123 -a hw:2,0 Music/{selected_file} &'
+    pi2.exec_command(command)
+    return 'Music started on pi2'
+
+@app.route('/play_music_lab', methods=['POST'])
+def play_music_lab():
+    global current_file
+    selected_file = request.form['file']
+    current_file = selected_file
+    command = f'mpg123 -a hw:3,0 Music/{selected_file} &'
     pi2.exec_command(command)
     return 'Music started on pi2'
 
