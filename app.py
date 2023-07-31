@@ -56,6 +56,7 @@ def execute_delete_locks_script():
 
 def start_scripts():
     pi2.exec_command('python status.py')
+    pi2.exec_command('python sensor_board.py')
     # pi2.exec_command('python distort.py')
     ssh.exec_command('python read.py')
     ssh.exec_command('python keypad.py')
@@ -296,6 +297,7 @@ def cleanup():
     ssh.exec_command('pkill -f status.py')
     pi2.exec_command('pkill -f status.py')
     pi2.exec_command('pkill -f distort.py')
+    pi2.exec_command('pkill -f sensor_board.py')
     ssh.exec_command('pkill -f keypad.py')
     ssh.exec_command('pkill -f read.py')
     ssh.close()
