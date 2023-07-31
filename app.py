@@ -27,6 +27,10 @@ ip1brink = '192.168.0.104'
 ip2home = '192.168.1.28'
 ip2brink = '192.168.0.105'
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 def turn_on_api():
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
