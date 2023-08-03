@@ -392,7 +392,6 @@ $(document).ready(function() {
                         <li>
                             ${filename}
                             <button class="pause-button" data-file="${filename}" data-channel="${soundcard_channel}">Pause</button>
-                            <button class="resume-button" data-file="${filename}" data-channel="${soundcard_channel}">Resume</button>
                         </li>
                     `);
                 });
