@@ -1,0 +1,6 @@
+{% for pi_status in pi_statuses %}
+<tr>
+    <td>{{ pi_status.ip_address }}</td>
+    <td>{{ pi_status.ssh_active }}</td>
+</tr>
+{% endfor %}
