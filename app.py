@@ -3,13 +3,14 @@ import json
 import paramiko
 import atexit
 import os
+from dotenv import load_dotenv
 import time
 import requests
 import subprocess
 import signal
 import sys
 import threading
-
+load_dotenv()
 app = Flask(__name__)
 command = 'python relay_control.py'
 ssh = None
@@ -34,7 +35,7 @@ log.setLevel(logging.ERROR)
 def turn_on_api():
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(ip1brink, username='pi', password='VerkoopBrood312')
+    ssh.connect(ip1brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
     ssh.exec_command('python status.py')
     establish_ssh_connection()
 
@@ -44,7 +45,7 @@ def establish_ssh_connection():
     if ssh is None or not ssh.get_transport().is_active():
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ip1brink, username='pi', password='VerkoopBrood312')
+        ssh.connect(ip1brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
         stdin = ssh.exec_command(command)[0]
     
     global pi2
@@ -52,7 +53,7 @@ def establish_ssh_connection():
     if pi2 is None or not pi2.get_transport().is_active():
         pi2 = paramiko.SSHClient()
         pi2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        pi2.connect(ip2brink, username='pi', password='VerkoopBrood312')
+        pi2.connect(ip2brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
 
 # Function to execute the delete-locks.py script
 def execute_delete_locks_script():
@@ -610,7 +611,7 @@ def reboot_mag_pi():
     time.sleep(40)
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(ip1brink, username='pi', password='VerkoopBrood312')
+    ssh.connect(ip1brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
     time.sleep(2)
     ssh.exec_command('python status.py')
     time.sleep(2)
@@ -629,7 +630,7 @@ def reboot_music_pi():
     time.sleep(40)
     pi2 = paramiko.SSHClient()
     pi2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    pi2.connect(ip2brink, username='pi', password='VerkoopBrood312')
+    pi2.connect(ip2brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
     time.sleep(3)
     pi2.exec_command('python status.py')
     pi2.exec_command('python sensor_board.py')
