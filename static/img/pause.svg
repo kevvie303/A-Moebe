@@ -3,10 +3,10 @@
   <defs>
     <style>
       .cls-1 {
-        fill: #007bff;
+        fill: #6aafef;
       }
     </style>
   </defs>
-  <rect class="cls-1" x="10.31" y="0" width="14.61" height="64" rx="3" ry="3"/>
-  <rect class="cls-1" x="39.24" y="0" width="14.61" height="64" rx="3" ry="3"/>
+  <rect class="cls-1" x="11.33" y="0" width="14.61" height="64" rx="3" ry="3"/>
+  <rect class="cls-1" x="40.26" y="0" width="14.61" height="64" rx="3" ry="3"/>
 </svg>

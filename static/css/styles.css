@@ -1,14 +1,14 @@
 /* custom variables */
 
 :root {
-  --background-color: #92d1e0;
+  --background-color: #B1EEB0;
   --secondary-background-color: #ffffff;
 
-  --primary-button-color: #4CAF50;
+  --primary-button-color: #B1EEB0;
   --primary-button-color-darker: #39893b;
-  --secondary-button-color: #FF0000;
+  --secondary-button-color: #F36060;
   --secondary-button-color-darker: #b20000;
-  --tertiary-button-color: #007bff;
+  --tertiary-button-color: #6AAFEF;
   --tertiary-button-color-darker: #0065d0;
 
   --text-color: #000000;
@@ -163,7 +163,6 @@ body {
   background: var(--secondary-background-color);
   padding: 30px;
   border-radius: 15px;
-  /* margin-top: 20px; */
   width: 80%;
 }
 
@@ -321,7 +320,7 @@ button:focus {
 
 /* header */
 
-header {
+.logo {
   height: 64px;
 }
 
@@ -333,13 +332,25 @@ header .logo-container {
   height: 100%;
 }
 
-header .logo-container figcaption {
+.logo .logo-container figcaption {
   align-self: center;
 }
 
 @media (min-width: 768px){
-  header {
+  .logo {
     height: 80px;
+  }
+}
+
+/* retriever header */
+
+.retriever-logo {
+  height: 80px;
+}
+
+@media (min-width: 768px){
+  .retriever-logo {
+    height: 96px;
   }
 }
 

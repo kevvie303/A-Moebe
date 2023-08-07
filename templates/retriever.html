@@ -10,17 +10,31 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>    
 </head>
 <body>
-    <header class="logo">
+    <header class="retriever-logo">
         <figure class="logo-container">
-            <img src="static/img/logo.png" alt="Logo">
-            <figcaption>A-Moebe Beta</figcaption>
+            <img src="static/img/retrieverlogo.svg" alt="Retriever Logo">
         </figure>
     </header>
 
-    <section class="control-container">
-        <figure>
-            <img src="static/img/retrieverlogo.svg" alt="Retriever logo">
+    <nav class="important-controls">
+        <div class="time-elapsed">
+            <p>Elapsed</p>
+            <p id="time-played">00:00</p>
+        </div>
+
+        <figure class="game-controls">
+            <a href=""><img src="static/img/media.svg" alt="Button to the media controls"></a>
+            <a href=""><img src="static/img/settings.svg" alt="Button to settings"></a>
+            <a href=""><img src="static/img/abort.svg" alt="Button to abort the room"></a>
         </figure>
+
+        <div class="time-remaining">
+            <p>Remaining</p>
+            <p id="time-left">60:00</p>
+        </div>
+    </nav>
+
+    <section class="control-container">
 
         <section class="time-container">
 
