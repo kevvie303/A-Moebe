@@ -284,8 +284,7 @@ def play_music_garage_alley():
     current_file = selected_file
 
     # Define the soundcard channel information
-    soundcard_channel = 'hw:3,0'  # Adjust this based on your specific configuration
-
+    soundcard_channel = 'hw:4,0'  # Adjust this based on your specific configuration
     # Construct the command to play the music using the specified soundcard channel
     command = f'mpg123 -a {soundcard_channel} Music/{selected_file} &'
     pi2.exec_command(command)
@@ -315,7 +314,6 @@ def play_music_garage_alley():
         json.dump(file_data, file)
 
     print("Data written successfully.")
-
     return 'Music started on pi2'
 
 @app.route('/play_music_garden', methods=['POST'])
@@ -356,7 +354,6 @@ def play_music_garden():
         json.dump(file_data, file)
 
     print("Data written successfully.")
-
     return 'Music started on pi2'
 
 @app.route('/get_file_status', methods=['GET'])
@@ -410,80 +407,11 @@ def play_music_lab():
         json.dump(file_data, file)
 
     print("Data written successfully.")
-
     return 'Music started on pi2'
-
-# @app.route('/play_music_all', methods=['POST'])
-# def play_music_all():
-#     global current_file
-#     selected_file = request.form['file']
-#     current_file = selected_file
-
-#     # Define the soundcard channel information
-#     soundcard_channel1 = 'hw:1,0'  # Adjust this based on your specific configuration
-#     soundcard_channel2 = 'hw:2,0'  # Adjust this based on your specific configuration
-#     # Construct the command to play the music using the specified soundcard channel
-#     command1 = f'mpg123 -a {soundcard_channel1} Music/{selected_file} &'
-#     command2 = f'mpg123 -a {soundcard_channel2} Music/{selected_file} &'
-
-#     print("Sending command1...")
-#     pi2.exec_command(command1)
-#     print("Command1 executed successfully.")
-
-#     # Remove time.sleep(2) if present
-
-#     print("Sending command2...")
-#     pi2.exec_command(command2)
-#     print("Command2 executed successfully.")
-
-#     # Save the data to a JSON file on the server
-#     status = 'playing'
-#     data = {'filename': selected_file, 'status': status, 'soundcard_channel': soundcard_channel1}
-#     file_path = os.path.join(current_dir, 'json', 'file_status.json')
-
-#     directory = os.path.dirname(file_path)
-#     if not os.path.exists(directory):
-#         os.makedirs(directory)
-
-#     try:
-#         # Load existing data from the JSON file (if it exists)
-#         with open(file_path, 'r') as file:
-#             file_data = json.load(file)
-#     except (FileNotFoundError, json.JSONDecodeError):
-#         file_data = []
-
-#     # Append the new data to the existing data
-#     file_data.append(data)
-
-#     # Write the data to the JSON file
-#     with open(file_path, 'w') as file:
-#         json.dump(file_data, file)
-#     data = {'filename': selected_file, 'status': status, 'soundcard_channel': soundcard_channel2}
-#     file_path = os.path.join(current_dir, 'json', 'file_status.json')
-
-#     # Ensure the directory exists or create it if not
-#     directory = os.path.dirname(file_path)
-#     if not os.path.exists(directory):
-#         os.makedirs(directory)
-
-#     try:
-#         # Load existing data from the JSON file (if it exists)
-#         with open(file_path, 'r') as file:
-#             file_data = json.load(file)
-#     except (FileNotFoundError, json.JSONDecodeError):
-#         file_data = []
-
-#     # Append the new data to the existing data
-#     file_data.append(data)
-
-#     # Write the data to the JSON file
-#     with open(file_path, 'w') as file:
-#         json.dump(file_data, file)
-
-#     print("Data written successfully.")
-
-#     return 'Music started on pi2'
-
+def set_starting_volume(soundcard_channel):
+    command = f'amixer -c {soundcard_channel} set PCM Playback Volume 25%'
+    pi2.exec_command(command)
+    return "Volume set to 25%"
 @app.route('/stop_music', methods=['POST'])
 def stop_music():
     # Stop the music on pi2
