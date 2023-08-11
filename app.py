@@ -798,4 +798,4 @@ if __name__ == '__main__':
         start_scripts()
         atexit.register(cleanup)
     signal.signal(signal.SIGINT, handle_interrupt)
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=80)
