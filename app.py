@@ -16,6 +16,7 @@ command = 'python relay_control.py'
 ssh = None
 stdin = None
 pi2 = None
+pi3 = None
 romy = False
 fade_duration = 3  # Fade-out duration in seconds
 fade_interval = 0.1  # Interval between volume adjustments in seconds
@@ -26,6 +27,7 @@ ip1home = '192.168.1.19'
 ip1brink = '192.168.0.104'
 ip2home = '192.168.1.28'
 ip2brink = '192.168.0.105'
+ip3brink = '192.168.0.114'
 active_ssh_connections = {}
 
 import logging
@@ -54,6 +56,11 @@ def establish_ssh_connection():
         pi2 = paramiko.SSHClient()
         pi2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         pi2.connect(ip2brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
+    global pi3
+    if pi3 is None or not pi3.get_transport().is_active():
+        pi3 = paramiko.SSHClient()
+        pi3.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        pi3.connect(ip3brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
 
 # Function to execute the delete-locks.py script
 def execute_delete_locks_script():
@@ -62,7 +69,7 @@ def execute_delete_locks_script():
 def start_scripts():
     pi2.exec_command('python status.py')
     pi2.exec_command('python sensor_board.py')
-    pi2.exec_command('python ir.py')
+    pi3.exec_command('python ir.py')
     # pi2.exec_command('python distort.py')
     ssh.exec_command('python read.py')
     ssh.exec_command('python keypad.py')
@@ -155,6 +162,10 @@ def file_selection():
     music_files = stdout.read().decode().splitlines()
     return render_template('file_selection.html', music_files=music_files)
 
+
+@app.route('/pin-info')
+def pin_info():
+    return render_template('pin_info.html')
 # Global variable to keep track of the currently playing music file
 current_file = None
 
@@ -327,7 +338,7 @@ def play_music_garden():
 
     # Construct the command to play the music using the specified soundcard channel
     command = f'mpg123 -a {soundcard_channel} Music/{selected_file} &'
-    pi2.exec_command(command)
+    pi3.exec_command(command)
 
     # Save the data to a JSON file on the server
     status = 'playing'
@@ -493,6 +504,8 @@ def cleanup():
     pi2.exec_command('pkill -f status.py')
     pi2.exec_command('pkill -f distort.py')
     pi2.exec_command('pkill -f sensor_board.py')
+    pi3.exec_command('pkill -f ir.py')
+    pi3.exec_command('pkill -f ir2.py')
     pi2.exec_command('pkill -f ir.py')
     ssh.exec_command('pkill -f keypad.py')
     ssh.exec_command('pkill -f read.py')
@@ -688,7 +701,7 @@ def get_pause_state():
 
 @app.route('/get-pi-status', methods=['GET'])
 def get_pi_status():
-    global ssh, pi2
+    global ssh, pi2, pi3
 
     # Prepare a list of dictionaries containing IP and SSH status for each Pi
     pi_statuses = []
@@ -710,6 +723,14 @@ def get_pi_status():
         except AttributeError:
             pi2_status["ssh_active"] = "Offline"
         pi_statuses.append(pi2_status)
+    if pi3:
+        pi3_status = {"ip_address": ip3brink}
+        try:
+            if pi3.get_transport().is_active():
+                pi3_status["ssh_active"] = "Online"
+        except AttributeError:
+            pi3_status["ssh_active"] = "Offline"
+        pi_statuses.append(pi3_status)
 
     # Render the template fragment and return as JSON
     return jsonify(render_template('status_table_fragment.html', pi_statuses=pi_statuses))
@@ -724,4 +745,4 @@ if __name__ == '__main__':
         start_scripts()
         atexit.register(cleanup)
     signal.signal(signal.SIGINT, handle_interrupt)
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=80)
