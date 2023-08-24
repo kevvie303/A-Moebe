@@ -60,7 +60,7 @@ def establish_ssh_connection():
     if pi3 is None or not pi3.get_transport().is_active():
         pi3 = paramiko.SSHClient()
         pi3.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        pi3.connect(ip3brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
+        pi3.connect(ip2brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
 
 # Function to execute the delete-locks.py script
 def execute_delete_locks_script():

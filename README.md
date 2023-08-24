@@ -17,7 +17,7 @@ Both of us are students who are doing this as a side project to learn more about
 Connect to the right pi by using Putty and entering the right IP-address:  
 `top-pi`, mostly used for sensors/maglocks: `192.168.0.104`  
 `middle-pi`, mostly used for the playing of music: `192.168.0.105`  
-`tree-pi`, only used for everything in the tree: `192.168.0.113`  
+`tree-pi`, only used for everything in the tree: `192.168.0.114`  
 First update the pi with the following commands:  
 `sudo apt-get update`  
 `sudo apt-get upgrade` (then entering y)  
@@ -31,6 +31,6 @@ Then press enter 3 times.
 `eval "$(ssh-agent -s)"`  
 `ssh-add ~/.ssh/id_ed25519`  
 `cat ~/.ssh/id_ed25519.pub`  
-Now you copy everything that it gives as a return, for example: "ssh-ed25519 fiuhewhiufheuifrehriufersugiegierbugsbibisigb kvbaar@hotmail.nl"
+Now you copy everything that it gives as a return, for example: "ssh-ed25519 fiuhewhiufheuifrehriufersugiegierbugsbibisigb kvbaar@hotmail.nl"  
 `git remote set-url origin git@github.com:kevvie303/[pi].git`, where [pi] needs to be replaced entirely by the name of the right pi, look above for the names.  
 
