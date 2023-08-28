@@ -55,7 +55,8 @@
             <!-- <button id="pause-music-button">Pause Music</button>
             <button id="resume-music-button">Resume Music</button> -->
             <button id="stop-music-button">Force stop music</button>
-            <button id="add-music-button">Add media to the PI</button>
+            <button id="add-music-button1">Add media to mid-PI</button>
+            <button id="add-music-button2">Add media to tree-PI</button>
             <button onclick="openMediaControlPage()">Control Media</button>
         </div>
         <div class="button-container">
@@ -81,5 +82,9 @@
         <!-- Music files will be dynamically added here -->
     </ul>
     <script src="{{ url_for('static', filename='sketch.js') }}"></script>
+
+    <h2>Sensor Status</h2>
+    <div id="sensor-status-container"></div>
+    <div id="ir-sensor-status-container"></div>
 </body>
 </html>

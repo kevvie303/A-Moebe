@@ -1,6 +1,6 @@
 
         $(document).ready(function() {
-            $('#add-music-button').click(function() {
+            $('#add-music-button1').click(function() {
                 // Open a file selection dialog when the button is clicked
                 var fileInput = $('<input type="file" accept=".mp3,.ogg,.wav">');
                 fileInput.on('change', function() {
@@ -10,7 +10,35 @@
                     formData.append('file', file);
                     $.ajax({
                         type: 'POST',
-                        url: '/add_music',
+                        url: '/add_music1',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            console.log(response);
+                            //alert('Music added successfully!');
+                        },
+                        error: function(error) {
+                            console.log(error);
+                            alert('Failed to add music.');
+                        }
+                    });
+                });
+                fileInput.click(); // Trigger the file selection dialog
+            });
+        });
+        $(document).ready(function() {
+            $('#add-music-button2').click(function() {
+                // Open a file selection dialog when the button is clicked
+                var fileInput = $('<input type="file" accept=".mp3,.ogg,.wav">');
+                fileInput.on('change', function() {
+                    var file = fileInput[0].files[0];
+                    // Send the selected file to the server
+                    var formData = new FormData();
+                    formData.append('file', file);
+                    $.ajax({
+                        type: 'POST',
+                        url: '/add_music2',
                         data: formData,
                         processData: false,
                         contentType: false,
@@ -147,7 +175,116 @@ $(document).ready(function() {
     }, 500); // Update every 2 seconds
 });
 
+$(document).ready(function() {
+// Create an object to store the latest sensor statuses
+var latestSensorStatuses = {};
+
+// Inside the updateAllSensorStatuses function
+function updateAllSensorStatuses() {
+  $.ajax({
+    type: 'GET',
+    url: 'http://192.168.0.104:5000/sensor/list',
+    success: function(response) {
+      var sensors = response.sensors;
+
+      for (var sensorNumber in sensors) {
+        var sensorName = sensors[sensorNumber];
+
+        // Create a new div for each sensor status if it doesn't exist
+        if (!$('#sensor' + sensorNumber + '-status').length) {
+          $('#sensor-status-container').append('<div id="sensor' + sensorNumber + '-status"></div>');
+        }
+
+        // Update the sensor status
+        updateSensorStatus(sensorNumber, sensorName);
+      }
+    },
+    error: function(error) {
+      console.log(error);
+    }
+  });
+}
+
+// Inside the updateSensorStatus function
+function updateSensorStatus(sensorNumber, sensorName) {
+  $.ajax({
+    type: 'GET',
+    url: 'http://192.168.0.104:5000/sensor/status/' + sensorNumber,
+    success: function(response) {
+      var sensorStatus = response.status;
+      var sensorStatusText = sensorName + ': ' + sensorStatus;
+
+      // Store the latest sensor status in the object
+      latestSensorStatuses[sensorNumber] = sensorStatusText;
+
+      // Display the latest sensor status
+      $('#sensor' + sensorNumber + '-status').text(latestSensorStatuses[sensorNumber]);
+    },
+    error: function(error) {
+      console.log(error);
+    }
+  });
+}
     
+      // Update sensor statuses and dynamically add to HTML
+      updateAllSensorStatuses();
+    
+      // Update maglock and sensor statuses periodically
+      setInterval(function() {
+        updateAllSensorStatuses();
+      }, 50); // Update every 0.5 seconds
+    });
+
+    $(document).ready(function() {
+        function updateIRSensorStatus(sensorNumber, sensorName) {
+          $.ajax({
+            type: 'GET',
+            url: `http://192.168.0.114:5001/ir-sensor/status/${sensorNumber}`,
+            success: function(response) {
+              var irSensorStatus = response.status;
+              var irSensorStatusText = `${sensorName}: ${irSensorStatus}`;
+    
+              // Update or create the IR sensor status element
+              var irSensorStatusElement = $(`#ir-sensor${sensorNumber}-status`);
+              if (irSensorStatusElement.length) {
+                irSensorStatusElement.text(irSensorStatusText);
+              } else {
+                var newIrSensorStatusElement = $('<div>').attr('id', `ir-sensor${sensorNumber}-status`);
+                newIrSensorStatusElement.text(irSensorStatusText);
+                $('#ir-sensor-status-container').append(newIrSensorStatusElement);
+              }
+            },
+            error: function(error) {
+              console.log(error);
+            }
+          });
+        }
+    
+        function updateAllIRSensorStatuses() {
+          $.ajax({
+            type: 'GET',
+            url: 'http://192.168.0.114:5001/ir-sensor/list',  // Endpoint that lists IR sensors
+            success: function(response) {
+              var irSensors = response.sensors;
+    
+              for (var i = 0; i < irSensors.length; i++) {
+                var sensor = irSensors[i];
+                updateIRSensorStatus(sensor.number, sensor.name);
+              }
+            },
+            error: function(error) {
+              console.log(error);
+            }
+          });
+        }
+    
+        // Initial update
+        updateAllIRSensorStatuses();
+    
+        // Update IR sensor statuses every 2 seconds
+        setInterval(updateAllIRSensorStatuses, 50);
+      });
+
 $(document).ready(function() {
     var intervalId;
     var speed = 2;

@@ -1,18 +1,21 @@
 from flask import Flask, render_template, request, redirect, jsonify
+from flask_cors import CORS
 import json
 import paramiko
 import atexit
 import os
 from dotenv import load_dotenv
 import time
+import multiprocessing
 import requests
 import subprocess
 import signal
 import sys
 import threading
+import logging
 load_dotenv()
 app = Flask(__name__)
-command = 'python relay_control.py'
+#command = 'python relay_control.py'
 ssh = None
 stdin = None
 pi2 = None
@@ -28,7 +31,12 @@ ip1brink = '192.168.0.104'
 ip2home = '192.168.1.28'
 ip2brink = '192.168.0.105'
 ip3brink = '192.168.0.114'
+sequence = 0
+should_sound_play = True
+
+#logging.basicConfig(level=logging.DEBUG)  # Use appropriate log level
 active_ssh_connections = {}
+CORS(app)
 
 import logging
 log = logging.getLogger('werkzeug')
@@ -48,7 +56,7 @@ def establish_ssh_connection():
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(ip1brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
-        stdin = ssh.exec_command(command)[0]
+        
     
     global pi2
     
@@ -60,22 +68,33 @@ def establish_ssh_connection():
     if pi3 is None or not pi3.get_transport().is_active():
         pi3 = paramiko.SSHClient()
         pi3.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        pi3.connect(ip2brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
+        pi3.connect(ip3brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
 
 # Function to execute the delete-locks.py script
 def execute_delete_locks_script():
     ssh.exec_command('python delete-locks.py')
 
+@app.route('/trigger', methods=['POST'])
+def trigger():
+    # Process the data and respond as needed
+    return jsonify({'message': 'Data received successfully'})
+
 def start_scripts():
+    global should_sound_play
     pi2.exec_command('python status.py')
     pi2.exec_command('python sensor_board.py')
-    pi3.exec_command('python ir.py')
     # pi2.exec_command('python distort.py')
     ssh.exec_command('python read.py')
     ssh.exec_command('python keypad.py')
+    #pi3.exec_command('python ir.py')
+    sensor_thread.start()
+    pi3.exec_command('python status.py')
+    if should_sound_play == True:
+        start_bird_sounds()
+        should_sound_play = False
 
-@app.route('/add_music', methods=['POST'])
-def add_music():
+@app.route('/add_music1', methods=['POST'])
+def add_music1():
     file = request.files['file']
     if file:
         try:
@@ -87,6 +106,24 @@ def add_music():
             if file_extension.lower() in allowed_extensions:
                 # Create an SFTP client to transfer the file
                 sftp = pi2.open_sftp()
+                
+                # Modify the file path to be relative to the Flask application
+                local_path = os.path.join(app.root_path, 'uploads', file.filename)
+                
+                # Save the file to the modified local path
+                file.save(local_path)
+                
+                # Save the file to the Music folder on the Pi
+                remote_path = '/home/pi/Music/' + filename + file_extension
+                sftp.put(local_path, remote_path)
+                
+                # Close the SFTP client
+                sftp.close()
+                
+                # Delete the local file after transferring
+                os.remove(local_path)
+
+                sftp = pi3.open_sftp()
                 
                 # Modify the file path to be relative to the Flask application
                 local_path = os.path.join(app.root_path, 'uploads', file.filename)
@@ -115,6 +152,46 @@ def add_music():
     else:
         return 'No file selected.'
 
+@app.route('/add_music2', methods=['POST'])
+def add_music2():
+    file = request.files['file']
+    if file:
+        try:
+            # Get the file extension
+            filename, file_extension = os.path.splitext(file.filename)
+            
+            # Check if the file extension is allowed
+            allowed_extensions = ['.mp3', '.wav', '.ogg']
+            if file_extension.lower() in allowed_extensions:
+                # Create an SFTP client to transfer the file
+                sftp = pi3.open_sftp()
+                
+                # Modify the file path to be relative to the Flask application
+                local_path = os.path.join(app.root_path, 'uploads', file.filename)
+                
+                # Save the file to the modified local path
+                file.save(local_path)
+                
+                # Save the file to the Music folder on the Pi
+                remote_path = '/home/pi/Music/' + filename + file_extension
+                sftp.put(local_path, remote_path)
+                
+                # Close the SFTP client
+                sftp.close()
+                
+                # Delete the local file after transferring
+                os.remove(local_path)
+                
+                return 'Music added successfully!'
+            else:
+                return 'Invalid file type. Only .mp3, .wav, and .ogg files are allowed.'
+        except IOError as e:
+            return f'Error: {str(e)}'
+        finally:
+            # Close the SSH connection
+            print("h")
+    else:
+        return 'No file selected.'
 
 @app.route('/media_control')
 def media_control():
@@ -427,7 +504,7 @@ def set_starting_volume(soundcard_channel):
 def stop_music():
     # Stop the music on pi2
     stdin, stdout, stderr = pi2.exec_command('pkill -9 mpg123')
-
+    stdin, stdout, stderr = pi3.exec_command('pkill -9 mpg123')
     # Wipe the entire JSON file by overwriting it with an empty list
     file_path = os.path.join(current_dir, 'json', 'file_status.json')
     with open(file_path, 'w') as file:
@@ -444,32 +521,31 @@ def backup_top_pi():
 def backup_middle_pi():
     ssh.exec_command('./commit_and_push.sh')
     return "Middle pi backed up"
-def turn_on_maglock(maglock):
 
+@app.route('/lock_entrance_door', methods=['POST'])
+def lock_entrance_door():
+    ssh.exec_command("raspi-gpio set 17 dl")
+    return "locked door"
+
+def turn_on_maglock(maglock):
     if maglock == '1':
-        command_input = '1\n'
+        ssh.exec_command("raspi-gpio set 17 dl")
     elif maglock == '2':
-        command_input = '2\n'
+        ssh.exec_command("raspi-gpio set 27 dl")
     else:
         return 'Invalid maglock selection'
-
-    stdin.write(command_input)
-    stdin.flush()
-
     return 'Maglock turned on'
+
+
 
 # Function to turn off the maglock
 def turn_off_maglock(maglock):
     if maglock == '0':
-        command_input = '0\n'
+        ssh.exec_command("raspi-gpio set 17 dh")
     elif maglock == '-1':
-        command_input = '-1\n'
+        ssh.exec_command("raspi-gpio set 27 dh")
     else:
         return 'Invalid maglock'
-
-    stdin.write(command_input)
-    stdin.flush()
-
     return 'Maglock turned off'
 
 
@@ -486,8 +562,99 @@ def get_state():
             state = 'unknown'
     except requests.exceptions.RequestException:
         state = 'unknown'
-    
     return jsonify({'state': state})
+
+API_URL_SENSORS = 'http://192.168.0.104:5000/sensor/status/'
+
+def get_sensor_status(sensor_number):
+    try:
+        response = requests.get(API_URL_SENSORS + str(sensor_number))
+        if response.status_code == 200:
+            return response.json().get('status')
+        else:
+            return 'unknown'
+    except requests.exceptions.RequestException:
+        return 'unknown'
+def monitor_sensor_statuses():
+    global sequence
+    while True:
+        green_house_ir_status = get_ir_sensor_status(14)
+        red_house_ir_status = get_ir_sensor_status(20)
+        blue_house_ir_status = get_ir_sensor_status(18)
+        entrance_door_status = get_sensor_status(14)
+        #other_sensor_status = get_sensor_status(24)
+
+        if (entrance_door_status == 'closed'):
+            ssh.exec_command("raspi-gpio set 17 op dl")
+        else:
+            ssh.exec_command("raspi-gpio set 17 op dh")
+
+        if green_house_ir_status == 'active' and sequence == 0:
+            pi3.exec_command("raspi-gpio set 15 op dh")
+            sequence = 1
+        if red_house_ir_status == 'active' and sequence == 1:
+            pi3.exec_command("raspi-gpio set 21 op dh")
+            sequence = 2
+        elif red_house_ir_status == 'active' and sequence <= 0:
+            pi3.exec_command("raspi-gpio set 21 op dh")
+            time.sleep(0.5)
+            pi3.exec_command("raspi-gpio set 21 op dl")
+            pi3.exec_command("raspi-gpio set 15 op dl")
+            sequence = 0
+        if blue_house_ir_status == 'active' and sequence == 2:
+            pi3.exec_command("raspi-gpio set 23 op dh")
+            time.sleep(1)
+            pi3.exec_command("raspi-gpio set 23 op dl")
+            pi3.exec_command("raspi-gpio set 21 op dl")
+            pi3.exec_command("raspi-gpio set 15 op dl")
+            time.sleep(1)
+            pi3.exec_command("raspi-gpio set 23 op dh")
+            pi3.exec_command("raspi-gpio set 21 op dh")
+            pi3.exec_command("raspi-gpio set 15 op dh")
+            time.sleep(1)
+            pi3.exec_command("raspi-gpio set 23 op dl")
+            pi3.exec_command("raspi-gpio set 21 op dl")
+            pi3.exec_command("raspi-gpio set 15 op dl")
+            time.sleep(1)
+            pi3.exec_command("raspi-gpio set 23 op dh")
+            pi3.exec_command("raspi-gpio set 21 op dh")
+            pi3.exec_command("raspi-gpio set 15 op dh")
+            sequence = 0
+        elif blue_house_ir_status == 'active' and sequence != 2:
+            pi3.exec_command("raspi-gpio set 23 op dh")
+            time.sleep(0.5)
+            pi3.exec_command("raspi-gpio set 23 op dl")
+            pi3.exec_command("raspi-gpio set 21 op dl")
+            pi3.exec_command("raspi-gpio set 15 op dl")
+            sequence = 0
+        time.sleep(0.1)
+# Start a new thread for monitoring sensor statuses
+def start_bird_sounds():
+    pi3.exec_command("mpg123 -a hw:1,0 Music/Pecker.mp3")
+    print("1")
+    time.sleep(8)
+    pi3.exec_command("mpg123 -a hw:1,0 Music/Owl.mp3")
+    print("2")
+    time.sleep(8)
+    pi3.exec_command("mpg123 -a hw:1,0 Music/Gull.mp3")
+    print("3")
+API_URL_IR_SENSORS = 'http://192.168.0.114:5001/ir-sensor/status/'
+
+def get_ir_sensor_status(sensor_number):
+    try:
+        response = requests.get(API_URL_IR_SENSORS + str(sensor_number))
+        if response.status_code == 200:
+            return response.json().get('status')
+        else:
+            return 'unknown'
+    except requests.exceptions.RequestException:
+        return 'unknown'
+sensor_thread = threading.Thread(target=monitor_sensor_statuses)
+sensor_thread.daemon = True  # Set the thread as a daemon thread to allow program exit
+
+# Start a new thread for monitoring IR sensor statuses
+#ir_sensor_thread = threading.Thread(target=monitor_ir_sensor_statuses)
+#ir_sensor_thread.daemon = True  # Set the thread as a daemon thread to allow program exit
 @app.route('/turn_on', methods=['POST'])
 def turn_on():
     maglock = request.form['maglock']
@@ -505,7 +672,6 @@ def cleanup():
     pi2.exec_command('pkill -f distort.py')
     pi2.exec_command('pkill -f sensor_board.py')
     pi3.exec_command('pkill -f ir.py')
-    pi3.exec_command('pkill -f ir2.py')
     pi2.exec_command('pkill -f ir.py')
     ssh.exec_command('pkill -f keypad.py')
     ssh.exec_command('pkill -f read.py')
@@ -555,8 +721,7 @@ def reboot_mag_pi():
     ssh.connect(ip1brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
     time.sleep(2)
     ssh.exec_command('python status.py')
-    time.sleep(2)
-    stdin = ssh.exec_command(command)[0]
+    #stdin = ssh.exec_command(command)[0]
     time.sleep(3)
     ssh.exec_command('python delete-locks.py')
     ssh.exec_command('python read.py')
