@@ -20,7 +20,6 @@ app = Flask(__name__)
 ssh = None
 stdin = None
 pi2 = None
-pi3 = None
 romy = False
 fade_duration = 3  # Fade-out duration in seconds
 fade_interval = 0.1  # Interval between volume adjustments in seconds
@@ -151,46 +150,6 @@ def add_music1():
     else:
         return 'No file selected.'
 
-@app.route('/add_music2', methods=['POST'])
-def add_music2():
-    file = request.files['file']
-    if file:
-        try:
-            # Get the file extension
-            filename, file_extension = os.path.splitext(file.filename)
-            
-            # Check if the file extension is allowed
-            allowed_extensions = ['.mp3', '.wav', '.ogg']
-            if file_extension.lower() in allowed_extensions:
-                # Create an SFTP client to transfer the file
-                sftp = pi3.open_sftp()
-                
-                # Modify the file path to be relative to the Flask application
-                local_path = os.path.join(app.root_path, 'uploads', file.filename)
-                
-                # Save the file to the modified local path
-                file.save(local_path)
-                
-                # Save the file to the Music folder on the Pi
-                remote_path = '/home/pi/Music/' + filename + file_extension
-                sftp.put(local_path, remote_path)
-                
-                # Close the SFTP client
-                sftp.close()
-                
-                # Delete the local file after transferring
-                os.remove(local_path)
-                
-                return 'Music added successfully!'
-            else:
-                return 'Invalid file type. Only .mp3, .wav, and .ogg files are allowed.'
-        except IOError as e:
-            return f'Error: {str(e)}'
-        finally:
-            # Close the SSH connection
-            print("h")
-    else:
-        return 'No file selected.'
 
 @app.route('/media_control')
 def media_control():

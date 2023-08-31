@@ -1,118 +1,59 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Maglock Control</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="icon" href="static/favicon.png" type="image/png">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <div class="logo-container">
-        <img src="static/favicon.png" alt="Logo">
-        <span>A-Moebe Beta</span>
-    </div>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>A-moebe Beta</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fonts/fonts.css')}}">
+    <link rel="icon" href="static/img/favicon.png" type="image/png">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>    
 </head>
-<body>
+<body class="landing-page">
 
-    <h1>Maglock Control</h1>
-    <div class="button-container">
-        <div class="column">
-            <h2>Lock</h2>
-            <button class="turn-on-button" data-maglock="1">entrance-door-lock</button>
-            <button class="turn-on-button" data-maglock="2">doghouse-lock</button>
-        </div>
-        <div class="column">
-            <h2>Unlock</h2>
-            <button class="turn-off-button" data-maglock="0">entrance-door-lock</button>
-            <button class="turn-off-button" data-maglock="-1">doghouse-lock</button>
-        </div>
-    </div>
-    <div class="game-container">
-        <button id="start-game-button">Start Game</button>
-        <button id="end-game-button">End game</button>
-        <button id="pause-button">Pause Game</button>
-        <button id="continue-button" style="display: none;">Continue Game</button>
-        <a href="{{ url_for('pin_info') }}" class="pin-info">GPIO pin information</a>
-        <div class="timer-container">
-            <div>
-                <span>Time Played:</span>
-                <span id="time-played">0:00</span>
+    <header class="logo">
+        <figure class="logo-container">
+            <img src="static/img/logo.png" alt="Logo">
+            <figcaption>A-Moebe Beta</figcaption>
+        </figure>
+    </header>
+
+    <section class="rooms">
+
+        <h2>Escape rooms</h2>
+
+        <article class="retriever-container">
+            <a href="/retriever" id="retriever-link">
+                <img src="static/img/retrieverlogo.svg" alt="Retriever logo">
+                <div class="time-preview">
+                    <div class="timer">
+                        <p id="time-played">00:00</p>
+                        <p id="time-left">60:00</p>
+                    </div>
+                    <p id="speed-display">Speed: 1x</p>
+                </div>
+            </a>
+        </article>
+
+    </section>
+
+    <section class="media">
+        <h2>Media control</h2>
+
+        <article class="media-control">
+            <div class="buttons">
+                <button id="add-music-button" class="button-style main-button">Add media to the PI</button>
+                <button onclick="openMediaControlPage()" class="button-style main-button">Control Media</button>           
             </div>
-            <div>
-                <span>Time Left:</span>
-                <span id="time-left">60:00</span>
-            </div>
-        </div>
-        <div class="button-container">
-            <button id="speed-up-button">Speed Up</button>
-            <button id="slow-down-button">Slow Down</button>
-        </div>
-        <div class="button-container">
-            <button id="reset-button">Reset Speed</button>
-            <div id="speed-display">Timer Speed: 1x</div>
-        </div>
-        <div class="button-container">
-            <button id="select-file-button">Select Song</button>
-            <!-- <button id="pause-music-button">Pause Music</button>
-            <button id="resume-music-button">Resume Music</button> -->
-            <button id="stop-music-button">Force stop music</button>
-            <button id="add-music-button1">Add media to mid-PI</button>
-            <button id="add-music-button2">Add media to tree-PI</button>
-            <button onclick="openMediaControlPage()">Control Media</button>
-        </div>
-        <div class="button-container">
-            <button id="reboot-pi-mag">Reboot maglock pi</button>
-            <button id="reboot-pi-music">Reboot music pi</button>
-            <button id="backup-top-pi">Backup the top pi</button>
-            <button id="backup-middle-pi">Backup the middle pi</button>
-        </div>
-        <h1>Pi Status</h1>
-        <table id="status-table">
-            <!-- Table will be populated dynamically -->
-        </table>
-        <div>
-            <h3>Maglock 1 Status: <span id="maglock1-status"></span></h3>
-          </div>
-          
-          <div>
-            <h3>Maglock 2 Status: <span id="maglock2-status"></span></h3>
-          </div>
-    </div>
-    <div id="status-display"></div>
-    <ul id="music-list">
-        <!-- Music files will be dynamically added here -->
-    </ul>
-    <script src="{{ url_for('static', filename='sketch.js') }}"></script>
+        </article>
+    </section>
 
-    <h2>Sensor Status</h2>
-    <div id="sensor-status-container"></div>
-    <div id="ir-sensor-status-container"></div>
+    <footer>
+        <img src="static/img/thebrinkescaperooms.png" alt="The Brink Escaperooms">
+    </footer>
 
-    <h1>Escape Room Tasks</h1>
-    <ul id="task-list"></ul>
-
-    <button id="add-task-button">Add Task</button>
-
-<!-- Modal -->
-<div id="task-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <label for="task-name">Task Name:</label>
-        <input type="text" id="task-name">
-        <label for="task-description">Task Description:</label>
-        <input type="text" id="task-description">
-        <button id="save-task-button">Save Task</button>
-    </div>
-</div>
-<button id="remove-task-button">Remove Task</button>
-
-<!-- Modal for Task Removal -->
-<div id="remove-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Select a Task to Remove</h2>
-        <ul id="task-removal-list"></ul>
-        <button id="confirm-remove-button">Confirm Removal</button>
-    </div>
-</div>
+    <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script> -->
 </body>
 </html>
