@@ -13,6 +13,7 @@ import signal
 import sys
 import threading
 import logging
+from apscheduler.schedulers.background import BackgroundScheduler
 load_dotenv()
 app = Flask(__name__)
 #command = 'python relay_control.py'
@@ -37,7 +38,8 @@ should_sound_play = True
 #logging.basicConfig(level=logging.DEBUG)  # Use appropriate log level
 active_ssh_connections = {}
 CORS(app)
-
+scheduler = BackgroundScheduler()
+scheduler.start()
 import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -89,9 +91,6 @@ def start_scripts():
     #pi3.exec_command('python ir.py')
     sensor_thread.start()
     pi3.exec_command('python status.py')
-    if should_sound_play == True:
-        start_bird_sounds()
-        should_sound_play = False
 
 @app.route('/add_music1', methods=['POST'])
 def add_music1():
@@ -456,7 +455,109 @@ def get_file_status():
             return jsonify([])
     else:
         return jsonify([])
+    
+@app.route('/get_task_status', methods=['GET'])
+def get_task_status():
+    file_path = os.path.join(current_dir, 'json', 'tasks.json')
+    if os.path.exists(file_path):
+        try:
+            with open(file_path, 'r') as file:
+                file_data = json.load(file)
+            return jsonify(file_data)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return jsonify([])
+    else:
+        return jsonify([])
+    
+@app.route('/solve_task/<task_name>', methods=['POST'])
+def solve_task(task_name):
+    file_path = os.path.join(current_dir, 'json', 'tasks.json')
 
+    try:
+        with open(file_path, 'r') as file:
+            tasks = json.load(file)
+
+        for task in tasks:
+            if task['task'] == task_name:
+                task['state'] = 'solved'
+
+        with open(file_path, 'w') as file:
+            json.dump(tasks, file, indent=4)
+        with app.app_context():
+            return jsonify({'message': 'Task updated successfully'})
+    except (FileNotFoundError, json.JSONDecodeError):
+        return jsonify({'message': 'Error updating task'})
+    
+@app.route('/pend_task/<task_name>', methods=['POST'])
+def pend_task(task_name):
+    file_path = os.path.join(current_dir, 'json', 'tasks.json')
+
+    try:
+        with open(file_path, 'r') as file:
+            tasks = json.load(file)
+
+        for task in tasks:
+            if task['task'] == task_name:
+                task['state'] = 'pending'
+
+        with open(file_path, 'w') as file:
+            json.dump(tasks, file, indent=4)
+
+        return jsonify({'message': 'Task updated successfully'})
+    except (FileNotFoundError, json.JSONDecodeError):
+        return jsonify({'message': 'Error updating task'})
+@app.route('/reset_task_statuses', methods=['POST'])
+def reset_task_statuses():
+    file_path = os.path.join(current_dir, 'json', 'tasks.json')
+
+    try:
+        with open(file_path, 'r') as file:
+            tasks = json.load(file)
+
+        for task in tasks:
+            task['state'] = 'pending'
+
+        with open(file_path, 'w') as file:
+            json.dump(tasks, file, indent=4)
+
+        return jsonify({'message': 'Task statuses reset successfully'})
+    except (FileNotFoundError, json.JSONDecodeError):
+        return jsonify({'message': 'Error resetting task statuses'})
+@app.route('/add_task', methods=['POST'])
+def add_task():
+    file_path = os.path.join(current_dir, 'json', 'tasks.json')
+    task_data = request.get_json()
+
+    try:
+        with open(file_path, 'r') as file:
+            tasks = json.load(file)
+        
+        tasks.append(task_data)
+
+        with open(file_path, 'w') as file:
+            json.dump(tasks, file, indent=4)
+
+        return jsonify({'message': 'Task added successfully'})
+    except (FileNotFoundError, json.JSONDecodeError):
+        return jsonify({'message': 'Error adding task'})
+    
+@app.route('/remove_task', methods=['POST'])
+def remove_task():
+    file_path = os.path.join(current_dir, 'json', 'tasks.json')
+    task_data = request.get_json()
+
+    try:
+        with open(file_path, 'r') as file:
+            tasks = json.load(file)
+
+        updated_tasks = [task for task in tasks if task['task'] != task_data['task']]
+
+        with open(file_path, 'w') as file:
+            json.dump(updated_tasks, file, indent=4)
+
+        return jsonify({'message': f'Task "{task_data["task"]}" removed successfully'})
+    except (FileNotFoundError, json.JSONDecodeError):
+        return jsonify({'message': 'Error removing task'})
 @app.route('/play_music_lab', methods=['POST'])
 def play_music_lab():
     global current_file
@@ -602,6 +703,7 @@ def monitor_sensor_statuses():
             pi3.exec_command("raspi-gpio set 15 op dl")
             sequence = 0
         if blue_house_ir_status == 'active' and sequence == 2:
+            solve_task("tree-lights")
             pi3.exec_command("raspi-gpio set 23 op dh")
             time.sleep(1)
             pi3.exec_command("raspi-gpio set 23 op dl")
@@ -638,6 +740,8 @@ def start_bird_sounds():
     time.sleep(8)
     pi3.exec_command("mpg123 -a hw:1,0 Music/Gull.mp3")
     print("3")
+
+
 API_URL_IR_SENSORS = 'http://192.168.0.114:5001/ir-sensor/status/'
 
 def get_ir_sensor_status(sensor_number):
@@ -651,7 +755,6 @@ def get_ir_sensor_status(sensor_number):
         return 'unknown'
 sensor_thread = threading.Thread(target=monitor_sensor_statuses)
 sensor_thread.daemon = True  # Set the thread as a daemon thread to allow program exit
-
 # Start a new thread for monitoring IR sensor statuses
 #ir_sensor_thread = threading.Thread(target=monitor_ir_sensor_statuses)
 #ir_sensor_thread.daemon = True  # Set the thread as a daemon thread to allow program exit
@@ -899,15 +1002,16 @@ def get_pi_status():
 
     # Render the template fragment and return as JSON
     return jsonify(render_template('status_table_fragment.html', pi_statuses=pi_statuses))
-
+if romy == False:
+    turn_on_api()
+    start_scripts()
+    scheduler.add_job(start_bird_sounds, 'interval', minutes=1)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 if __name__ == '__main__':
-    if romy == False:
-        turn_on_api()
-        start_scripts()
-        atexit.register(cleanup)
     signal.signal(signal.SIGINT, handle_interrupt)
     app.run(host='0.0.0.0', port=80)
+    if romy == False:
+        atexit.register(cleanup)
