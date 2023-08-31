@@ -16,7 +16,7 @@ command = 'python relay_control.py'
 ssh = None
 stdin = None
 pi2 = None
-romy = False
+romy = True
 fade_duration = 3  # Fade-out duration in seconds
 fade_interval = 0.1  # Interval between volume adjustments in seconds
 fade_steps = int(fade_duration / fade_interval)  # Number of fade steps
@@ -157,6 +157,9 @@ def file_selection():
     music_files = stdout.read().decode().splitlines()
     return render_template('file_selection.html', music_files=music_files)
 
+@app.route('/pin-info')
+def pin_info():
+    return render_template('pin_info.html')
 # Global variable to keep track of the currently playing music file
 current_file = None
 

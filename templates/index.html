@@ -32,9 +32,15 @@
                 </div>
             </a>
 
-            <div class="controls buttons">
-                <a href="/pi" class="button-style">Pi control</a>
-                <a href="/media" class="button-style">Media control</a>
+            <div class="controls">
+                <div class="control">
+                    <a href="/pi" class="button-style">Pi control</a>
+                    <a href="/media" class="button-style">Media control</a>
+                </div>
+
+                <div class="info">
+                    <a href="{{ url_for('pin_info') }}" class="button-style">GPIO pin information</a>
+                </div>
             </div>
         </article>
     </section>

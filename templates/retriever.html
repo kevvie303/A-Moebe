@@ -11,6 +11,7 @@
 </head>
 <body>
     <header class="retriever-logo">
+        <a href="/">Go back</a>
         <figure class="logo-container">
             <img src="static/img/retrieverlogo.svg" alt="Retriever Logo">
         </figure>
@@ -35,27 +36,102 @@
         </div>
     </nav>
 
-    <section class="media-hidden">
+    <section class="media-hidden hidden">
         <article class="media">
+            <button class="close-media close"><img src="static/img/abort.svg" alt="Close button"></button>
+
             <h2>Media</h2>
             <div>
+                <button id="select-file-button" class="button-style">Select Song</button>
+                <a href="/media" class="button-style">Control media</a>
 
-                <button class="button-style">Select song</button>
-
-                <p>Song name</p>
-
-                <figure>
-                    <button><img src="static/img/start.svg" alt="Start music"></button>
-                </figure>
-
-                <!-- <p id="music-list">
+                <p id="music-list">
                     Music files will be dynamically added here
-                </p> -->
+                </p>
+            </div>
+        </article>
+    </section>
 
+    <section class="time-hidden hidden">
+        <article class="time">
+            <button class="close-time close"><img src="static/img/abort.svg" alt="Close button"></button>
+
+            <h2>Time controls</h2>
+
+            <div class="time-display">
+
+                <div class="timer">
+                    <p>Played<strong id="time-played">00:00</strong></p>
+                    <p>Left: <strong id="time-left">60:00</strong></p>
+                </div>
+                
+                <div class="speed-display">
+                    <p id="speed-display">Speed: 1x</p>
+                </div>
+            </div>
+
+            <div class="time-controls">
+                <div class="speed-up-slow-down">
+                    <button id="speed-up-button" class="button-style main-button">Speed Up</button>
+                    <button id="slow-down-button" class="button-style main-button">Slow Down</button>
+                </div>
+                <div class="reset-speed">
+                    <button id="reset-button" class="button-style main-button">Reset Speed</button>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="pi-hidden hidden">
+        <article class="pi">
+            <button class="close-pi close"><img src="static/img/abort.svg" alt="Close button"></button>
+
+            <h2>Pi controls</h2>
+
+            <div class="reboot">
+                <h3>Reboot</h3>
+
+                <div class="pies">
+                    <button id="reboot-pi-mag" class="button-style">Reboot maglock pi</button>
+                    <button id="reboot-pi-music" class="button-style">Reboot music pi</button>
+                    <button id="reboot-tree-pi" class="button-style">Reboot tree pi</button>
+                </div>
+            </div>
+
+            <div class="backup">
+                <h3>Backup</h3>
+
+                <div class="pies">
+                    <button id="backup-top-pi" class="button-style">Backup maglock pi</button>
+                    <button id="backup-middle-pi" class="button-style">Backup music pi</button>
+                    <button id="backup-tree-pi" class="button-style">Backup the tree pi</button>
+                </div>
+            </div>
                 
             </div>
-            
+        </article>
+    </section>
 
+    <section class="game-hidden hidden">
+        <article class="game-controls">
+            <button class="close-game close"><img src="static/img/abort.svg" alt="Close button"></button>
+
+            <h2>Game controls</h2>
+
+            <div class="game-buttons">
+                <button id="start-game-button" class="button-style">Start game</button>
+                <!-- <button id="pause-button"><img class="icon" src="static/img/pause.svg" alt="Pause game button"></button>
+                <button id="continue-button" style="display: none;"><img src="static/img/pause.svg" alt="Pause game button"></button> -->
+                <button class=" abort-button button-style">Abort game</button>
+            </div>
+
+            <div class="abort hidden">
+                <p>Are you sure you want to abort the game?</p>
+
+                <button id="end-game-button" class="button-style">Yes, abort game</button>
+            </div>
+
+            <p class="confirmation hidden">Game aborted</p>
         </article>
     </section>
 
@@ -92,65 +168,25 @@
             </div>
         </section>
 
-        <section class="time-container">
+        <a href="{{ url_for('pin_info') }}" class="pin-info button-style">GPIO pin information</a>
 
-            <h2>Time controls</h2>
-    
-            <article class="time">
-                <p>Played<strong id="time-played">00:00</strong></p>
-                <p>Left: <strong id="time-left">60:00</strong></p>
-                <p id="speed-display">Speed: 1x</p>
-            </article>
-    
-            <article class="speed-buttons">
-                <div class="speed-up-slow-down">
-                    <button id="speed-up-button" class="button-style main-button">Speed Up</button>
-                    <button id="slow-down-button" class="button-style main-button">Slow Down</button>
-                </div>
-                <div class="reset-speed">
-                    <button id="reset-button" class="button-style main-button">Reset Speed</button>
-                </div>
-            </article>
-    
-        </section>
-
-        <article class="game-buttons">
-            <h2>Game</h2>
-
-            <div class="play-pause-buttons">
-                <button id="start-game-button"><img class="icon" src="static/img/start.svg" alt="Start game button"></button>
-                <button id="pause-button"><img class="icon" src="static/img/pause.svg" alt="Pause game button"></button>
-                <button id="continue-button" style="display: none;"><img src="static/img/pause.svg" alt="Pause game button"></button>
-                <button id="end-game-button"><img class="icon" src="static/img/abort.svg" alt="Abort game button"></button>
-            </div>
-        </article>
-
-        <article class="media-play">
+        <!-- <article class="media-play">
             <h2>Play media</h2>
 
             <div class="buttons">
 
                 <div class="button-container">
-                    <button id="select-file-button" class="button-style main-button">Select Song</button>
+                    <button id="select-file-button" class="button-style main-button">Select Song</button> -->
                     <!-- <button id="pause-music-button" class="button-style main-button">Pause Music</button> -->
                     <!-- <button id="resume-music-button" class="button-style main-button">Resume Music</button> -->
-                    <button id="stop-music-button" class="button-style main-button">Force stop music</button>
+                    <!-- <button id="stop-music-button" class="button-style main-button">Force stop music</button>
                     <button id="add-music-button">Add media to the PI</button>
             <button onclick="openMediaControlPage()">Control Media</button>
                 </div>
             </div>
-        </article>
+        </article> -->
 
-        <article class="pi-reboot">
-            <h2>Pi reboot</h2>
-
-            <div class="buttons">
-                <button id="reboot-pi-mag">Reboot maglock pi</button>
-            <button id="reboot-pi-music">Reboot music pi</button>
-            <button id="backup-top-pi">Backup the top pi</button>
-            <button id="backup-middle-pi">Backup the middle pi</button>
-            </div>
-        </article>
+        <!-- Updaten van de aanwezige pi's en hun status -->
 
         <table id="status-table">
             <!-- Table will be populated dynamically -->
@@ -158,10 +194,23 @@
 
         <div id="status-display"></div>
         <ul id="music-list">
-            <!-- Music files will be dynamically added here -->
+            <div class="song-name">Something is playing!</div>
+            <li>
+                <button class="pause-button" data-file="${filename}" data-channel="${soundcard_channel}">Pause</button>
+            </li>
+            <div>Paused songs:</div>
+            <div>Something is paused!</div>
+            <li>
+                <button class="resume-button" data-file="${filename}" data-channel="${soundcard_channel}">Resume</button>
+            </li>
+            
         </ul>
 
     </section>
+
+    <footer>
+        <img src="static/img/thebrinkescaperooms.svg" alt="The Brink Escaperooms">
+    </footer>
     
     <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
