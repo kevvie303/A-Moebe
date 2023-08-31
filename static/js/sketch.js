@@ -35,7 +35,7 @@ $(document).ready(function () {
     var fileSelectionWindow = window.open(
       "/file_selection",
       "_blank",
-      "height=400,width=400"
+      "height=400,width=420"
     );
 
     // Poll for the selected file
@@ -122,13 +122,32 @@ $(document).ready(function () {
       url: "http://192.168.0.104:5000/maglock/status/" + maglockNumber,
       success: function (response) {
         var maglockStatus = response.status;
-        var maglockStatusText =
-          maglockStatus === "locked" ? "Locked" : "Unlocked";
-
+        let maglock1 = document.getElementById("maglock1-status");
+        let maglock2 = document.getElementById("maglock2-status");
+        var maglockStatusText;
+        if (maglockStatus === "locked") {
+          maglockStatusText = "Locked";
+        } else {
+          maglockStatusText = "Unlocked";
+        }
         if (maglockNumber === 1) {
           $("#maglock1-status").text(maglockStatusText);
+          if (maglockStatusText === "Locked") {
+            maglock1.classList.remove("unlocked");
+            maglock1.classList.add("locked");
+          } else {
+            maglock1.classList.remove("locked");
+            maglock1.classList.add("unlocked");
+          }
         } else if (maglockNumber === 2) {
           $("#maglock2-status").text(maglockStatusText);
+          if (maglockStatusText === "Locked") {
+            maglock2.classList.remove("unlocked");
+            maglock2.classList.add("locked");
+          } else {
+            maglock2.classList.remove("locked");
+            maglock2.classList.add("unlocked");
+          }
         }
       },
       error: function (error) {
@@ -321,6 +340,42 @@ $(document).ready(function () {
       },
     });
   });
+  $("#reboot-pi-music").click(function () {
+    $.ajax({
+      type: "POST",
+      url: "/reboot-music-pi",
+      success: function (response) {
+        console.log(response);
+      },
+      error: function (error) {
+        console.log(error);
+      },
+    });
+  });
+  $("#backup-top-pi").click(function () {
+    $.ajax({
+      type: "POST",
+      url: "/backup-top-pi",
+      success: function (response) {
+        console.log(response);
+      },
+      error: function (error) {
+        console.log(error);
+      },
+    });
+  });
+  $("#backup-middle-pi").click(function () {
+    $.ajax({
+      type: "POST",
+      url: "/backup-middle-pi",
+      success: function (response) {
+        console.log(response);
+      },
+      error: function (error) {
+        console.log(error);
+      },
+    });
+  });
 });
 
 function updateState() {
@@ -338,3 +393,106 @@ function updateState() {
 }
 // Update the state every 5 seconds (5000 milliseconds)
 setInterval(updateState, 5000);
+
+$(document).ready(function () {
+  function updateStatusDisplay() {
+    $.get("/get_file_status", function (data) {
+      $("#status-display").empty();
+
+      const playingSongs = data.filter((entry) => entry.status === "playing");
+      const pausedSongs = data.filter((entry) => entry.status === "paused");
+
+      if (playingSongs.length > 0) {
+        $("#music-list").empty();
+
+        playingSongs.forEach((entry) => {
+          const { filename, soundcard_channel } = entry;
+          $("#status-display").append(
+            `<div class="song-name">${filename} is playing!</div>`
+          );
+          $("#music-list").append(`
+              <li>
+                  ${filename}
+                  <button class="pause-button" data-file="${filename}" data-channel="${soundcard_channel}">Pause</button>
+              </li>
+          `);
+        });
+      } else {
+        $("#music-list").empty(); // Clear the list if there are no songs playing
+      }
+
+      if (pausedSongs.length > 0) {
+        $("#status-display").append("<div>Paused songs:</div>");
+        pausedSongs.forEach((entry) => {
+          const { filename, soundcard_channel } = entry;
+          $("#status-display").append(`<div>${filename} is paused!</div>`);
+          $("#music-list").append(`
+              <li>
+                  ${filename}
+                  <button class="resume-button" data-file="${filename}" data-channel="${soundcard_channel}">Resume</button>
+              </li>
+          `);
+        });
+      }
+    });
+  }
+
+  // Handle pause button click
+  $(document).on("click", ".pause-button", function () {
+    const selectedFile = $(this).data("file");
+    const selectedChannel = $(this).data("channel");
+    $.ajax({
+      type: "POST",
+      url: "/pause_music",
+      data: { file: selectedFile, channel: selectedChannel },
+      success: function (response) {
+        console.log(response);
+        updateStatusDisplay(); // Update the status display after pausing the song
+      },
+      error: function (error) {
+        console.log(error);
+      },
+    });
+  });
+
+  // Handle resume button click
+  $(document).on("click", ".resume-button", function () {
+    const selectedFile = $(this).data("file");
+    const selectedChannel = $(this).data("channel");
+    $.ajax({
+      type: "POST",
+      url: "/resume_music",
+      data: { file: selectedFile, channel: selectedChannel },
+      success: function (response) {
+        console.log(response);
+        updateStatusDisplay(); // Update the status display after resuming the song
+      },
+      error: function (error) {
+        console.log(error);
+      },
+    });
+  });
+
+  // Call the function initially and update the status display every 5 seconds
+  updateStatusDisplay();
+  setInterval(updateStatusDisplay, 5000);
+});
+function updatePiStatus() {
+  $.ajax({
+    url: "/get-pi-status",
+    method: "GET",
+    success: function (data) {
+      // Update the table with the latest status data
+      $("#status-table").html(data);
+    },
+    complete: function () {
+      // Schedule the next update after 5 seconds
+      setTimeout(updatePiStatus, 5000);
+    },
+  });
+}
+
+// Start updating status on page load
+$(document).ready(function () {
+  updatePiStatus();
+});
