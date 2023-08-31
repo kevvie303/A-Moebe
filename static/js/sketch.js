@@ -496,3 +496,182 @@ function updatePiStatus() {
 $(document).ready(function () {
   updatePiStatus();
 });
+
+async function fetchTasks() {
+  console.log("Fetching tasks...");
+  try {
+    const response = await fetch("/get_task_status"); // Corrected route
+    const tasks = await response.json();
+    console.log("Fetched tasks:", tasks);
+
+    const taskList = document.getElementById("task-list");
+    taskList.innerHTML = ""; // Clear existing list
+
+    tasks.forEach((task) => {
+      const li = document.createElement("li");
+      li.textContent = `${task.task} - ${task.state} (${task.description})`;
+
+      if (task.state !== "solved") {
+        const button = document.createElement("button");
+        button.textContent = "Mark as Solved";
+        button.addEventListener("click", () => markAsSolved(task.task));
+        li.appendChild(button);
+      }
+      if (task.state == "solved") {
+        const button = document.createElement("button");
+        button.textContent = "Mark as Pending";
+        button.addEventListener("click", () => markAsPending(task.task));
+        li.appendChild(button);
+      }
+
+      taskList.appendChild(li);
+    });
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+  }
+}
+
+async function markAsSolved(taskName) {
+  console.log(`Marking ${taskName} as solved...`);
+  try {
+    const response = await fetch(`/solve_task/${taskName}`, {
+      method: "POST",
+    });
+
+    const data = await response.json();
+    console.log(data.message);
+
+    fetchTasks(); // Refresh the list
+  } catch (error) {
+    console.error("Error marking as solved:", error);
+  }
+}
+
+async function markAsPending(taskName) {
+  console.log(`Marking ${taskName} as solved...`);
+  try {
+    const response = await fetch(`/pend_task/${taskName}`, {
+      method: "POST",
+    });
+
+    const data = await response.json();
+    console.log(data.message);
+
+    fetchTasks(); // Refresh the list
+  } catch (error) {
+    console.error("Error marking as solved:", error);
+  }
+}
+
+fetchTasks();
+
+document.addEventListener("DOMContentLoaded", function () {
+  document
+    .getElementById("add-task-button")
+    .addEventListener("click", function () {
+      document.getElementById("task-modal").style.display = "block";
+    });
+
+  document.querySelector(".close").addEventListener("click", function () {
+    document.getElementById("task-modal").style.display = "none";
+  });
+
+  document
+    .getElementById("save-task-button")
+    .addEventListener("click", function () {
+      const taskName = document.getElementById("task-name").value;
+      const taskDescription = document.getElementById("task-description").value;
+
+      if (taskName && taskDescription) {
+        // Send a POST request to your Flask route to add a new task
+        // Adjust the route and data as needed
+        fetch("/add_task", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            task: taskName,
+            description: taskDescription,
+            state: "pending",
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data.message);
+            fetchTasks(); // Refresh the list
+          })
+          .catch((error) => console.error("Error adding task:", error));
+      }
+
+      document.getElementById("task-modal").style.display = "none";
+    });
+  document
+    .getElementById("remove-task-button")
+    .addEventListener("click", function () {
+      populateTaskRemovalList(); // Populate the list of tasks
+      document.getElementById("remove-modal").style.display = "block";
+    });
+
+  document.querySelector(".close").addEventListener("click", function () {
+    document.getElementById("remove-modal").style.display = "none";
+  });
+  async function removeTask(taskName) {
+    console.log(`Removing ${taskName}...`);
+    try {
+      const response = await fetch("/remove_task", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ task: taskName }),
+      });
+
+      const data = await response.json();
+      console.log(data.message);
+      fetchTasks(); // Refresh the list
+    } catch (error) {
+      console.error("Error removing task:", error);
+    }
+  }
+
+  document
+    .getElementById("confirm-remove-button")
+    .addEventListener("click", function () {
+      const selectedTask = document.querySelector(
+        'input[name="task"]:checked'
+      ).value;
+      if (selectedTask) {
+        const confirmRemove = confirm(
+          `Are you sure you want to remove the task "${selectedTask}"?`
+        );
+        if (confirmRemove) {
+          removeTask(selectedTask);
+          document.getElementById("remove-modal").style.display = "none";
+        }
+      }
+    });
+
+  async function populateTaskRemovalList() {
+    try {
+      const response = await fetch("/get_task_status");
+      const tasks = await response.json();
+
+      const taskRemovalList = document.getElementById("task-removal-list");
+      taskRemovalList.innerHTML = "";
+
+      tasks.forEach((task) => {
+        const li = document.createElement("li");
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "task";
+        radio.value = task.task;
+        li.textContent = `${task.task} - ${task.state}`;
+        li.prepend(radio);
+        taskRemovalList.appendChild(li);
+      });
+    } catch (error) {
+      console.error("Error fetching tasks for removal:", error);
+    }
+  }
+});

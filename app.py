@@ -20,6 +20,7 @@ app = Flask(__name__)
 ssh = None
 stdin = None
 pi2 = None
+pi3 = None
 romy = False
 fade_duration = 3  # Fade-out duration in seconds
 fade_interval = 0.1  # Interval between volume adjustments in seconds
@@ -79,7 +80,9 @@ def execute_delete_locks_script():
 def trigger():
     # Process the data and respond as needed
     return jsonify({'message': 'Data received successfully'})
-
+@app.route('/retriever')
+def retriever():
+    return render_template('retriever.html')
 def start_scripts():
     global should_sound_play
     pi2.exec_command('python status.py')

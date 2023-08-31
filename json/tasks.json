@@ -12,6 +12,6 @@
     {
         "task": "Test",
         "description": "test",
-        "state": "solved"
+        "state": "pending"
     }
 ]
