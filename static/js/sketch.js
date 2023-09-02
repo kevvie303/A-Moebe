@@ -643,12 +643,14 @@ async function fetchTasks() {
       if (task.state !== "solved") {
         const button = document.createElement("button");
         button.textContent = "Mark as Solved";
+        button.className = "button-style"
         button.addEventListener("click", () => markAsSolved(task.task));
         li.appendChild(button);
       }
       if (task.state == "solved") {
         const button = document.createElement("button");
         button.textContent = "Mark as Pending";
+        button.className = "button-style"
         button.addEventListener("click", () => markAsPending(task.task));
         li.appendChild(button);
       }
@@ -701,7 +703,8 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("task-modal").style.display = "block";
     });
 
-  document.querySelector(".close").addEventListener("click", function () {
+  document.querySelector(".close-task").addEventListener("click", function () {
+    console.log("Close button clicked");
     document.getElementById("task-modal").style.display = "none";
   });
 
@@ -742,7 +745,7 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("remove-modal").style.display = "block";
     });
 
-  document.querySelector(".close").addEventListener("click", function () {
+  document.querySelector(".close-remove").addEventListener("click", function () {
     document.getElementById("remove-modal").style.display = "none";
   });
   async function removeTask(taskName) {

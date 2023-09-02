@@ -85,14 +85,16 @@ def retriever():
     return render_template('retriever.html')
 def start_scripts():
     global should_sound_play
-    pi2.exec_command('python status.py')
     pi2.exec_command('python sensor_board.py')
+    pi2.exec_command('sudo python sinus_game.py')
     # pi2.exec_command('python distort.py')
     ssh.exec_command('python read.py')
     ssh.exec_command('python keypad.py')
     #pi3.exec_command('python ir.py')
     sensor_thread.start()
+    time.sleep(0.5)
     pi3.exec_command('python status.py')
+    pi2.exec_command('python status.py')
 
 @app.route('/add_music1', methods=['POST'])
 def add_music1():
@@ -222,6 +224,7 @@ def get_played_music_status():
 def pause_music():
     selected_file = request.form['file']
     soundcard_channel = request.form['channel']  # Get the soundcard channel from the AJAX request
+    pi = request.form['pi']
     if selected_file:
         # Fade out the music gradually
         fade_duration = 2  # Adjust the fade duration as needed
@@ -250,21 +253,30 @@ def pause_music():
             return 'Invalid soundcard channel'
         # Get the process ID of the mpg123 process
         command = f'pgrep -f "mpg123 -a {soundcard_channel} Music/{selected_file}"'
-        stdin, stdout, stderr = pi2.exec_command(command)
+        if entry['pi'] == "pi2":
+            stdin, stdout, stderr = pi2.exec_command(command)
+        elif entry['pi'] == "pi3":
+            stdin, stdout, stderr = pi3.exec_command(command)
         process_id = stdout.read().decode().strip()
 
         if process_id:
             # Reduce the volume gradually
             for volume in reversed(range(0, max_volume, int(step_size))):
                 command = f'amixer -c {soundcard_number} set PCM Playback Volume {volume}%'
-                pi2.exec_command(command)
+                if entry['pi'] == "pi2":
+                    stdin, stdout, stderr = pi2.exec_command(command)
+                elif entry['pi'] == "pi3":
+                    stdin, stdout, stderr = pi3.exec_command(command)
                 time.sleep(fade_interval)
 
                 # Check if the volume reached 0
                 if volume <= 0:
                     # Pause the music by sending a SIGSTOP signal to the mpg123 process
                     command = f'pkill -STOP -f "mpg123 Music/{selected_file}"'
-                    pi2.exec_command(command)
+                    if entry['pi'] == "pi2":
+                        stdin, stdout, stderr = pi2.exec_command(command)
+                    elif entry['pi'] == "pi3":
+                        stdin, stdout, stderr = pi3.exec_command(command)
 
             return f'Music paused for {selected_file} on pi2'
         else:
@@ -303,7 +315,10 @@ def resume_music():
 
         # Get the process ID of the mpg123 process
         command = f'pgrep -f "mpg123 -a {soundcard_channel} Music/{selected_file}"'
-        stdin, stdout, stderr = pi2.exec_command(command)
+        if entry['pi'] == "pi2":
+            stdin, stdout, stderr = pi2.exec_command(command)
+        elif entry['pi'] == "pi3":
+            stdin, stdout, stderr = pi3.exec_command(command)
         process_id = stdout.read().decode().strip()
 
         if process_id:
@@ -311,11 +326,17 @@ def resume_music():
             for volume in range(0, target_volume + 1, int(step_size)):
                 # Set the same volume for both Front Left and Front Right channels
                 command = f'amixer -c {soundcard_number} set PCM Playback Volume {volume}%'
-                pi2.exec_command(command)
+                if entry['pi'] == "pi2":
+                    stdin, stdout, stderr = pi2.exec_command(command)
+                elif entry['pi'] == "pi3":
+                    stdin, stdout, stderr = pi3.exec_command(command)
                 time.sleep(fade_interval)
             print(selected_file)
             command = f'pkill -CONT -f "mpg123 Music/{selected_file}"'
-            pi2.exec_command(command)
+            if entry['pi'] == "pi2":
+                stdin, stdout, stderr = pi2.exec_command(command)
+            elif entry['pi'] == "pi3":
+                stdin, stdout, stderr = pi3.exec_command(command)
 
             return 'Music resumed on pi2'
         else:
@@ -331,7 +352,7 @@ def play_music_garage_alley():
     global current_file
     selected_file = request.form['file']
     current_file = selected_file
-
+    pi = 'pi2'
     # Define the soundcard channel information
     soundcard_channel = 'hw:4,0'  # Adjust this based on your specific configuration
     # Construct the command to play the music using the specified soundcard channel
@@ -340,7 +361,7 @@ def play_music_garage_alley():
 
     # Save the data to a JSON file on the server
     status = 'playing'
-    data = {'filename': selected_file, 'status': status, 'soundcard_channel': soundcard_channel}
+    data = {'filename': selected_file, 'status': status, 'soundcard_channel': soundcard_channel, 'pi': pi}
     file_path = os.path.join(current_dir, 'json', 'file_status.json')
 
     # Ensure the directory exists or create it if not
@@ -370,6 +391,7 @@ def play_music_garden():
     global current_file
     selected_file = request.form['file']
     current_file = selected_file
+    pi = 'pi3'
 
     # Define the soundcard channel information
     soundcard_channel = 'hw:2,0'  # Adjust this based on your specific configuration
@@ -380,7 +402,7 @@ def play_music_garden():
 
     # Save the data to a JSON file on the server
     status = 'playing'
-    data = {'filename': selected_file, 'status': status, 'soundcard_channel': soundcard_channel}
+    data = {'filename': selected_file, 'status': status, 'soundcard_channel': soundcard_channel, 'pi': pi}
     file_path = os.path.join(current_dir, 'json', 'file_status.json')
 
     # Ensure the directory exists or create it if not
@@ -470,8 +492,9 @@ def pend_task(task_name):
         return jsonify({'message': 'Error updating task'})
 @app.route('/reset_task_statuses', methods=['POST'])
 def reset_task_statuses():
+    global sequence
     file_path = os.path.join(current_dir, 'json', 'tasks.json')
-
+    sequence = 0
     try:
         with open(file_path, 'r') as file:
             tasks = json.load(file)
@@ -525,6 +548,7 @@ def play_music_lab():
     global current_file
     selected_file = request.form['file']
     current_file = selected_file
+    pi = "pi2"
 
     # Define the soundcard channel information
     soundcard_channel = 'hw:1,0'  # Adjust this based on your specific configuration
@@ -535,7 +559,7 @@ def play_music_lab():
 
     # Save the data to a JSON file on the server
     status = 'playing'
-    data = {'filename': selected_file, 'status': status, 'soundcard_channel': soundcard_channel}
+    data = {'filename': selected_file, 'status': status, 'soundcard_channel': soundcard_channel, 'pi': pi}
     file_path = os.path.join(current_dir, 'json', 'file_status.json')
 
     # Ensure the directory exists or create it if not
@@ -573,7 +597,7 @@ def stop_music():
     with open(file_path, 'w') as file:
         json.dump([], file)
 
-    return 'Music stopped on pi2 and JSON wiped.'
+    return 'Music stopped on pi2/pi3 and JSON wiped.'
 
 @app.route('/backup-top-pi', methods=['POST'])
 def backup_top_pi():
@@ -645,8 +669,11 @@ def monitor_sensor_statuses():
         red_house_ir_status = get_ir_sensor_status(20)
         blue_house_ir_status = get_ir_sensor_status(18)
         entrance_door_status = get_sensor_status(14)
+        sinus_status = get_sinus_status()
         #other_sensor_status = get_sensor_status(24)
-
+        print(sinus_status)
+        if sinus_status == "solved":
+            pi2.exec_command("mpg123 -a hw:1,0 Music/pentakill.mp3")
         if (entrance_door_status == 'closed'):
             ssh.exec_command("raspi-gpio set 17 op dl")
         else:
@@ -716,10 +743,19 @@ def get_ir_sensor_status(sensor_number):
     except requests.exceptions.RequestException:
         return 'unknown'
 sensor_thread = threading.Thread(target=monitor_sensor_statuses)
-sensor_thread.daemon = True  # Set the thread as a daemon thread to allow program exit
-# Start a new thread for monitoring IR sensor statuses
-#ir_sensor_thread = threading.Thread(target=monitor_ir_sensor_statuses)
-#ir_sensor_thread.daemon = True  # Set the thread as a daemon thread to allow program exit
+sensor_thread.daemon = True
+
+API_URL_SINUS = 'http://192.168.0.105:5001/sinus-game/state'
+
+def get_sinus_status():
+    try:
+        response = requests.get(API_URL_SINUS)
+        if response.status_code == 200:
+            return response.json().get('state')
+        else:
+            return 'unknown'
+    except requests.exceptions.RequestException:
+        return 'unknown'
 @app.route('/turn_on', methods=['POST'])
 def turn_on():
     maglock = request.form['maglock']
@@ -967,7 +1003,7 @@ def get_pi_status():
 if romy == False:
     turn_on_api()
     start_scripts()
-    scheduler.add_job(start_bird_sounds, 'interval', minutes=1)
+    #scheduler.add_job(start_bird_sounds, 'interval', minutes=1)
 
 @app.route('/')
 def index():
