@@ -44,6 +44,7 @@
             <div>
                 <button id="select-file-button" class="button-style">Select Song</button>
                 <a href="/media" class="button-style">Control media</a>
+                <button id="stop-music-button" class="button-style">Force stop music</button>
 
                 <p id="music-list">
                     Music files will be dynamically added here
@@ -211,9 +212,6 @@
     <footer>
         <img src="static/img/thebrinkescaperooms.svg" alt="The Brink Escaperooms">
     </footer>
-    
-    <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <h2>Sensor Status</h2>
     <div id="sensor-status-container"></div>
     <div id="ir-sensor-status-container"></div>
@@ -221,29 +219,31 @@
     <h1>Escape Room Tasks</h1>
     <ul id="task-list"></ul>
 
-    <button id="add-task-button">Add Task</button>
+    <button id="add-task-button" class="button-style">Add Task</button>
 
 <!-- Modal -->
 <div id="task-modal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
+        <span class="close-task">&times;</span>
         <label for="task-name">Task Name:</label>
         <input type="text" id="task-name">
         <label for="task-description">Task Description:</label>
         <input type="text" id="task-description">
-        <button id="save-task-button">Save Task</button>
+        <button id="save-task-button" class="button-style">Save Task</button>
     </div>
 </div>
-<button id="remove-task-button">Remove Task</button>
+<button id="remove-task-button" class="button-style">Remove Task</button>
 
 <!-- Modal for Task Removal -->
 <div id="remove-modal" class="modal">
     <div class="modal-content">
-        <span class="close">&times;</span>
+        <span class="close-remove">&times;</span>
         <h2>Select a Task to Remove</h2>
         <ul id="task-removal-list"></ul>
-        <button id="confirm-remove-button">Confirm Removal</button>
+        <button id="confirm-remove-button" class="button-style">Confirm Removal</button>
     </div>
 </div>
+    <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>
 </html>
