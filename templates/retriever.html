@@ -11,7 +11,7 @@
 </head>
 <body>
     <header class="retriever-logo">
-        <a href="/">Go back</a>
+        <a href="/" class="back-button">Go back</a>
         <figure class="logo-container">
             <img src="static/img/retrieverlogo.svg" alt="Retriever Logo">
         </figure>
@@ -43,13 +43,26 @@
             <h2>Media</h2>
             <div>
                 <button id="select-file-button" class="button-style">Select Song</button>
-                <a href="/media" class="button-style">Control media</a>
+                <button class="button-style" onclick="openMediaControlPage()">Media control</button>
                 <button id="stop-music-button" class="button-style">Force stop music</button>
 
                 <p id="music-list">
                     Music files will be dynamically added here
                 </p>
             </div>
+
+            <div id="status-display"></div>
+            <ul id="music-list">
+                <div class="song-name">Something is playing!</div>
+                <li>
+                    <button class="pause-button" data-file="${filename}" data-channel="${soundcard_channel}">Pause</button>
+                </li>
+                <div>Paused songs:</div>
+                <div>Something is paused!</div>
+                <li>
+                    <button class="resume-button" data-file="${filename}" data-channel="${soundcard_channel}">Resume</button>
+                </li>
+            </ul>
         </article>
     </section>
 
@@ -107,6 +120,14 @@
                     <button id="backup-middle-pi" class="button-style">Backup music pi</button>
                     <button id="backup-tree-pi" class="button-style">Backup the tree pi</button>
                 </div>
+            </div>
+
+            <div class="pi-status">
+                 <!-- Updaten van de aanwezige pi's en hun status -->
+
+                <table id="status-table">
+                    <!-- Table will be populated dynamically -->
+                </table>
             </div>
                 
             </div>
@@ -166,6 +187,41 @@
             <div class="status">
                 <p>entrance-door-lock<strong id="maglock1-status">Locked</strong></p>
                 <p>doghouse-lock<strong id="maglock2-status">Locked</strong></p>
+                <div id="sensor-status-container"></div>
+                <div id="ir-sensor-status-container"></div>
+            </div>
+        </section>
+
+        <section class="tasks">
+            <h2>Tasks</h2>
+
+            <div class="task">
+                <ul id="task-list"></ul>
+            </div>
+
+            <button id="add-task-button" class="button-style">Add Task</button>
+
+            <!-- Modal -->
+            <div id="task-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-task">&times;</span>
+                    <label for="task-name">Task Name:</label>
+                    <input type="text" id="task-name">
+                    <label for="task-description">Task Description:</label>
+                    <input type="text" id="task-description">
+                    <button id="save-task-button" class="button-style">Save Task</button>
+                </div>
+            </div>
+            <button id="remove-task-button" class="button-style">Remove Task</button>
+
+            <!-- Modal for Task Removal -->
+            <div id="remove-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-remove">&times;</span>
+                    <h2>Select a Task to Remove</h2>
+                    <ul id="task-removal-list"></ul>
+                    <button id="confirm-remove-button" class="button-style">Confirm Removal</button>
+                </div>
             </div>
         </section>
 
@@ -187,62 +243,12 @@
             </div>
         </article> -->
 
-        <!-- Updaten van de aanwezige pi's en hun status -->
-
-        <table id="status-table">
-            <!-- Table will be populated dynamically -->
-        </table>
-
-        <div id="status-display"></div>
-        <ul id="music-list">
-            <div class="song-name">Something is playing!</div>
-            <li>
-                <button class="pause-button" data-file="${filename}" data-channel="${soundcard_channel}">Pause</button>
-            </li>
-            <div>Paused songs:</div>
-            <div>Something is paused!</div>
-            <li>
-                <button class="resume-button" data-file="${filename}" data-channel="${soundcard_channel}">Resume</button>
-            </li>
-            
-        </ul>
-
     </section>
 
     <footer>
         <img src="static/img/thebrinkescaperooms.svg" alt="The Brink Escaperooms">
     </footer>
-    <h2>Sensor Status</h2>
-    <div id="sensor-status-container"></div>
-    <div id="ir-sensor-status-container"></div>
 
-    <h1>Escape Room Tasks</h1>
-    <ul id="task-list"></ul>
-
-    <button id="add-task-button" class="button-style">Add Task</button>
-
-<!-- Modal -->
-<div id="task-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-task">&times;</span>
-        <label for="task-name">Task Name:</label>
-        <input type="text" id="task-name">
-        <label for="task-description">Task Description:</label>
-        <input type="text" id="task-description">
-        <button id="save-task-button" class="button-style">Save Task</button>
-    </div>
-</div>
-<button id="remove-task-button" class="button-style">Remove Task</button>
-
-<!-- Modal for Task Removal -->
-<div id="remove-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-remove">&times;</span>
-        <h2>Select a Task to Remove</h2>
-        <ul id="task-removal-list"></ul>
-        <button id="confirm-remove-button" class="button-style">Confirm Removal</button>
-    </div>
-</div>
     <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>

@@ -248,6 +248,7 @@ body {
 .landing-page .rooms .retriever-container .controls .control { 
   display: flex;
   flex-direction: row;
+  justify-content: center;
   gap: 10px;
   width: 100%;
 }
@@ -257,8 +258,13 @@ body {
   width: fit-content;
 }
 
-.landing-page .rooms .retriever-container .controls .control a, .landing-page .rooms .retriever-container .controls .control .info a {
-  width: 100%;
+.landing-page .rooms .retriever-container .controls .control a, .landing-page .rooms .retriever-container .controls .control button {
+  /* width: 100%; */
+  width: 150px;
+}
+
+.landing-page .rooms .retriever-container .controls .info a {
+  width: fit-content;
 }
 /* 
 .landing-page .rooms .retriever-container .controls a {
@@ -415,6 +421,12 @@ header .logo-container {
 
 /* retriever header */
 
+.back-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
 .retriever-logo {
   height: 80px;
   margin-bottom: -15px;
@@ -457,23 +469,6 @@ header .logo-container {
   max-width: 500px;
 }
 
-@media (min-width: 576px){
-  .media-hidden .media, .time-hidden .time, .pi-hidden .pi, .game-hidden .game-controls {
-    width: 400px;
-    margin-top: 20px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-@media (min-width: 768px){
-  .media-hidden .media, .time-hidden .time, .pi-hidden .pi, .game-hidden .game-controls {
-    width: 500px;
-    margin-top: 20px;
-    padding: 30px 40px;
-  }
-}
-
 .close {
   width: var(--icon-sm);
   height: var(--icon-sm);
@@ -494,7 +489,7 @@ header .logo-container {
 }
 
 .media-hidden .media div button, .media-hidden .media div a {
-  width: fit-content;
+  width: 150px;
 }
 
 /* time */
@@ -521,13 +516,15 @@ header .logo-container {
 
 .time-hidden .time .time-controls .speed-up-slow-down {
   display: flex;
+  justify-content: center;
   flex-direction: row;
   gap: 10px;
   width: 100%;
 }
 
-.time-hidden .time .time-controls .speed-up-slow-down button {
-  width: 100%;
+.time-hidden .time .time-controls .speed-up-slow-down button, .time-hidden .time .time-controls .reset-speed button {
+  /* width: 100%; */
+  width: 150px;
 }
 
 .time-hidden .time .time-controls .reset-speed {
@@ -562,18 +559,12 @@ header .logo-container {
   flex-direction: row;
   gap: 10px;
   width: 100%;
-  /* align-content: center; */
   justify-content: center;
 }
 
 .game-hidden .game-controls .game-buttons {
   width: fit-content;
 }
-
-/* .game-hidden .game-controls .abort {
-  display: flex;
-  
-} */
 
 .game-hidden .game-controls .abort p {
   text-align: center;
@@ -589,6 +580,25 @@ header .logo-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* media queries */
+
+@media (min-width: 576px){
+  .media-hidden .media, .time-hidden .time, .pi-hidden .pi, .game-hidden .game-controls {
+    width: 400px;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 768px){
+  .media-hidden .media, .time-hidden .time, .pi-hidden .pi, .game-hidden .game-controls {
+    width: 500px;
+    margin-top: 20px;
+    padding: 30px 40px;
+  }
 }
 
 /* .media-hidden {
@@ -726,7 +736,7 @@ header .logo-container {
   gap: 20px;
 }
 
-.control-container .locks, .control-container .lock-status {
+.control-container .locks, .control-container .lock-status, .control-container .tasks {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -741,12 +751,6 @@ header .logo-container {
 }
 
 /* locks */
-
-.control-container .locks {
-  /* display: flex;
-  flex-direction: column;
-  gap: 10px; */
-}
 
 .control-container .locks .lock {
   display: flex;
@@ -778,6 +782,13 @@ header .logo-container {
 
 .control-container .lock-status .status p strong {
   text-align: right;
+}
+
+/* tasks */
+
+.control-container .tasks .task #task-list {
+  list-style-type: none;
+  text-align: left;
 }
 
 /* pin info button */
@@ -898,7 +909,7 @@ header .logo-container {
       gap: 30px;
     }
   
-    .control-container .locks, .control-container .lock-status {
+    .control-container .locks, .control-container .lock-status, .control-container .tasks {
       width: 400px;
       align-self: center;
       margin: 0;
@@ -914,7 +925,7 @@ header .logo-container {
       gap: 40px;
     }
 
-    .control-container .locks, .control-container .lock-status {
+    .control-container .locks, .control-container .lock-status, .control-container .tasks {
       width: 500px;
       padding: 30px 40px;
     }
