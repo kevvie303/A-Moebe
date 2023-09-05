@@ -176,121 +176,124 @@ $(document).ready(function () {
   }, 500); // Update every 2 seconds
 });
 
-$(document).ready(function () {
+$(document).ready(function() {
   // Create an object to store the latest sensor statuses
   var latestSensorStatuses = {};
 
-  // Inside the updateAllSensorStatuses function
-  function updateAllSensorStatuses() {
+  // Function to update sensor status
+  function updateSensorStatus(sensorNumber, sensorName, sensorURL) {
     $.ajax({
-      type: "GET",
-      url: "http://192.168.0.104:5000/sensor/list",
-      success: function (response) {
+      type: 'GET',
+      url: `${sensorURL}/sensor/status/${sensorNumber}`,
+      success: function(response) {
+        var sensorStatus = response.status;
+
+        // Check if the status has changed
+        if (latestSensorStatuses[sensorNumber] !== sensorStatus) {
+          // Store the latest sensor status in the object
+          latestSensorStatuses[sensorNumber] = sensorStatus;
+
+          // Create or update the sensor status element
+          var sensorStatusElement = $(`#sensor${sensorNumber}-status`);
+          if (sensorStatusElement.length) {
+            sensorStatusElement.html(sensorName + ': <strong>' + sensorStatus + '</strong>');
+          } else {
+            var newSensorStatusElement = $('<p>').html(sensorName + ': <strong>' + sensorStatus + '</strong>');
+            newSensorStatusElement.attr('id', `sensor${sensorNumber}-status`);
+            $('#sensor-status-container').append(newSensorStatusElement);
+          }
+        }
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
+  }
+
+  // Function to update all sensor statuses
+  function updateAllSensorStatuses(sensorURL) {
+    $.ajax({
+      type: 'GET',
+      url: `${sensorURL}/sensor/list`,
+      success: function(response) {
         var sensors = response.sensors;
 
         for (var sensorNumber in sensors) {
           var sensorName = sensors[sensorNumber];
-
-          // Create a new div for each sensor status if it doesn't exist
-          if (!$("#sensor" + sensorNumber + "-status").length) {
-            $("#sensor-status-container").append(
-              '<div id="sensor' + sensorNumber + '-status"></div>'
-            );
-          }
-
-          // Update the sensor status
-          updateSensorStatus(sensorNumber, sensorName);
+          updateSensorStatus(sensorNumber, sensorName, sensorURL);
         }
       },
-      error: function (error) {
+      error: function(error) {
         console.log(error);
-      },
+      }
     });
   }
 
-  // Inside the updateSensorStatus function
-  function updateSensorStatus(sensorNumber, sensorName) {
+  // Initial update for normal sensors from the first URL
+  updateAllSensorStatuses('http://192.168.0.104:5000');
+
+  // Initial update for IR sensors from the second URL
+  updateAllSensorStatuses('http://192.168.0.105:5001');
+
+  // Function to update IR sensor status
+  function updateIRSensorStatus(sensorNumber, sensorName, sensorURL) {
     $.ajax({
-      type: "GET",
-      url: "http://192.168.0.104:5000/sensor/status/" + sensorNumber,
-      success: function (response) {
-        var sensorStatus = response.status;
-        var sensorStatusText = sensorName + ": " + sensorStatus;
-
-        // Store the latest sensor status in the object
-        latestSensorStatuses[sensorNumber] = sensorStatusText;
-
-        // Display the latest sensor status
-        $("#sensor" + sensorNumber + "-status").text(
-          latestSensorStatuses[sensorNumber]
-        );
-      },
-      error: function (error) {
-        console.log(error);
-      },
-    });
-  }
-
-  // Update sensor statuses and dynamically add to HTML
-  updateAllSensorStatuses();
-
-  // Update maglock and sensor statuses periodically
-  setInterval(function () {
-    updateAllSensorStatuses();
-  }, 50); // Update every 0.5 seconds
-});
-
-$(document).ready(function () {
-  function updateIRSensorStatus(sensorNumber, sensorName) {
-    $.ajax({
-      type: "GET",
-      url: `http://192.168.0.114:5001/ir-sensor/status/${sensorNumber}`,
-      success: function (response) {
+      type: 'GET',
+      url: `${sensorURL}/ir-sensor/status/${sensorNumber}`,
+      success: function(response) {
         var irSensorStatus = response.status;
-        var irSensorStatusText = `${sensorName}: ${irSensorStatus}`;
 
-        // Update or create the IR sensor status element
-        var irSensorStatusElement = $(`#ir-sensor${sensorNumber}-status`);
-        if (irSensorStatusElement.length) {
-          irSensorStatusElement.text(irSensorStatusText);
-        } else {
-          var newIrSensorStatusElement = $("<div>").attr(
-            "id",
-            `ir-sensor${sensorNumber}-status`
-          );
-          newIrSensorStatusElement.text(irSensorStatusText);
-          $("#ir-sensor-status-container").append(newIrSensorStatusElement);
+        // Check if the status has changed
+        if (latestSensorStatuses[sensorNumber] !== irSensorStatus) {
+          // Create or update the IR sensor status element
+          var irSensorStatusElement = $(`#ir-sensor${sensorNumber}-status`);
+          if (irSensorStatusElement.length) {
+            irSensorStatusElement.html(sensorName + ': <strong>' + irSensorStatus + '</strong>');
+          } else {
+            var newIrSensorStatusElement = $('<p>').html(sensorName + ': <strong>' + irSensorStatus + '</strong>');
+            newIrSensorStatusElement.attr('id', `ir-sensor${sensorNumber}-status`);
+            $('#ir-sensor-status-container').append(newIrSensorStatusElement);
+          }
         }
       },
-      error: function (error) {
+      error: function(error) {
         console.log(error);
-      },
+      }
     });
   }
 
-  function updateAllIRSensorStatuses() {
+  // Function to update all IR sensor statuses
+  function updateAllIRSensorStatuses(sensorURL) {
     $.ajax({
-      type: "GET",
-      url: "http://192.168.0.114:5001/ir-sensor/list", // Endpoint that lists IR sensors
-      success: function (response) {
+      type: 'GET',
+      url: `${sensorURL}/ir-sensor/list`,
+      success: function(response) {
         var irSensors = response.sensors;
 
         for (var i = 0; i < irSensors.length; i++) {
           var sensor = irSensors[i];
-          updateIRSensorStatus(sensor.number, sensor.name);
+          updateIRSensorStatus(sensor.number, sensor.name, sensorURL);
         }
       },
-      error: function (error) {
+      error: function(error) {
         console.log(error);
-      },
+      }
     });
   }
 
-  // Initial update
-  updateAllIRSensorStatuses();
+  // Initial update for IR sensors from the second URL
+  updateAllIRSensorStatuses('http://192.168.0.114:5001');
 
-  // Update IR sensor statuses every 2 seconds
-  setInterval(updateAllIRSensorStatuses, 50);
+  // Update normal sensor statuses periodically
+  setInterval(function() {
+    updateAllSensorStatuses('http://192.168.0.104:5000');
+    updateAllSensorStatuses('http://192.168.0.105:5001');
+  }, 500);
+
+  // Update IR sensor statuses periodically
+  setInterval(function() {
+    updateAllIRSensorStatuses('http://192.168.0.114:5001');
+  }, 500);
 });
 
 $(document).ready(function () {
@@ -353,6 +356,10 @@ $(document).ready(function () {
     });
 
     $.post("/reset_task_statuses", function (data) {
+      console.log(data);
+      fetchTasks(); // Refresh the list after resetting statuses
+    });
+    $.post("/reset_puzzles", function (data) {
       console.log(data);
       fetchTasks(); // Refresh the list after resetting statuses
     });

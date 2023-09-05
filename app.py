@@ -22,6 +22,7 @@ stdin = None
 pi2 = None
 pi3 = None
 romy = False
+aborted = False
 fade_duration = 3  # Fade-out duration in seconds
 fade_interval = 0.1  # Interval between volume adjustments in seconds
 fade_steps = int(fade_duration / fade_interval)  # Number of fade steps
@@ -508,6 +509,19 @@ def reset_task_statuses():
         return jsonify({'message': 'Task statuses reset successfully'})
     except (FileNotFoundError, json.JSONDecodeError):
         return jsonify({'message': 'Error resetting task statuses'})
+@app.route('/reset_puzzles', methods=['POST'])
+def reset_puzzles():
+    global aborted
+    aborted = True
+    pi2.exec_command('sudo pkill -f sinus_game.py')
+    pi2.exec_command('pkill -f sensor_board.py')
+    pi2.exec_command('pkill -9 mpg123')
+    time.sleep(3)
+    pi2.exec_command('sudo python sinus_game.py')
+    pi2.exec_command('python sensor_board.py')
+    time.sleep(15)
+    aborted = False
+    return "puzzles reset"
 @app.route('/add_task', methods=['POST'])
 def add_task():
     file_path = os.path.join(current_dir, 'json', 'tasks.json')
@@ -671,8 +685,8 @@ def monitor_sensor_statuses():
         entrance_door_status = get_sensor_status(14)
         sinus_status = get_sinus_status()
         #other_sensor_status = get_sensor_status(24)
-        print(sinus_status)
-        if sinus_status == "solved":
+        #print(sinus_status)
+        if sinus_status == "solved" and aborted == False:
             pi2.exec_command("mpg123 -a hw:1,0 Music/pentakill.mp3")
         if (entrance_door_status == 'closed'):
             ssh.exec_command("raspi-gpio set 17 op dl")
@@ -772,6 +786,7 @@ def cleanup():
     pi2.exec_command('pkill -f status.py')
     pi2.exec_command('pkill -f distort.py')
     pi2.exec_command('pkill -f sensor_board.py')
+    pi2.exec_command('sudo pkill -f sinus_game.py')
     pi3.exec_command('pkill -f ir.py')
     pi2.exec_command('pkill -f ir.py')
     ssh.exec_command('pkill -f keypad.py')
@@ -1013,5 +1028,3 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80)
     if romy == False:
         atexit.register(cleanup)
-    signal.signal(signal.SIGINT, handle_interrupt)
-    app.run(host='0.0.0.0', port=80)
