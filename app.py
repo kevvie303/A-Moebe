@@ -678,6 +678,18 @@ def get_sensor_status(sensor_number):
             return 'unknown'
     except requests.exceptions.RequestException:
         return 'unknown'
+    
+API_URL_SENSORS_PI2 = 'http://192.168.0.105:5001/sensor/status/'
+
+def get_sensor_status_pi2(sensor_number):
+    try:
+        response = requests.get(API_URL_SENSORS_PI2 + str(sensor_number))
+        if response.status_code == 200:
+            return response.json().get('status')
+        else:
+            return 'unknown'
+    except requests.exceptions.RequestException:
+        return 'unknown'
 def monitor_sensor_statuses():
     global sequence
     while True:
@@ -686,8 +698,28 @@ def monitor_sensor_statuses():
         blue_house_ir_status = get_ir_sensor_status(18)
         entrance_door_status = get_sensor_status(14)
         sinus_status = get_sinus_status()
+        top_left_kraken = get_sensor_status_pi2(15)
+        bottom_left_kraken = get_sensor_status_pi2(16)
+        top_right_kraken = get_sensor_status_pi2(20)
+        bottom_right_kraken = get_sensor_status_pi2(23)
         #other_sensor_status = get_sensor_status(24)
         #print(sinus_status)
+        if top_left_kraken == "closed":
+            pi2.exec_command('raspi-gpio set 12 op dh')
+        else:
+            pi2.exec_command('raspi-gpio set 12 op dl')
+        if bottom_left_kraken == "closed":
+            pi2.exec_command('raspi-gpio set 1 op dh')
+        else:
+            pi2.exec_command('raspi-gpio set 1 op dl')
+        if top_right_kraken == "closed":
+            pi2.exec_command('raspi-gpio set 7 op dh')
+        else:
+            pi2.exec_command('raspi-gpio set 7 op dl')
+        if bottom_right_kraken == "closed":
+            pi2.exec_command('raspi-gpio set 8 op dh')
+        else:
+            pi2.exec_command('raspi-gpio set 8 op dl')
         if sinus_status == "solved" and aborted == False:
             pi2.exec_command("mpg123 -a hw:1,0 Music/pentakill.mp3")
         if (entrance_door_status == 'closed'):
