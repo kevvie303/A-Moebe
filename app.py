@@ -225,7 +225,6 @@ def get_played_music_status():
 def pause_music():
     selected_file = request.form['file']
     soundcard_channel = request.form['channel']  # Get the soundcard channel from the AJAX request
-    pi = request.form['pi']
     if selected_file:
         # Fade out the music gradually
         fade_duration = 2  # Adjust the fade duration as needed
@@ -240,7 +239,18 @@ def pause_music():
             if entry['filename'] == selected_file and entry['soundcard_channel'] == soundcard_channel:
                 entry['status'] = 'paused'
                 break
-
+        for entry in file_data:
+            if entry['filename'] == selected_file and entry['soundcard_channel'] == soundcard_channel:
+                pi_name = entry['pi']
+                break
+        else:
+            return 'Selected song not found in the JSON file'
+        
+        if pi_name == 'pi2':
+            pi = pi2
+        elif pi_name == 'pi3':
+            pi = pi3
+            max_volume = 85
         with open(file_path, 'w') as file:
             json.dump(file_data, file)
         # Calculate the step size for volume reduction
@@ -254,32 +264,23 @@ def pause_music():
             return 'Invalid soundcard channel'
         # Get the process ID of the mpg123 process
         command = f'pgrep -f "mpg123 -a {soundcard_channel} Music/{selected_file}"'
-        if entry['pi'] == "pi2":
-            stdin, stdout, stderr = pi2.exec_command(command)
-        elif entry['pi'] == "pi3":
-            stdin, stdout, stderr = pi3.exec_command(command)
+        stdin, stdout, stderr = pi.exec_command(command)
         process_id = stdout.read().decode().strip()
 
         if process_id:
             # Reduce the volume gradually
             for volume in reversed(range(0, max_volume, int(step_size))):
                 command = f'amixer -c {soundcard_number} set PCM Playback Volume {volume}%'
-                if entry['pi'] == "pi2":
-                    stdin, stdout, stderr = pi2.exec_command(command)
-                elif entry['pi'] == "pi3":
-                    stdin, stdout, stderr = pi3.exec_command(command)
+                pi.exec_command(command)
                 time.sleep(fade_interval)
 
                 # Check if the volume reached 0
                 if volume <= 0:
                     # Pause the music by sending a SIGSTOP signal to the mpg123 process
                     command = f'pkill -STOP -f "mpg123 Music/{selected_file}"'
-                    if entry['pi'] == "pi2":
-                        stdin, stdout, stderr = pi2.exec_command(command)
-                    elif entry['pi'] == "pi3":
-                        stdin, stdout, stderr = pi3.exec_command(command)
+                    pi.exec_command(command)
 
-            return f'Music paused for {selected_file} on pi2'
+            return f'Music paused for {selected_file} on {pi}'
         else:
             return f'{selected_file} is not currently playing'
     else:
@@ -302,7 +303,17 @@ def resume_music():
             if entry['filename'] == selected_file and entry['soundcard_channel'] == soundcard_channel:
                 entry['status'] = 'playing'
                 break
-
+        for entry in file_data:
+            if entry['filename'] == selected_file and entry['soundcard_channel'] == soundcard_channel:
+                pi_name = entry['pi']
+                break
+        else:
+            return 'Selected song not found in the JSON file'
+        if pi_name == 'pi2':
+            pi = pi2
+        elif pi_name == 'pi3':
+            pi = pi3
+            target_volume = 85
         with open(file_path, 'w') as file:
             json.dump(file_data, file)
         import re
@@ -316,10 +327,7 @@ def resume_music():
 
         # Get the process ID of the mpg123 process
         command = f'pgrep -f "mpg123 -a {soundcard_channel} Music/{selected_file}"'
-        if entry['pi'] == "pi2":
-            stdin, stdout, stderr = pi2.exec_command(command)
-        elif entry['pi'] == "pi3":
-            stdin, stdout, stderr = pi3.exec_command(command)
+        stdin, stdout, stderr = pi.exec_command(command)
         process_id = stdout.read().decode().strip()
 
         if process_id:
@@ -327,19 +335,13 @@ def resume_music():
             for volume in range(0, target_volume + 1, int(step_size)):
                 # Set the same volume for both Front Left and Front Right channels
                 command = f'amixer -c {soundcard_number} set PCM Playback Volume {volume}%'
-                if entry['pi'] == "pi2":
-                    stdin, stdout, stderr = pi2.exec_command(command)
-                elif entry['pi'] == "pi3":
-                    stdin, stdout, stderr = pi3.exec_command(command)
+                pi.exec_command(command)
                 time.sleep(fade_interval)
             print(selected_file)
             command = f'pkill -CONT -f "mpg123 Music/{selected_file}"'
-            if entry['pi'] == "pi2":
-                stdin, stdout, stderr = pi2.exec_command(command)
-            elif entry['pi'] == "pi3":
-                stdin, stdout, stderr = pi3.exec_command(command)
+            pi.exec_command(command)
 
-            return 'Music resumed on pi2'
+            return f'Music resumed on {pi}'
         else:
             return 'No music is currently playing'
     else:
@@ -395,7 +397,7 @@ def play_music_garden():
     pi = 'pi3'
 
     # Define the soundcard channel information
-    soundcard_channel = 'hw:2,0'  # Adjust this based on your specific configuration
+    soundcard_channel = 'hw:0,0'  # Adjust this based on your specific configuration
 
     # Construct the command to play the music using the specified soundcard channel
     command = f'mpg123 -a {soundcard_channel} Music/{selected_file} &'
@@ -781,12 +783,12 @@ def turn_off():
     return turn_off_maglock(maglock)
 
 def cleanup():
+    pi2.exec_command('sudo pkill -f sinus_game.py')
     execute_delete_locks_script()
     ssh.exec_command('pkill -f status.py')
     pi2.exec_command('pkill -f status.py')
     pi2.exec_command('pkill -f distort.py')
     pi2.exec_command('pkill -f sensor_board.py')
-    pi2.exec_command('sudo pkill -f sinus_game.py')
     pi3.exec_command('pkill -f ir.py')
     pi2.exec_command('pkill -f ir.py')
     ssh.exec_command('pkill -f keypad.py')
