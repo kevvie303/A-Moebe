@@ -719,32 +719,34 @@ def control_maglock():
     maglock = request.form.get('maglock')
     action = request.form.get('action')
     
-    # Use the match statement to handle cases
-    match (maglock, action):
-        case ("entrance-door-lock", "locked"):
+    if maglock == "entrance-door-lock":
+        if action == "locked":
             pi3.exec_command("raspi-gpio set 25 dl")
             return 'Maglock entrance-door-lock is now locked'
-        case ("entrance-door-lock", "unlocked"):
+        elif action == "unlocked":
             pi3.exec_command("raspi-gpio set 25 dh")
             return 'Maglock entrance-door-lock is now unlocked'
-        case ("doghouse-lock", "locked"):
+    elif maglock == "doghouse-lock":
+        if action == "locked":
             ssh.exec_command("raspi-gpio set 27 dl")
             return 'Maglock doghouse-lock is now locked'
-        case ("doghouse-lock", "unlocked"):
+        elif action == "unlocked":
             ssh.exec_command("raspi-gpio set 27 dh")
             return 'Maglock doghouse-lock is now unlocked'
-        case ("shed-door-lock", "locked"):
+    elif maglock == "shed-door-lock":
+        if action == "locked":
             pi3.exec_command("raspi-gpio set 16 dl")
             return 'shed locked'
-        case ("shed-door-lock", "unlocked"):
+        elif action == "unlocked":
             pi3.exec_command("raspi-gpio set 16 dh")
             return 'shed unlocked'
-        case _:
-            return 'Invalid maglock or action'
+    else:
+        return 'Invalid maglock or action'
 
 @app.route('/control_maglock', methods=['POST'])
 def control_maglock_route():
     return control_maglock()
+
 
 
 API_URL = 'http://192.168.0.105:5001/current_state'
