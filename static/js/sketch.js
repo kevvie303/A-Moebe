@@ -144,35 +144,57 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-  function updateMaglockStatus(maglockNumber) {
+  function updateMaglockStatus(maglockNumber, maglockName, maglockURL) {
     $.ajax({
-      type: "GET",
-      url: "http://192.168.0.104:5000/maglock/status/" + maglockNumber,
-      success: function (response) {
-        var maglockStatus = response.status;
-        var maglockStatusText =
-          maglockStatus === "locked" ? "Locked" : "Unlocked";
+        type: "GET",
+        url: `${maglockURL}/maglock/status/${maglockNumber}`,
+        success: function (response) {
+            var maglockStatus = response.status;
+            var maglockStatusText =
+                maglockStatus === "locked" ? "Locked" : "Unlocked";
 
-        if (maglockNumber === 1) {
-          $("#maglock1-status").text(maglockStatusText);
-        } else if (maglockNumber === 2) {
-          $("#maglock2-status").text(maglockStatusText);
-        }
-      },
-      error: function (error) {
-        console.log(error);
-      },
+            // Create or update the maglock status element
+            var maglockStatusElement = $(`#maglock${maglockNumber}-status`);
+            if (maglockStatusElement.length) {
+                maglockStatusElement.html(`${maglockName}: <strong>${maglockStatusText}</strong>`);
+            } else {
+                var newMaglockStatusElement = $('<p>').html(`${maglockName}: <strong>${maglockStatusText}</strong>`);
+                newMaglockStatusElement.attr('id', `maglock${maglockNumber}-status`);
+                $('#maglock-status-container').append(newMaglockStatusElement);
+            }
+        },
+        error: function (error) {
+            console.log(error);
+        },
+    });
+}
+
+  function updateAllMaglockStatuses(maglockURL) {
+    $.ajax({
+        type: 'GET',
+        url: `${maglockURL}/maglock/list`,
+        success: function (response) {
+            var maglocks = response.maglocks;
+
+            for (var i = 0; i < maglocks.length; i++) {
+                var maglock = maglocks[i];
+                updateMaglockStatus(maglock.number, maglock.name, maglockURL);
+            }
+        },
+        error: function (error) {
+            console.log(error);
+        },
     });
   }
 
-  // Update maglock status on page load
-  updateMaglockStatus(1);
-  updateMaglockStatus(2);
+// Initial update for maglocks from the URL where you list them
+  updateAllMaglockStatuses('http://192.168.0.104:5000');
+  updateAllMaglockStatuses('http://192.168.0.114:5001');
 
   // Update maglock statuses periodically
   setInterval(function () {
-    updateMaglockStatus(1);
-    updateMaglockStatus(2);
+    updateAllMaglockStatuses('http://192.168.0.104:5000');
+    updateAllMaglockStatuses('http://192.168.0.114:5001');
   }, 500); // Update every 2 seconds
 });
 
@@ -228,10 +250,28 @@ $(document).ready(function() {
       }
     });
   }
+  function updateLastKeypadCode(sensorURL) {
+    $.ajax({
+      type: 'GET',
+      url: `${sensorURL}/keypad/pressed_keys`,
+      success: function(response) {
+        var pressedKeysArrays = response.pressed_keys_arrays;
+        if (pressedKeysArrays.length > 0) {
+          // Get the last-used code from the array
+          var lastUsedCodeArray = pressedKeysArrays[pressedKeysArrays.length - 1];
+          var lastUsedCode = lastUsedCodeArray.join(''); // Combine keys into a single code
+          $('#keypad-shed-code strong').text(lastUsedCode);
+        }
+      },
+      error: function(error) {
+        console.log(error);
+      }
+    });
+  }
 
   // Initial update for normal sensors from the first URL
   updateAllSensorStatuses('http://192.168.0.104:5000');
-
+  updateLastKeypadCode('http://192.168.0.104:5000')
   // Initial update for IR sensors from the second URL
   updateAllSensorStatuses('http://192.168.0.105:5001');
 
@@ -288,6 +328,7 @@ $(document).ready(function() {
   setInterval(function() {
     updateAllSensorStatuses('http://192.168.0.104:5000');
     updateAllSensorStatuses('http://192.168.0.105:5001');
+    updateLastKeypadCode('http://192.168.0.104:5000')
   }, 500);
 
   // Update IR sensor statuses periodically
@@ -295,6 +336,8 @@ $(document).ready(function() {
     updateAllIRSensorStatuses('http://192.168.0.114:5001');
   }, 500);
 });
+
+
 
 $(document).ready(function () {
   var intervalId;
@@ -364,7 +407,17 @@ $(document).ready(function () {
       fetchTasks(); // Refresh the list after resetting statuses
     });
   });
-
+  $("#snooze-game-button").click(function () {
+    $.post("/snooze_game", function (data) {
+      console.log(data);
+    });
+    // Display snoozed status in the nav
+    $("#nav-snooze-status").text("Room Snoozed");
+    // Show the "Wake" button
+    $("#wake-button").show();
+    $(".important-controls").hide();
+    
+  });
   $("#speed-up-button").click(function () {
     $.post("/timer/speed", { change: 0.1 }, function (data) {
       speed += 0.1;
@@ -434,6 +487,33 @@ $(document).ready(function () {
   getTimerSpeed();
   getButtonState();
 });
+
+$(document).ready(function () {
+  // Check the snooze status from the JSON file
+  $.get("/get_snooze_status", function (data) {
+    if (data.snoozed) {
+      // Display snoozed status in the nav
+      $("#nav-snooze-status").text("Room Snoozed");
+      // Show the "Wake" button
+      $("#wake-button").show();
+      $(".important-controls").hide();
+    }
+  });
+
+  // Handle the "Wake" button click
+  $("#wake-button").click(function () {
+    // Send a request to reset snooze status to false
+    $.post("/wake_room", function (data) {
+      console.log(data);
+      // Hide the "Wake" button
+      $("#wake-button").hide();
+      $(".important-controls").show();
+      // Update the snooze status in the navigation
+      $("#nav-snooze-status").hide();
+    });
+  });
+});
+
 
 function openMediaControlPage() {
   window.open("/media_control", "_blank", "height=400,width=400");
@@ -627,7 +707,6 @@ function updatePiStatus() {
     },
   });
 }
-
 // Start updating status on page load
 $(document).ready(function () {
   updatePiStatus();
@@ -668,7 +747,7 @@ async function fetchTasks() {
     console.error("Error fetching tasks:", error);
   }
 }
-
+const interval = setInterval(fetchTasks, 1500);
 async function markAsSolved(taskName) {
   console.log(`Marking ${taskName} as solved...`);
   try {
@@ -813,4 +892,90 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Error fetching tasks for removal:", error);
     }
   }
+  const editButton = document.getElementById("edit-task-button");
+  const editModal = document.getElementById("edit-modal");
+  const taskEditList = document.getElementById("task-edit-list");
+  const editTaskModal = document.getElementById("edit-task-modal");
+  const editTaskNameInput = document.getElementById("edit-task-name");
+  const editTaskDescriptionInput = document.getElementById("edit-task-description");
+  const saveEditTaskButton = document.getElementById("save-edit-task-button");
+  let previousSaveEditTaskListener;
+  // Event listener for opening the edit modal
+  editButton.addEventListener("click", function () {
+    // Fetch the list of tasks from the server
+    fetch("/get_tasks")
+      .then((response) => response.json())
+      .then((tasks) => {
+        // Clear the previous task list
+        taskEditList.innerHTML = "";
+  
+        // Populate the modal with tasks
+        tasks.forEach((task) => {
+          const li = document.createElement("li");
+          const editTaskButton = document.createElement("button");
+          editTaskButton.textContent = task.task;
+          editTaskButton.classList.add("button-style");
+          editTaskButton.addEventListener("click", function () {
+            // Open the edit task modal and populate with current task info
+            editTaskNameInput.value = task.task;
+            editTaskDescriptionInput.value = task.description;
+            editTaskModal.style.display = "block";
+            // Save the current task being edited
+            const currentTask = task;
+            
+            // Remove any previous event listeners
+            if (previousSaveEditTaskListener) {
+              saveEditTaskButton.removeEventListener("click", previousSaveEditTaskListener);
+            }
+  
+            // Add a new event listener for the save button
+            previousSaveEditTaskListener = function () {
+              // Get the edited task information
+              const editedTaskName = editTaskNameInput.value;
+              const editedTaskDescription = editTaskDescriptionInput.value;
+              
+              // Send the edited information to the server
+              fetch("/edit_task", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  task: currentTask.task,
+                  editedTaskName: editedTaskName,
+                  editedTaskDescription: editedTaskDescription,
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  console.log(data.message);
+                  // Close the edit task modal
+                  editTaskModal.style.display = "none";
+                  // Fetch tasks again to refresh the list
+                  fetchTasks();
+                })
+                .catch((error) => {
+                  console.error("Error editing task:", error);
+                });
+            };
+  
+            saveEditTaskButton.addEventListener("click", previousSaveEditTaskListener);
+          });
+          li.appendChild(editTaskButton);
+          taskEditList.appendChild(li);
+        });
+  
+        // Show the edit modal
+        editModal.style.display = "block";
+      })
+      .catch((error) => {
+        console.error("Error fetching tasks:", error);
+      });
+      document.querySelector(".close-edit").addEventListener("click", function () {
+        document.getElementById("edit-modal").style.display = "none";
+      });
+      document.querySelector(".close-edit-task").addEventListener("click", function () {
+        document.getElementById("edit-task-modal").style.display = "none";
+      });
+  });
 });

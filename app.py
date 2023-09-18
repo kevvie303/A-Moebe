@@ -35,6 +35,8 @@ ip2brink = '192.168.0.105'
 ip3brink = '192.168.0.114'
 sequence = 0
 should_sound_play = True
+code1 = False
+code2 = False
 
 #logging.basicConfig(level=logging.DEBUG)  # Use appropriate log level
 active_ssh_connections = {}
@@ -49,7 +51,7 @@ def turn_on_api():
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(ip1brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
-    ssh.exec_command('python status.py')
+    ssh.exec_command('sudo -E python status.py')
     establish_ssh_connection()
 
 def establish_ssh_connection():
@@ -86,16 +88,16 @@ def retriever():
     return render_template('retriever.html')
 def start_scripts():
     global should_sound_play
-    pi2.exec_command('python sensor_board.py')
+    #pi2.exec_command('python sensor_board.py')
     pi2.exec_command('sudo python sinus_game.py')
     # pi2.exec_command('python distort.py')
     ssh.exec_command('python read.py')
-    ssh.exec_command('python keypad.py')
+    # ssh.exec_command('python keypad.py')
     #pi3.exec_command('python ir.py')
     sensor_thread.start()
+    pi2.exec_command('python status.py')
     time.sleep(0.5)
     pi3.exec_command('python status.py')
-    pi2.exec_command('python status.py')
 
 @app.route('/add_music1', methods=['POST'])
 def add_music1():
@@ -514,16 +516,64 @@ def reset_task_statuses():
 @app.route('/reset_puzzles', methods=['POST'])
 def reset_puzzles():
     global aborted
+    global code1
+    global code2
     aborted = True
+    code1 = False
+    code2 = False
+    update_snooze_status(False)
+    pi3.exec_command('raspi-gpio set 16 op dl')
     pi2.exec_command('sudo pkill -f sinus_game.py')
     pi2.exec_command('pkill -f sensor_board.py')
     pi2.exec_command('pkill -9 mpg123')
+    pi2.exec_command('raspi-gpio set 12 op dl')
+    pi2.exec_command('raspi-gpio set 1 op dl')
+    pi2.exec_command('raspi-gpio set 7 op dl')
+    pi2.exec_command('raspi-gpio set 8 op dl')
     time.sleep(3)
     pi2.exec_command('sudo python sinus_game.py')
-    pi2.exec_command('python sensor_board.py')
+    #pi2.exec_command('python sensor_board.py')
     time.sleep(15)
     aborted = False
     return "puzzles reset"
+
+def read_snooze_status():
+    with open('json/snoozeStatus.json', 'r') as file:
+        data = json.load(file)
+    return data.get('snoozed', False)
+
+# Function to update the snooze status in the JSON file
+def update_snooze_status(snoozed):
+    data = {"snoozed": snoozed}
+    with open('json/snoozeStatus.json', 'w') as file:
+        json.dump(data, file)
+
+@app.route('/get_snooze_status', methods=['GET'])
+def get_snooze_status():
+    snooze_status = read_snooze_status()
+    return {"snoozed": snooze_status}
+
+@app.route('/wake_room', methods=['POST'])
+def wake_room():
+    # Update the snooze status to 'false'
+    pi3.exec_command('raspi-gpio set 12 op dl')
+    pi3.exec_command('raspi-gpio set 7 op dl')
+    pi3.exec_command('raspi-gpio set 1 op dl')
+    pi3.exec_command('raspi-gpio set 8 op dl')
+    update_snooze_status(False)
+    return "room awakened"
+
+@app.route('/snooze_game', methods=['POST'])
+def snooze_game():
+    pi3.exec_command('raspi-gpio set 12 op dh')
+    pi3.exec_command('raspi-gpio set 7 op dh')
+    pi3.exec_command('raspi-gpio set 1 op dh')
+    pi3.exec_command('raspi-gpio set 8 op dh')
+    ssh.exec_command('raspi-gpio set 17 op dh')
+    ssh.exec_command('raspi-gpio set 27 op dh')
+    pi3.exec_command('raspi-gpio set 16 op dh')
+    update_snooze_status(True)
+    return "room snoozed"
 @app.route('/add_task', methods=['POST'])
 def add_task():
     file_path = os.path.join(current_dir, 'json', 'tasks.json')
@@ -559,6 +609,40 @@ def remove_task():
         return jsonify({'message': f'Task "{task_data["task"]}" removed successfully'})
     except (FileNotFoundError, json.JSONDecodeError):
         return jsonify({'message': 'Error removing task'})
+@app.route('/edit_task', methods=['POST'])
+def edit_task():
+    file_path = os.path.join(current_dir, 'json', 'tasks.json')
+    edit_data = request.get_json()
+
+    try:
+        with open(file_path, 'r') as file:
+            tasks = json.load(file)
+
+        # Find the task to edit by its name
+        for task in tasks:
+            if task['task'] == edit_data['task']:
+                task['task'] = edit_data['editedTaskName']
+                task['description'] = edit_data['editedTaskDescription']
+
+        # Write the updated task list back to the JSON file
+        with open(file_path, 'w') as file:
+            json.dump(tasks, file, indent=4)
+
+        return jsonify({'message': 'Task updated successfully'})
+    except (FileNotFoundError, json.JSONDecodeError):
+        return jsonify({'message': 'Error updating task'})
+    
+@app.route('/get_tasks', methods=['GET'])
+def get_tasks():
+    file_path = os.path.join(current_dir, 'json', 'tasks.json')
+    
+    try:
+        with open(file_path, 'r') as file:
+            tasks = json.load(file)
+        return jsonify(tasks)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return jsonify([])
+    
 @app.route('/play_music_lab', methods=['POST'])
 def play_music_lab():
     global current_file
@@ -679,6 +763,25 @@ def get_sensor_status(sensor_number):
     except requests.exceptions.RequestException:
         return 'unknown'
     
+API_URL_SHED_KEYPAD = 'http://192.168.0.104:5000/keypad/pressed_keys'
+
+def get_shed_keypad_code():
+    try:
+        response = requests.get(API_URL_SHED_KEYPAD)
+        if response.status_code == 200:
+            pressed_keys_arrays = response.json().get('pressed_keys_arrays')
+            if pressed_keys_arrays:
+                # Get the last-used code from the array
+                last_used_code_array = pressed_keys_arrays[-1]
+                last_used_code = ''.join(last_used_code_array)
+                return last_used_code
+            else:
+                return 'No code entered yet'
+        else:
+            return 'unknown'
+    except requests.exceptions.RequestException:
+        return 'unknown'
+
 API_URL_SENSORS_PI2 = 'http://192.168.0.105:5001/sensor/status/'
 
 def get_sensor_status_pi2(sensor_number):
@@ -692,6 +795,8 @@ def get_sensor_status_pi2(sensor_number):
         return 'unknown'
 def monitor_sensor_statuses():
     global sequence
+    global code1
+    global code2
     while True:
         green_house_ir_status = get_ir_sensor_status(14)
         red_house_ir_status = get_ir_sensor_status(20)
@@ -702,8 +807,18 @@ def monitor_sensor_statuses():
         bottom_left_kraken = get_sensor_status_pi2(16)
         top_right_kraken = get_sensor_status_pi2(20)
         bottom_right_kraken = get_sensor_status_pi2(23)
-        #other_sensor_status = get_sensor_status(24)
-        #print(sinus_status)
+        last_used_keypad_code = get_shed_keypad_code()
+        #print(code1)
+        #print(code2)
+        if last_used_keypad_code == "1111":
+            code1 = True
+        if last_used_keypad_code == "2222":
+            code2 = True
+        if code1 and code2:
+            print("executed")
+            pi3.exec_command('raspi-gpio set 16 op dh')
+            code1 = False
+            code2 = False
         if top_left_kraken == "closed":
             pi2.exec_command('raspi-gpio set 12 op dh')
         else:
@@ -819,13 +934,13 @@ def cleanup():
     execute_delete_locks_script()
     ssh.exec_command('pkill -f status.py')
     pi2.exec_command('pkill -f status.py')
+    pi3.exec_command('pkill -f status.py')
     pi2.exec_command('pkill -f distort.py')
     pi2.exec_command('pkill -f sensor_board.py')
     pi3.exec_command('pkill -f ir.py')
     pi2.exec_command('pkill -f ir.py')
     ssh.exec_command('pkill -f keypad.py')
     ssh.exec_command('pkill -f read.py')
-    ssh.close()
 
 @app.route('/send_script')
 def send_script():
@@ -875,7 +990,7 @@ def reboot_mag_pi():
     time.sleep(3)
     ssh.exec_command('python delete-locks.py')
     ssh.exec_command('python read.py')
-    ssh.exec_command('python keypad.py')
+    #ssh.exec_command('python keypad.py')
     return "top pi reset succesfully!"
 
 @app.route('/reboot-music-pi', methods=['POST'])
@@ -889,7 +1004,7 @@ def reboot_music_pi():
     pi2.connect(ip2brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
     time.sleep(3)
     pi2.exec_command('python status.py')
-    pi2.exec_command('python sensor_board.py')
+    #pi2.exec_command('python sensor_board.py')
     pi2.exec_command('python ir.py')
     return "middle pi reset succesfully!"
 
@@ -1060,5 +1175,4 @@ def index():
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, handle_interrupt)
     app.run(host='0.0.0.0', port=80)
-    if romy == False:
-        atexit.register(cleanup)
+    atexit.register(cleanup)

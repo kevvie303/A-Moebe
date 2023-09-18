@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fonts/fonts.css')}}">
     <link rel="icon" href="static/img/favicon.png" type="image/png">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
     <header class="retriever-logo">
@@ -16,7 +17,6 @@
             <img src="static/img/retrieverlogo.svg" alt="Retriever Logo">
         </figure>
     </header>
-
     <nav class="important-controls">
         <div class="time-elapsed">
             <p>Elapsed</p>
@@ -43,7 +43,7 @@
             <h2>Media</h2>
             <div>
                 <button id="select-file-button" class="button-style">Select Song</button>
-                <a href="/media" class="button-style">Control media</a>
+                <a href="/media_control" class="button-style">Control media</a>
                 <button id="stop-music-button" class="button-style">Force stop music</button>
 
                 <p id="music-list">
@@ -121,9 +121,11 @@
 
             <div class="game-buttons">
                 <button id="start-game-button" class="button-style">Start game</button>
+                <button id="snooze-game-button" class="button-style">Snooze game</button>
                 <!-- <button id="pause-button"><img class="icon" src="static/img/pause.svg" alt="Pause game button"></button>
                 <button id="continue-button" style="display: none;"><img src="static/img/pause.svg" alt="Pause game button"></button> -->
                 <button class=" abort-button button-style">Abort game</button>
+
             </div>
 
             <div class="abort hidden">
@@ -135,7 +137,8 @@
             <p class="confirmation hidden">Game aborted</p>
         </article>
     </section>
-
+    <nav id="nav-snooze-status"></nav>
+    <button id="wake-button" class="button-style" style="display: none;">Wake</button>
     <section class="control-container">
 
         <section class="locks">
@@ -164,10 +167,10 @@
             <h2>Status</h2>
 
             <div class="status">
-                <p>entrance-door-lock<strong id="maglock1-status">Locked</strong></p>
-                <p>doghouse-lock<strong id="maglock2-status">Locked</strong></p>
+                <div id="maglock-status-container"></div>
                 <div id="ir-sensor-status-container"></div>
                 <div id="sensor-status-container"></div>
+                <p id="keypad-shed-code">Shed keypad code: <strong></strong></p>
             </div>
         </section>
 
@@ -240,6 +243,25 @@
         <h2>Select a Task to Remove</h2>
         <ul id="task-removal-list"></ul>
         <button id="confirm-remove-button" class="button-style">Confirm Removal</button>
+    </div>
+</div>
+<button id="edit-task-button" class="button-style">Edit Task</button>
+<div id="edit-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-edit">&times;</span>
+        <h2>Select a Task to Edit</h2>
+        <ul id="task-edit-list"></ul>
+    </div>
+</div>
+<div id="edit-task-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-edit-task">&times;</span>
+        <h2>Edit Task</h2>
+        <label for="edit-task-name">Task Name:</label>
+        <input type="text" id="edit-task-name">
+        <label for="edit-task-description">Task Description:</label>
+        <input type="text" id="edit-task-description">
+        <button id="save-edit-task-button" class="button-style">Save Changes</button>
     </div>
 </div>
     <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
