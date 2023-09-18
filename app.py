@@ -556,19 +556,21 @@ def get_snooze_status():
 @app.route('/wake_room', methods=['POST'])
 def wake_room():
     # Update the snooze status to 'false'
-    pi3.exec_command('raspi-gpio set 12 op dl')
-    pi3.exec_command('raspi-gpio set 7 op dl')
-    pi3.exec_command('raspi-gpio set 1 op dl')
-    pi3.exec_command('raspi-gpio set 8 op dl')
+    pi3.exec_command('raspi-gpio set 12 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 1 op dl \n raspi-gpio set 8 op dl')
+    #pi3.exec_command('raspi-gpio set 7 op dl')
+    #pi3.exec_command('raspi-gpio set 1 op dl')
+    #pi3.exec_command('raspi-gpio set 8 op dl')
     update_snooze_status(False)
     return "room awakened"
 
 @app.route('/snooze_game', methods=['POST'])
 def snooze_game():
-    pi3.exec_command('raspi-gpio set 12 op dh')
-    pi3.exec_command('raspi-gpio set 7 op dh')
-    pi3.exec_command('raspi-gpio set 1 op dh')
-    pi3.exec_command('raspi-gpio set 8 op dh')
+    light1off = 'raspi-gpio set 12 op dh'
+    light2off = 'raspi-gpio set 7 op dh'
+    light3off = 'raspi-gpio set 1 op dh'
+    light4off = 'raspi-gpio set 8 op dh'
+    lightsoff = f"{light1off}; {light2off}; {light3off}; {light4off}"
+    pi3.exec_command(lightsoff)
     ssh.exec_command('raspi-gpio set 17 op dh')
     ssh.exec_command('raspi-gpio set 27 op dh')
     pi3.exec_command('raspi-gpio set 16 op dh')
@@ -713,27 +715,36 @@ def backup_middle_pi():
 def lock_entrance_door():
     ssh.exec_command("raspi-gpio set 17 dl")
     return "locked door"
+def control_maglock():
+    maglock = request.form.get('maglock')
+    action = request.form.get('action')
+    
+    # Use the match statement to handle cases
+    match (maglock, action):
+        case ("entrance-door-lock", "locked"):
+            pi3.exec_command("raspi-gpio set 25 dl")
+            return 'Maglock entrance-door-lock is now locked'
+        case ("entrance-door-lock", "unlocked"):
+            pi3.exec_command("raspi-gpio set 25 dh")
+            return 'Maglock entrance-door-lock is now unlocked'
+        case ("doghouse-lock", "locked"):
+            ssh.exec_command("raspi-gpio set 27 dl")
+            return 'Maglock doghouse-lock is now locked'
+        case ("doghouse-lock", "unlocked"):
+            ssh.exec_command("raspi-gpio set 27 dh")
+            return 'Maglock doghouse-lock is now unlocked'
+        case ("shed-door-lock", "locked"):
+            pi3.exec_command("raspi-gpio set 16 dl")
+            return 'shed locked'
+        case ("shed-door-lock", "unlocked"):
+            pi3.exec_command("raspi-gpio set 16 dh")
+            return 'shed unlocked'
+        case _:
+            return 'Invalid maglock or action'
 
-def turn_on_maglock(maglock):
-    if maglock == '1':
-        ssh.exec_command("raspi-gpio set 17 dl")
-    elif maglock == '2':
-        ssh.exec_command("raspi-gpio set 27 dl")
-    else:
-        return 'Invalid maglock selection'
-    return 'Maglock turned on'
-
-
-
-# Function to turn off the maglock
-def turn_off_maglock(maglock):
-    if maglock == '0':
-        ssh.exec_command("raspi-gpio set 17 dh")
-    elif maglock == '-1':
-        ssh.exec_command("raspi-gpio set 27 dh")
-    else:
-        return 'Invalid maglock'
-    return 'Maglock turned off'
+@app.route('/control_maglock', methods=['POST'])
+def control_maglock_route():
+    return control_maglock()
 
 
 API_URL = 'http://192.168.0.105:5001/current_state'
@@ -919,13 +930,13 @@ def get_sinus_status():
             return 'unknown'
     except requests.exceptions.RequestException:
         return 'unknown'
-@app.route('/turn_on', methods=['POST'])
-def turn_on():
+#@app.route('/turn_on', methods=['POST'])
+#def turn_on():
     maglock = request.form['maglock']
     return turn_on_maglock(maglock)
 
-@app.route('/turn_off', methods=['POST'])
-def turn_off():
+#@app.route('/turn_off', methods=['POST'])
+#def turn_off():
     maglock = request.form['maglock']
     return turn_off_maglock(maglock)
 
@@ -1133,31 +1144,45 @@ def get_pause_state():
 def get_pi_status():
     global ssh, pi2, pi3
 
-    # Prepare a list of dictionaries containing IP and SSH status for each Pi
+    # Define the names and IP addresses of the Pis
+    pi_names = {
+        "top-pi": "192.168.0.104",
+        "middle-pi": "192.168.0.105",
+        "tree-pi": "192.168.0.114"
+    }
+
+    # Prepare a list of dictionaries containing Pi status data
     pi_statuses = []
 
     if ssh:
-        pi1_status = {"ip_address": ip1brink}
+        pi1_status = {"name": "top-pi", "ip_address": pi_names["top-pi"]}
         try:
             if ssh.get_transport().is_active():
                 pi1_status["ssh_active"] = "Online"
+            else:
+                pi1_status["ssh_active"] = "Offline"
         except AttributeError:
             pi1_status["ssh_active"] = "Offline"
         pi_statuses.append(pi1_status)
 
     if pi2:
-        pi2_status = {"ip_address": ip2brink}
+        pi2_status = {"name": "middle-pi", "ip_address": pi_names["middle-pi"]}
         try:
             if pi2.get_transport().is_active():
                 pi2_status["ssh_active"] = "Online"
+            else:
+                pi2_status["ssh_active"] = "Offline"
         except AttributeError:
             pi2_status["ssh_active"] = "Offline"
         pi_statuses.append(pi2_status)
+
     if pi3:
-        pi3_status = {"ip_address": ip3brink}
+        pi3_status = {"name": "tree-pi", "ip_address": pi_names["tree-pi"]}
         try:
             if pi3.get_transport().is_active():
                 pi3_status["ssh_active"] = "Online"
+            else:
+                pi3_status["ssh_active"] = "Offline"
         except AttributeError:
             pi3_status["ssh_active"] = "Offline"
         pi_statuses.append(pi3_status)

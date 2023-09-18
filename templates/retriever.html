@@ -88,13 +88,15 @@
             <button class="close-pi close"><img src="static/img/abort.svg" alt="Close button"></button>
 
             <h2>Pi controls</h2>
-
+            <table id="status-table">
+                <!-- Table will be populated dynamically -->
+            </table>
             <div class="reboot">
                 <h3>Reboot</h3>
 
                 <div class="pies">
-                    <button id="reboot-pi-mag" class="button-style">Reboot maglock pi</button>
-                    <button id="reboot-pi-music" class="button-style">Reboot music pi</button>
+                    <button id="reboot-pi-mag" class="button-style">Reboot top pi</button>
+                    <button id="reboot-pi-music" class="button-style">Reboot mid pi</button>
                     <button id="reboot-tree-pi" class="button-style">Reboot tree pi</button>
                 </div>
             </div>
@@ -103,8 +105,8 @@
                 <h3>Backup</h3>
 
                 <div class="pies">
-                    <button id="backup-top-pi" class="button-style">Backup maglock pi</button>
-                    <button id="backup-middle-pi" class="button-style">Backup music pi</button>
+                    <button id="backup-top-pi" class="button-style">Backup top pi</button>
+                    <button id="backup-middle-pi" class="button-style">Backup mid pi</button>
                     <button id="backup-tree-pi" class="button-style">Backup the tree pi</button>
                 </div>
             </div>
@@ -148,16 +150,24 @@
                 <div class="lock">
                     <p>entrance-door-lock</p>
                     <div class="lock-buttons">
-                        <button class="turn-on-button icon" data-maglock="1"><img src="static/img/lock.svg" alt="Lock"></button>
-                        <button class="turn-off-button icon" data-maglock="0"><img src="static/img/unlock.svg" alt="Unlock"></button>
+                        <button class="turn-on-button icon"><img src="static/img/lock.svg" alt="Lock"></button>
+                        <button class="turn-off-button icon"><img src="static/img/unlock.svg" alt="Unlock"></button>
+                    </div>
+                </div>
+            
+                <div class="lock">
+                    <p>doghouse-lock</p>
+                    <div class="lock-buttons">
+                        <button class="turn-on-button icon"><img src="static/img/lock.svg" alt="Lock"></button>
+                        <button class="turn-off-button icon"><img src="static/img/unlock.svg" alt="Unlock"></button>
                     </div>
                 </div>
 
                 <div class="lock">
-                    <p>doghouse-lock</p>
+                    <p>shed-door-lock</p>
                     <div class="lock-buttons">
-                        <button class="turn-on-button icon" data-maglock="2"><img src="static/img/lock.svg" alt="Lock"></button>
-                        <button class="turn-off-button icon" data-maglock="-1"><img src="static/img/unlock.svg" alt="Unlock"></button>
+                        <button class="turn-on-button icon"><img src="static/img/lock.svg" alt="Lock"></button>
+                        <button class="turn-off-button icon"><img src="static/img/unlock.svg" alt="Unlock"></button>
                     </div>
                 </div>
             </article>
@@ -191,26 +201,6 @@
                 </div>
             </div>
         </article> -->
-
-        <!-- Updaten van de aanwezige pi's en hun status -->
-
-        <table id="status-table">
-            <!-- Table will be populated dynamically -->
-        </table>
-
-        <div id="status-display"></div>
-        <ul id="music-list">
-            <div class="song-name">Something is playing!</div>
-            <li>
-                <button class="pause-button" data-file="${filename}" data-channel="${soundcard_channel}">Pause</button>
-            </li>
-            <div>Paused songs:</div>
-            <div>Something is paused!</div>
-            <li>
-                <button class="resume-button" data-file="${filename}" data-channel="${soundcard_channel}">Resume</button>
-            </li>
-            
-        </ul>
 
     </section>
 

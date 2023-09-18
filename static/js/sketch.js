@@ -110,29 +110,15 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-  // Handle turn on button click
-  $(".turn-on-button").click(function () {
-    var maglock = $(this).data("maglock");
+  // Handle button click for both turning on and off
+  $(".lock-buttons button").click(function () {
+    var maglockName = $(this).closest(".lock").find("p").text();
+    var action = $(this).hasClass("turn-on-button") ? "locked" : "unlocked";
+    
     $.ajax({
       type: "POST",
-      url: "/turn_on",
-      data: { maglock: maglock },
-      success: function (response) {
-        console.log(response);
-      },
-      error: function (error) {
-        console.log(error);
-      },
-    });
-  });
-
-  // Handle turn off button click
-  $(".turn-off-button").click(function () {
-    var maglock = $(this).data("maglock");
-    $.ajax({
-      type: "POST",
-      url: "/turn_off",
-      data: { maglock: maglock },
+      url: "/control_maglock",
+      data: { maglock: maglockName, action: action },
       success: function (response) {
         console.log(response);
       },
@@ -142,6 +128,7 @@ $(document).ready(function () {
     });
   });
 });
+
 
 $(document).ready(function () {
   function updateMaglockStatus(maglockNumber, maglockName, maglockURL) {
@@ -629,7 +616,7 @@ $(document).ready(function () {
           $("#music-list").append(`
                         <li>
                             ${filename}
-                            <button class="pause-button" data-file="${filename}" data-channel="${soundcard_channel}">Pause</button>
+                            <button class="button-style pause-button" data-file="${filename}" data-channel="${soundcard_channel}">Pause</button>
                         </li>
                     `);
         });
@@ -645,7 +632,7 @@ $(document).ready(function () {
           $("#music-list").append(`
                         <li>
                             ${filename}
-                            <button class="resume-button" data-file="${filename}" data-channel="${soundcard_channel}">Resume</button>
+                            <button class="button-style resume-button" data-file="${filename}" data-channel="${soundcard_channel}">Resume</button>
                         </li>
                     `);
         });
