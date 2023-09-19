@@ -574,6 +574,7 @@ def snooze_game():
     ssh.exec_command('raspi-gpio set 17 op dh')
     ssh.exec_command('raspi-gpio set 27 op dh')
     pi3.exec_command('raspi-gpio set 16 op dh')
+    pi3.exec_command('raspi-gpio set 25 op dh')
     update_snooze_status(True)
     return "room snoozed"
 @app.route('/add_task', methods=['POST'])
@@ -740,6 +741,13 @@ def control_maglock():
         elif action == "unlocked":
             pi3.exec_command("raspi-gpio set 16 dh")
             return 'shed unlocked'
+    elif maglock == "blacklight":
+        if action == "locked":
+            ssh.exec_command("raspi-gpio set 17 dl")
+            return 'blacklight locked'
+        elif action == "unlocked":
+            ssh.exec_command("raspi-gpio set 17 dh")
+            return 'blacklight unlocked'
     else:
         return 'Invalid maglock or action'
 
@@ -850,10 +858,6 @@ def monitor_sensor_statuses():
             pi2.exec_command('raspi-gpio set 8 op dl')
         if sinus_status == "solved" and aborted == False:
             pi2.exec_command("mpg123 -a hw:1,0 Music/pentakill.mp3")
-        if (entrance_door_status == 'closed'):
-            ssh.exec_command("raspi-gpio set 17 op dl")
-        else:
-            ssh.exec_command("raspi-gpio set 17 op dh")
 
         if green_house_ir_status == 'active' and sequence == 0:
             pi3.exec_command("raspi-gpio set 15 op dh")
