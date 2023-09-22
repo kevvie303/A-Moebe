@@ -18,6 +18,7 @@ const closeGameButton = document.querySelector(".close-game");
 const abortButton = document.querySelector(".abort-button");
 const confirmButton = document.getElementById("end-game-button");
 const startButton = document.getElementById("start-game-button");
+const snoozeButton = document.getElementById("snooze-game-button");
 const abortPopup = document.querySelector(".abort");
 const confirmPopup = document.querySelector(".confirmation");
 
@@ -70,6 +71,9 @@ closeGameButton.addEventListener("click", () => {
 
   confirmPopup.classList.remove("shown");
   confirmPopup.classList.add("hidden");
+
+  abortPopup.classList.remove("message-shown");
+  abortPopup.classList.add("hidden");
 });
 
 /* abort */
@@ -85,9 +89,24 @@ confirmButton.addEventListener("click", () => {
 
   confirmPopup.classList.remove("hidden");
   confirmPopup.classList.add("shown");
+
+  gamePopup.classList.remove("shown");
+  gamePopup.classList.add("hidden");
 });
 
 startButton.addEventListener("click", () => {
   confirmPopup.classList.remove("shown");
   confirmPopup.classList.add("hidden");
+
+  gamePopup.classList.remove("shown");
+  gamePopup.classList.add("hidden");
+});
+
+
+snoozeButton.addEventListener("click", () => {
+  confirmPopup.classList.remove("shown");
+  confirmPopup.classList.add("hidden");
+
+  gamePopup.classList.remove("shown");
+  gamePopup.classList.add("hidden");
 });

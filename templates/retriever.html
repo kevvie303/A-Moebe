@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fonts/fonts.css')}}">
     <link rel="icon" href="static/img/favicon.png" type="image/png">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
 <body>
     <header class="retriever-logo">
@@ -16,7 +17,6 @@
             <img src="static/img/retrieverlogo.svg" alt="Retriever Logo">
         </figure>
     </header>
-
     <nav class="important-controls">
         <div class="time-elapsed">
             <p>Elapsed</p>
@@ -43,7 +43,7 @@
             <h2>Media</h2>
             <div>
                 <button id="select-file-button" class="button-style">Select Song</button>
-                <button class="button-style" onclick="openMediaControlPage()">Media control</button>
+                <a href="/media_control" class="button-style">Control media</a>
                 <button id="stop-music-button" class="button-style">Force stop music</button>
 
                 <p id="music-list">
@@ -101,13 +101,15 @@
             <button class="close-pi close"><img src="static/img/abort.svg" alt="Close button"></button>
 
             <h2>Pi controls</h2>
-
+            <table id="status-table">
+                <!-- Table will be populated dynamically -->
+            </table>
             <div class="reboot">
                 <h3>Reboot</h3>
 
                 <div class="pies">
-                    <button id="reboot-pi-mag" class="button-style">Reboot maglock pi</button>
-                    <button id="reboot-pi-music" class="button-style">Reboot music pi</button>
+                    <button id="reboot-pi-mag" class="button-style">Reboot top pi</button>
+                    <button id="reboot-pi-music" class="button-style">Reboot mid pi</button>
                     <button id="reboot-tree-pi" class="button-style">Reboot tree pi</button>
                 </div>
             </div>
@@ -116,8 +118,8 @@
                 <h3>Backup</h3>
 
                 <div class="pies">
-                    <button id="backup-top-pi" class="button-style">Backup maglock pi</button>
-                    <button id="backup-middle-pi" class="button-style">Backup music pi</button>
+                    <button id="backup-top-pi" class="button-style">Backup top pi</button>
+                    <button id="backup-middle-pi" class="button-style">Backup mid pi</button>
                     <button id="backup-tree-pi" class="button-style">Backup the tree pi</button>
                 </div>
             </div>
@@ -142,9 +144,11 @@
 
             <div class="game-buttons">
                 <button id="start-game-button" class="button-style">Start game</button>
+                <button id="snooze-game-button" class="button-style">Snooze game</button>
                 <!-- <button id="pause-button"><img class="icon" src="static/img/pause.svg" alt="Pause game button"></button>
                 <button id="continue-button" style="display: none;"><img src="static/img/pause.svg" alt="Pause game button"></button> -->
                 <button class=" abort-button button-style">Abort game</button>
+
             </div>
 
             <div class="abort hidden">
@@ -156,7 +160,8 @@
             <p class="confirmation hidden">Game aborted</p>
         </article>
     </section>
-
+    <nav id="nav-snooze-status"></nav>
+    <button id="wake-button" class="button-style" style="display: none;">Wake</button>
     <section class="control-container">
 
         <section class="locks">
@@ -166,16 +171,31 @@
                 <div class="lock">
                     <p>entrance-door-lock</p>
                     <div class="lock-buttons">
-                        <button class="turn-on-button icon" data-maglock="1"><img src="static/img/lock.svg" alt="Lock"></button>
-                        <button class="turn-off-button icon" data-maglock="0"><img src="static/img/unlock.svg" alt="Unlock"></button>
+                        <button class="turn-on-button icon"><img src="static/img/lock.svg" alt="Lock"></button>
+                        <button class="turn-off-button icon"><img src="static/img/unlock.svg" alt="Unlock"></button>
+                    </div>
+                </div>
+            
+                <div class="lock">
+                    <p>doghouse-lock</p>
+                    <div class="lock-buttons">
+                        <button class="turn-on-button icon"><img src="static/img/lock.svg" alt="Lock"></button>
+                        <button class="turn-off-button icon"><img src="static/img/unlock.svg" alt="Unlock"></button>
                     </div>
                 </div>
 
                 <div class="lock">
-                    <p>doghouse-lock</p>
+                    <p>shed-door-lock</p>
                     <div class="lock-buttons">
-                        <button class="turn-on-button icon" data-maglock="2"><img src="static/img/lock.svg" alt="Lock"></button>
-                        <button class="turn-off-button icon" data-maglock="-1"><img src="static/img/unlock.svg" alt="Unlock"></button>
+                        <button class="turn-on-button icon"><img src="static/img/lock.svg" alt="Lock"></button>
+                        <button class="turn-off-button icon"><img src="static/img/unlock.svg" alt="Unlock"></button>
+                    </div>
+                </div>
+                <div class="lock">
+                    <p>blacklight</p>
+                    <div class="lock-buttons">
+                        <button class="turn-on-button icon"><img src="static/img/lock.svg" alt="Lock"></button>
+                        <button class="turn-off-button icon"><img src="static/img/unlock.svg" alt="Unlock"></button>
                     </div>
                 </div>
             </article>
@@ -185,43 +205,10 @@
             <h2>Status</h2>
 
             <div class="status">
-                <p>entrance-door-lock<strong id="maglock1-status">Locked</strong></p>
-                <p>doghouse-lock<strong id="maglock2-status">Locked</strong></p>
-                <div id="sensor-status-container"></div>
+                <div id="maglock-status-container"></div>
                 <div id="ir-sensor-status-container"></div>
-            </div>
-        </section>
-
-        <section class="tasks">
-            <h2>Tasks</h2>
-
-            <div class="task">
-                <ul id="task-list"></ul>
-            </div>
-
-            <button id="add-task-button" class="button-style">Add Task</button>
-
-            <!-- Modal -->
-            <div id="task-modal" class="modal">
-                <div class="modal-content">
-                    <span class="close-task">&times;</span>
-                    <label for="task-name">Task Name:</label>
-                    <input type="text" id="task-name">
-                    <label for="task-description">Task Description:</label>
-                    <input type="text" id="task-description">
-                    <button id="save-task-button" class="button-style">Save Task</button>
-                </div>
-            </div>
-            <button id="remove-task-button" class="button-style">Remove Task</button>
-
-            <!-- Modal for Task Removal -->
-            <div id="remove-modal" class="modal">
-                <div class="modal-content">
-                    <span class="close-remove">&times;</span>
-                    <h2>Select a Task to Remove</h2>
-                    <ul id="task-removal-list"></ul>
-                    <button id="confirm-remove-button" class="button-style">Confirm Removal</button>
-                </div>
+                <div id="sensor-status-container"></div>
+                <p id="keypad-shed-code">Shed keypad code: <strong></strong></p>
             </div>
         </section>
 
@@ -249,6 +236,52 @@
         <img src="static/img/thebrinkescaperooms.svg" alt="The Brink Escaperooms">
     </footer>
 
+    <h1>Escape Room Tasks</h1>
+    <ul id="task-list"></ul>
+
+    <button id="add-task-button" class="button-style">Add Task</button>
+
+<!-- Modal -->
+<div id="task-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-task">&times;</span>
+        <label for="task-name">Task Name:</label>
+        <input type="text" id="task-name">
+        <label for="task-description">Task Description:</label>
+        <input type="text" id="task-description">
+        <button id="save-task-button" class="button-style">Save Task</button>
+    </div>
+</div>
+<button id="remove-task-button" class="button-style">Remove Task</button>
+
+<!-- Modal for Task Removal -->
+<div id="remove-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-remove">&times;</span>
+        <h2>Select a Task to Remove</h2>
+        <ul id="task-removal-list"></ul>
+        <button id="confirm-remove-button" class="button-style">Confirm Removal</button>
+    </div>
+</div>
+<button id="edit-task-button" class="button-style">Edit Task</button>
+<div id="edit-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-edit">&times;</span>
+        <h2>Select a Task to Edit</h2>
+        <ul id="task-edit-list"></ul>
+    </div>
+</div>
+<div id="edit-task-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-edit-task">&times;</span>
+        <h2>Edit Task</h2>
+        <label for="edit-task-name">Task Name:</label>
+        <input type="text" id="edit-task-name">
+        <label for="edit-task-description">Task Description:</label>
+        <input type="text" id="edit-task-description">
+        <button id="save-edit-task-button" class="button-style">Save Changes</button>
+    </div>
+</div>
     <script src="{{ url_for('static', filename='js/sketch.js') }}"></script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>

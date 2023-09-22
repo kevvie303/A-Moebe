@@ -110,29 +110,15 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-  // Handle turn on button click
-  $(".turn-on-button").click(function () {
-    var maglock = $(this).data("maglock");
-    $.ajax({
-      type: "POST",
-      url: "/turn_on",
-      data: { maglock: maglock },
-      success: function (response) {
-        console.log(response);
-      },
-      error: function (error) {
-        console.log(error);
-      },
-    });
-  });
+  // Handle button click for both turning on and off
+  $(".lock-buttons button").click(function () {
+    var maglockName = $(this).closest(".lock").find("p").text();
+    var action = $(this).hasClass("turn-on-button") ? "locked" : "unlocked";
 
-  // Handle turn off button click
-  $(".turn-off-button").click(function () {
-    var maglock = $(this).data("maglock");
     $.ajax({
       type: "POST",
-      url: "/turn_off",
-      data: { maglock: maglock },
+      url: "/control_maglock",
+      data: { maglock: maglockName, action: action },
       success: function (response) {
         console.log(response);
       },
@@ -144,19 +130,27 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-  function updateMaglockStatus(maglockNumber) {
+  function updateMaglockStatus(maglockNumber, maglockName, maglockURL) {
     $.ajax({
       type: "GET",
-      url: "http://192.168.0.104:5000/maglock/status/" + maglockNumber,
+      url: `${maglockURL}/maglock/status/${maglockNumber}`,
       success: function (response) {
         var maglockStatus = response.status;
         var maglockStatusText =
           maglockStatus === "locked" ? "Locked" : "Unlocked";
 
-        if (maglockNumber === 1) {
-          $("#maglock1-status").text(maglockStatusText);
-        } else if (maglockNumber === 2) {
-          $("#maglock2-status").text(maglockStatusText);
+        // Create or update the maglock status element
+        var maglockStatusElement = $(`#maglock${maglockNumber}-status`);
+        if (maglockStatusElement.length) {
+          maglockStatusElement.html(
+            `${maglockName}: <strong>${maglockStatusText}</strong>`
+          );
+        } else {
+          var newMaglockStatusElement = $("<p>").html(
+            `${maglockName}: <strong>${maglockStatusText}</strong>`
+          );
+          newMaglockStatusElement.attr("id", `maglock${maglockNumber}-status`);
+          $("#maglock-status-container").append(newMaglockStatusElement);
         }
       },
       error: function (error) {
@@ -165,14 +159,32 @@ $(document).ready(function () {
     });
   }
 
-  // Update maglock status on page load
-  updateMaglockStatus(1);
-  updateMaglockStatus(2);
+  function updateAllMaglockStatuses(maglockURL) {
+    $.ajax({
+      type: "GET",
+      url: `${maglockURL}/maglock/list`,
+      success: function (response) {
+        var maglocks = response.maglocks;
+
+        for (var i = 0; i < maglocks.length; i++) {
+          var maglock = maglocks[i];
+          updateMaglockStatus(maglock.number, maglock.name, maglockURL);
+        }
+      },
+      error: function (error) {
+        console.log(error);
+      },
+    });
+  }
+
+  // Initial update for maglocks from the URL where you list them
+  updateAllMaglockStatuses("http://192.168.0.104:5000");
+  updateAllMaglockStatuses("http://192.168.0.114:5001");
 
   // Update maglock statuses periodically
   setInterval(function () {
-    updateMaglockStatus(1);
-    updateMaglockStatus(2);
+    updateAllMaglockStatuses("http://192.168.0.104:5000");
+    updateAllMaglockStatuses("http://192.168.0.114:5001");
   }, 500); // Update every 2 seconds
 });
 
@@ -180,26 +192,70 @@ $(document).ready(function () {
   // Create an object to store the latest sensor statuses
   var latestSensorStatuses = {};
 
-  // Inside the updateAllSensorStatuses function
-  function updateAllSensorStatuses() {
+  // Function to update sensor status
+  function updateSensorStatus(sensorNumber, sensorName, sensorURL) {
     $.ajax({
       type: "GET",
-      url: "http://192.168.0.104:5000/sensor/list",
+      url: `${sensorURL}/sensor/status/${sensorNumber}`,
+      success: function (response) {
+        var sensorStatus = response.status;
+
+        // Check if the status has changed
+        if (latestSensorStatuses[sensorNumber] !== sensorStatus) {
+          // Store the latest sensor status in the object
+          latestSensorStatuses[sensorNumber] = sensorStatus;
+
+          // Create or update the sensor status element
+          var sensorStatusElement = $(`#sensor${sensorNumber}-status`);
+          if (sensorStatusElement.length) {
+            sensorStatusElement.html(
+              sensorName + ": <strong>" + sensorStatus + "</strong>"
+            );
+          } else {
+            var newSensorStatusElement = $("<p>").html(
+              sensorName + ": <strong>" + sensorStatus + "</strong>"
+            );
+            newSensorStatusElement.attr("id", `sensor${sensorNumber}-status`);
+            $("#sensor-status-container").append(newSensorStatusElement);
+          }
+        }
+      },
+      error: function (error) {
+        console.log(error);
+      },
+    });
+  }
+
+  // Function to update all sensor statuses
+  function updateAllSensorStatuses(sensorURL) {
+    $.ajax({
+      type: "GET",
+      url: `${sensorURL}/sensor/list`,
       success: function (response) {
         var sensors = response.sensors;
 
         for (var sensorNumber in sensors) {
           var sensorName = sensors[sensorNumber];
-
-          // Create a new div for each sensor status if it doesn't exist
-          if (!$("#sensor" + sensorNumber + "-status").length) {
-            $("#sensor-status-container").append(
-              '<div id="sensor' + sensorNumber + '-status"></div>'
-            );
-          }
-
-          // Update the sensor status
-          updateSensorStatus(sensorNumber, sensorName);
+          updateSensorStatus(sensorNumber, sensorName, sensorURL);
+        }
+      },
+      error: function (error) {
+        console.log(error);
+      },
+    });
+  }
+  function updateLastKeypadCode(sensorURL) {
+    $.ajax({
+      type: "GET",
+      url: `${sensorURL}/keypad/pressed_keys`,
+      success: function (response) {
+        var pressedKeysArrays = response.pressed_keys_arrays;
+        if (pressedKeysArrays.length > 0) {
+          // Get the last-used code from the array
+          var lastUsedCodeArray =
+            pressedKeysArrays[pressedKeysArrays.length - 1];
+          var lastUsedCode = lastUsedCodeArray.join(""); // Combine keys into a single code
+          $("#keypad-shed-code strong").text(lastUsedCode);
         }
       },
       error: function (error) {
@@ -208,58 +264,38 @@ $(document).ready(function () {
     });
   }
 
-  // Inside the updateSensorStatus function
-  function updateSensorStatus(sensorNumber, sensorName) {
+  // Initial update for normal sensors from the first URL
+  updateAllSensorStatuses("http://192.168.0.104:5000");
+  updateLastKeypadCode("http://192.168.0.104:5000");
+  // Initial update for IR sensors from the second URL
+  updateAllSensorStatuses("http://192.168.0.105:5001");
+
+  // Function to update IR sensor status
+  function updateIRSensorStatus(sensorNumber, sensorName, sensorURL) {
     $.ajax({
       type: "GET",
-      url: "http://192.168.0.104:5000/sensor/status/" + sensorNumber,
-      success: function (response) {
-        var sensorStatus = response.status;
-        var sensorStatusText = sensorName + ": " + sensorStatus;
-
-        // Store the latest sensor status in the object
-        latestSensorStatuses[sensorNumber] = sensorStatusText;
-
-        // Display the latest sensor status
-        $("#sensor" + sensorNumber + "-status").text(
-          latestSensorStatuses[sensorNumber]
-        );
-      },
-      error: function (error) {
-        console.log(error);
-      },
-    });
-  }
-
-  // Update sensor statuses and dynamically add to HTML
-  updateAllSensorStatuses();
-
-  // Update maglock and sensor statuses periodically
-  setInterval(function () {
-    updateAllSensorStatuses();
-  }, 50); // Update every 0.5 seconds
-});
-
-$(document).ready(function () {
-  function updateIRSensorStatus(sensorNumber, sensorName) {
-    $.ajax({
-      type: "GET",
-      url: `http://192.168.0.114:5001/ir-sensor/status/${sensorNumber}`,
+      url: `${sensorURL}/ir-sensor/status/${sensorNumber}`,
       success: function (response) {
         var irSensorStatus = response.status;
-        var irSensorStatusText = `${sensorName}: ${irSensorStatus}`;
 
-        // Update or create the IR sensor status element
-        var irSensorStatusElement = $(`#ir-sensor${sensorNumber}-status`);
-        if (irSensorStatusElement.length) {
-          irSensorStatusElement.text(irSensorStatusText);
-        } else {
-          var newIrSensorStatusElement = $("<div>").attr(
-            "id",
-            `ir-sensor${sensorNumber}-status`
-          );
-          newIrSensorStatusElement.text(irSensorStatusText);
-          $("#ir-sensor-status-container").append(newIrSensorStatusElement);
+        // Check if the status has changed
+        if (latestSensorStatuses[sensorNumber] !== irSensorStatus) {
+          // Create or update the IR sensor status element
+          var irSensorStatusElement = $(`#ir-sensor${sensorNumber}-status`);
+          if (irSensorStatusElement.length) {
+            irSensorStatusElement.html(
+              sensorName + ": <strong>" + irSensorStatus + "</strong>"
+            );
+          } else {
+            var newIrSensorStatusElement = $("<p>").html(
+              sensorName + ": <strong>" + irSensorStatus + "</strong>"
+            );
+            newIrSensorStatusElement.attr(
+              "id",
+              `ir-sensor${sensorNumber}-status`
+            );
+            $("#ir-sensor-status-container").append(newIrSensorStatusElement);
+          }
         }
       },
       error: function (error) {
@@ -268,16 +304,17 @@ $(document).ready(function () {
     });
   }
 
-  function updateAllIRSensorStatuses() {
+  // Function to update all IR sensor statuses
+  function updateAllIRSensorStatuses(sensorURL) {
     $.ajax({
       type: "GET",
-      url: "http://192.168.0.114:5001/ir-sensor/list", // Endpoint that lists IR sensors
+      url: `${sensorURL}/ir-sensor/list`,
       success: function (response) {
         var irSensors = response.sensors;
 
         for (var i = 0; i < irSensors.length; i++) {
           var sensor = irSensors[i];
-          updateIRSensorStatus(sensor.number, sensor.name);
+          updateIRSensorStatus(sensor.number, sensor.name, sensorURL);
         }
       },
       error: function (error) {
@@ -286,11 +323,20 @@ $(document).ready(function () {
     });
   }
 
-  // Initial update
-  updateAllIRSensorStatuses();
+  // Initial update for IR sensors from the second URL
+  updateAllIRSensorStatuses("http://192.168.0.114:5001");
 
-  // Update IR sensor statuses every 2 seconds
-  setInterval(updateAllIRSensorStatuses, 50);
+  // Update normal sensor statuses periodically
+  setInterval(function () {
+    updateAllSensorStatuses("http://192.168.0.104:5000");
+    updateAllSensorStatuses("http://192.168.0.105:5001");
+    updateLastKeypadCode("http://192.168.0.104:5000");
+  }, 500);
+
+  // Update IR sensor statuses periodically
+  setInterval(function () {
+    updateAllIRSensorStatuses("http://192.168.0.114:5001");
+  }, 500);
 });
 
 $(document).ready(function () {
@@ -356,8 +402,21 @@ $(document).ready(function () {
       console.log(data);
       fetchTasks(); // Refresh the list after resetting statuses
     });
+    $.post("/reset_puzzles", function (data) {
+      console.log(data);
+      fetchTasks(); // Refresh the list after resetting statuses
+    });
   });
-
+  $("#snooze-game-button").click(function () {
+    $.post("/snooze_game", function (data) {
+      console.log(data);
+    });
+    // Display snoozed status in the nav
+    $("#nav-snooze-status").text("Room Snoozed");
+    // Show the "Wake" button
+    $("#wake-button").show();
+    $(".important-controls").hide();
+  });
   $("#speed-up-button").click(function () {
     $.post("/timer/speed", { change: 0.1 }, function (data) {
       speed += 0.1;
@@ -426,6 +485,32 @@ $(document).ready(function () {
   initializeTimer();
   getTimerSpeed();
   getButtonState();
+});
+
+$(document).ready(function () {
+  // Check the snooze status from the JSON file
+  $.get("/get_snooze_status", function (data) {
+    if (data.snoozed) {
+      // Display snoozed status in the nav
+      $("#nav-snooze-status").text("Room Snoozed");
+      // Show the "Wake" button
+      $("#wake-button").show();
+      $(".important-controls").hide();
+    }
+  });
+
+  // Handle the "Wake" button click
+  $("#wake-button").click(function () {
+    // Send a request to reset snooze status to false
+    $.post("/wake_room", function (data) {
+      console.log(data);
+      // Hide the "Wake" button
+      $("#wake-button").hide();
+      $(".important-controls").show();
+      // Update the snooze status in the navigation
+      $("#nav-snooze-status").hide();
+    });
+  });
 });
 
 function openMediaControlPage() {
@@ -542,7 +627,7 @@ $(document).ready(function () {
           $("#music-list").append(`
                         <li>
                             ${filename}
-                            <button class="pause-button" data-file="${filename}" data-channel="${soundcard_channel}">Pause</button>
+                            <button class="button-style pause-button" data-file="${filename}" data-channel="${soundcard_channel}">Pause</button>
                         </li>
                     `);
         });
@@ -558,7 +643,7 @@ $(document).ready(function () {
           $("#music-list").append(`
                         <li>
                             ${filename}
-                            <button class="resume-button" data-file="${filename}" data-channel="${soundcard_channel}">Resume</button>
+                            <button class="button-style resume-button" data-file="${filename}" data-channel="${soundcard_channel}">Resume</button>
                         </li>
                     `);
         });
@@ -620,7 +705,6 @@ function updatePiStatus() {
     },
   });
 }
-
 // Start updating status on page load
 $(document).ready(function () {
   updatePiStatus();
@@ -643,14 +727,14 @@ async function fetchTasks() {
       if (task.state !== "solved") {
         const button = document.createElement("button");
         button.textContent = "Mark as Solved";
-        button.className = "button-style"
+        button.className = "button-style";
         button.addEventListener("click", () => markAsSolved(task.task));
         li.appendChild(button);
       }
       if (task.state == "solved") {
         const button = document.createElement("button");
         button.textContent = "Mark as Pending";
-        button.className = "button-style"
+        button.className = "button-style";
         button.addEventListener("click", () => markAsPending(task.task));
         li.appendChild(button);
       }
@@ -661,7 +745,7 @@ async function fetchTasks() {
     console.error("Error fetching tasks:", error);
   }
 }
-
+const interval = setInterval(fetchTasks, 1500);
 async function markAsSolved(taskName) {
   console.log(`Marking ${taskName} as solved...`);
   try {
@@ -745,9 +829,11 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("remove-modal").style.display = "block";
     });
 
-  document.querySelector(".close-remove").addEventListener("click", function () {
-    document.getElementById("remove-modal").style.display = "none";
-  });
+  document
+    .querySelector(".close-remove")
+    .addEventListener("click", function () {
+      document.getElementById("remove-modal").style.display = "none";
+    });
   async function removeTask(taskName) {
     console.log(`Removing ${taskName}...`);
     try {

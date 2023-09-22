@@ -678,6 +678,10 @@ header .logo-container {
 }
 
 /* main */
+#nav-snooze-status {
+  text-align: center; /* Center the text horizontally */
+  font-weight: bold; /* Make the text bold */
+}
 
 .important-controls {
   display: flex;
@@ -1226,7 +1230,9 @@ h2 {
 }
 
 .close-task,
-.close-remove {
+.close-remove,
+.close-edit,
+.close-edit-task {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -1238,8 +1244,15 @@ h2 {
 .close-task:hover,
 .close-task:focus,
 .close-remove:hover,
-.close-remove:focus {
+.close-remove:focus,
+.close-edit:hover,
+.close-edit:focus,
+.close-edit-task:hover,
+.close-edit-task:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+input[type="text"] {
+  width: 100%; /* Set the width to 100% of their container */
 }
