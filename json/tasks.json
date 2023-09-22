@@ -5,18 +5,8 @@
         "state": "pending"
     },
     {
-        "task": "Number-feel",
+        "task": "number-feel",
         "description": "Players have felt the right numbers, 0128, and filled it in, in the keypad",
-        "state": "solved"
-    },
-    {
-        "task": "Test",
-        "description": "test",
-        "state": "pending"
-    },
-    {
-        "task": "test4",
-        "description": "false",
         "state": "pending"
     }
 ]

@@ -722,19 +722,24 @@ async function fetchTasks() {
 
     tasks.forEach((task) => {
       const li = document.createElement("li");
+      li.classList.add("task-list-item");
       li.textContent = `${task.task} - ${task.state} (${task.description})`;
+
+      // Set the id attribute of the li element to the task name
+      li.id = task.task;
+      li.name = task.task;
 
       if (task.state !== "solved") {
         const button = document.createElement("button");
         button.textContent = "Mark as Solved";
-        button.className = "button-style";
+        button.className = "button-style solved";
         button.addEventListener("click", () => markAsSolved(task.task));
         li.appendChild(button);
       }
       if (task.state == "solved") {
         const button = document.createElement("button");
         button.textContent = "Mark as Pending";
-        button.className = "button-style";
+        button.className = "button-style pending";
         button.addEventListener("click", () => markAsPending(task.task));
         li.appendChild(button);
       }
@@ -892,4 +897,102 @@ document.addEventListener("DOMContentLoaded", function () {
       console.error("Error fetching tasks for removal:", error);
     }
   }
+  const editButton = document.getElementById("edit-task-button");
+  const editModal = document.getElementById("edit-modal");
+  const taskEditList = document.getElementById("task-edit-list");
+  const editTaskModal = document.getElementById("edit-task-modal");
+  const editTaskNameInput = document.getElementById("edit-task-name");
+  const editTaskDescriptionInput = document.getElementById(
+    "edit-task-description"
+  );
+  const saveEditTaskButton = document.getElementById("save-edit-task-button");
+  let previousSaveEditTaskListener;
+  // Event listener for opening the edit modal
+  editButton.addEventListener("click", function () {
+    // Fetch the list of tasks from the server
+    fetch("/get_tasks")
+      .then((response) => response.json())
+      .then((tasks) => {
+        // Clear the previous task list
+        taskEditList.innerHTML = "";
+
+        // Populate the modal with tasks
+        tasks.forEach((task) => {
+          const li = document.createElement("li");
+          const editTaskButton = document.createElement("button");
+          editTaskButton.textContent = task.task;
+          editTaskButton.classList.add("button-style");
+          editTaskButton.addEventListener("click", function () {
+            // Open the edit task modal and populate with current task info
+            editTaskNameInput.value = task.task;
+            editTaskDescriptionInput.value = task.description;
+            editTaskModal.style.display = "block";
+            // Save the current task being edited
+            const currentTask = task;
+
+            // Remove any previous event listeners
+            if (previousSaveEditTaskListener) {
+              saveEditTaskButton.removeEventListener(
+                "click",
+                previousSaveEditTaskListener
+              );
+            }
+
+            // Add a new event listener for the save button
+            previousSaveEditTaskListener = function () {
+              // Get the edited task information
+              const editedTaskName = editTaskNameInput.value;
+              const editedTaskDescription = editTaskDescriptionInput.value;
+
+              // Send the edited information to the server
+              fetch("/edit_task", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  task: currentTask.task,
+                  editedTaskName: editedTaskName,
+                  editedTaskDescription: editedTaskDescription,
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  console.log(data.message);
+                  // Close the edit task modal
+                  editTaskModal.style.display = "none";
+                  // Fetch tasks again to refresh the list
+                  fetchTasks();
+                })
+                .catch((error) => {
+                  console.error("Error editing task:", error);
+                });
+            };
+
+            saveEditTaskButton.addEventListener(
+              "click",
+              previousSaveEditTaskListener
+            );
+          });
+          li.appendChild(editTaskButton);
+          taskEditList.appendChild(li);
+        });
+
+        // Show the edit modal
+        editModal.style.display = "block";
+      })
+      .catch((error) => {
+        console.error("Error fetching tasks:", error);
+      });
+    document
+      .querySelector(".close-edit")
+      .addEventListener("click", function () {
+        document.getElementById("edit-modal").style.display = "none";
+      });
+    document
+      .querySelector(".close-edit-task")
+      .addEventListener("click", function () {
+        document.getElementById("edit-task-modal").style.display = "none";
+      });
+  });
 });

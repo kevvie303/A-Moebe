@@ -9,11 +9,13 @@ const mediaPopup = document.querySelector(".media-hidden");
 const timePopup = document.querySelector(".time-hidden");
 const piPopup = document.querySelector(".pi-hidden");
 const gamePopup = document.querySelector(".game-hidden");
+const taskPopup = document.querySelector(".tasks-hidden");
 
 const closeMediaButton = document.querySelector(".close-media");
 const closeTimeButton = document.querySelector(".close-time");
 const closePiButton = document.querySelector(".close-pi");
 const closeGameButton = document.querySelector(".close-game");
+const closeTasksButton = document.querySelector(".close-tasks");
 
 const abortButton = document.querySelector(".abort-button");
 const confirmButton = document.getElementById("end-game-button");
@@ -102,11 +104,22 @@ startButton.addEventListener("click", () => {
   gamePopup.classList.add("hidden");
 });
 
-
 snoozeButton.addEventListener("click", () => {
   confirmPopup.classList.remove("shown");
   confirmPopup.classList.add("hidden");
 
   gamePopup.classList.remove("shown");
   gamePopup.classList.add("hidden");
+});
+
+/* tasks */
+
+piButton.addEventListener("click", () => {
+  piPopup.classList.remove("hidden");
+  piPopup.classList.add("shown");
+});
+
+closePiButton.addEventListener("click", () => {
+  piPopup.classList.remove("shown");
+  piPopup.classList.add("hidden");
 });
