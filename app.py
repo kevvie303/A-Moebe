@@ -18,7 +18,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import paho.mqtt.client as mqtt
 load_dotenv()
 app = Flask(__name__)
-mqtt_client = mqtt.Client()
 #command = 'python relay_control.py'
 ssh = None
 stdin = None
@@ -104,6 +103,8 @@ client.connect(broker_ip, 1883)
 # Subscribe to all topics under the specified prefix
 client.subscribe(prefix_to_subscribe + "#")  # Subscribe to all topics under the prefix
 # Function to execute the delete-locks.py script
+mqtt_thread = threading.Thread(target=client.loop_forever)
+mqtt_thread.start()
 def execute_delete_locks_script():
     ssh.exec_command('python delete-locks.py')
 
@@ -1358,7 +1359,6 @@ if romy == False:
 def index():
     return render_template('index.html')
 if __name__ == '__main__':
-    client.loop_forever()
     signal.signal(signal.SIGINT, handle_interrupt)
     app.run(host='0.0.0.0', port=80)
     if romy == False:
