@@ -107,6 +107,32 @@ $(document).ready(function () {
       },
     });
   });
+  $("#fade-out-music-button").click(function () {
+    // Send a request to the server to stop the music
+    $.ajax({
+      type: "POST",
+      url: "/fade_music_out",
+      success: function (response) {
+        console.log(response);
+      },
+      error: function (error) {
+        console.log(error);
+      },
+    });
+  });
+  $("#fade-in-music-button").click(function () {
+    // Send a request to the server to stop the music
+    $.ajax({
+      type: "POST",
+      url: "/fade_music_in",
+      success: function (response) {
+        console.log(response);
+      },
+      error: function (error) {
+        console.log(error);
+      },
+    });
+  });
 });
 
 $(document).ready(function () {

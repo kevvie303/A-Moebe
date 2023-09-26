@@ -1,0 +1,58 @@
+[
+    {
+        "name": "blue_house_ir",
+        "type": "IR",
+        "pin": 18,
+        "pi": "top-pi",
+        "state": "Not triggered"
+    },
+    {
+        "name": "top_left_kraken",
+        "type": "Magnet",
+        "pin": 15,
+        "pi": "middle-pi",
+        "state": "Triggered"
+    },
+    {
+        "name": "green_house_ir",
+        "type": "IR",
+        "pin": 14,
+        "pi": "tree-pi",
+        "state": "Not triggered"
+    },
+    {
+        "name": "red_house_ir",
+        "type": "IR",
+        "pin": 20,
+        "pi": "tree-pi",
+        "state": "Not triggered"
+    },
+    {
+        "name": "test",
+        "type": "IR",
+        "pin": 1,
+        "pi": "top-pi",
+        "state": "Not triggered"
+    },
+    {
+        "name": "testt",
+        "type": "IR",
+        "pin": 2,
+        "pi": "top-pi",
+        "state": "Not triggered"
+    },
+    {
+        "name": "testtt",
+        "type": "IR",
+        "pin": 3,
+        "pi": "top-pi",
+        "state": "Not triggered"
+    },
+    {
+        "name": "e",
+        "type": "IR",
+        "pin": 5,
+        "pi": "top-pi",
+        "state": "Not triggered"
+    }
+]

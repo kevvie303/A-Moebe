@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, url_for
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 import json
 import paramiko
 import atexit
@@ -14,8 +15,10 @@ import sys
 import threading
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
+import paho.mqtt.client as mqtt
 load_dotenv()
 app = Flask(__name__)
+mqtt_client = mqtt.Client()
 #command = 'python relay_control.py'
 ssh = None
 stdin = None
@@ -37,7 +40,7 @@ sequence = 0
 should_sound_play = True
 code1 = False
 code2 = False
-
+code3 = False
 #logging.basicConfig(level=logging.DEBUG)  # Use appropriate log level
 active_ssh_connections = {}
 CORS(app)
@@ -74,7 +77,32 @@ def establish_ssh_connection():
         pi3 = paramiko.SSHClient()
         pi3.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         pi3.connect(ip3brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
+broker_ip = "192.168.0.103"  # IP address of the broker Raspberry Pi
 
+# Define the topic prefix to subscribe to (e.g., "sensor_state/")
+prefix_to_subscribe = "sensor_state/"
+
+# Callback function to process incoming MQTT messages
+def on_message(client, userdata, message):
+    # Extract the topic and message payload
+    topic = message.topic
+    sensor_name = topic[len(prefix_to_subscribe):]  # Extract sensor name from the topic
+    sensor_state = message.payload.decode("utf-8")
+
+    # Process the received sensor state as needed
+    print(f"Received sensor state for {sensor_name}: {sensor_state}")
+
+# Create an MQTT client instance
+client = mqtt.Client()
+
+# Set the callback function for incoming MQTT messages
+client.on_message = on_message
+
+# Connect to the MQTT broker
+client.connect(broker_ip, 1883)
+
+# Subscribe to all topics under the specified prefix
+client.subscribe(prefix_to_subscribe + "#")  # Subscribe to all topics under the prefix
 # Function to execute the delete-locks.py script
 def execute_delete_locks_script():
     ssh.exec_command('python delete-locks.py')
@@ -91,13 +119,15 @@ def start_scripts():
     #pi2.exec_command('python sensor_board.py')
     pi2.exec_command('sudo python sinus_game.py')
     # pi2.exec_command('python distort.py')
-    ssh.exec_command('python read.py')
+    #ssh.exec_command('python read.py')
     # ssh.exec_command('python keypad.py')
     #pi3.exec_command('python ir.py')
     sensor_thread.start()
     pi2.exec_command('python status.py')
     time.sleep(0.5)
     pi3.exec_command('python status.py')
+    time.sleep(0.5)
+    #scheduler.add_job(monitor_sensor_statuses, 'interval', seconds=0.1)
 
 @app.route('/add_music1', methods=['POST'])
 def add_music1():
@@ -287,7 +317,30 @@ def pause_music():
             return f'{selected_file} is not currently playing'
     else:
         return 'No file selected to pause'
+@app.route('/fade_music_out', methods=['POST'])
+def fade_music_out():
 
+        # Gradually reduce the volume from 80 to 40
+    for volume in range(75, 15, -1):
+        # Send the volume command to the Raspberry Pi
+        command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
+        stdin, stdout, stderr = pi3.exec_command(command)
+
+        # Wait for a short duration between volume changes
+        time.sleep(0.05)  # Adjust the sleep duration as needed
+    return "Volume faded successfully"
+@app.route('/fade_music_in', methods=['POST'])
+def fade_music_in():
+
+        # Gradually reduce the volume from 80 to 40
+    for volume in range(15, 75, 1):
+        # Send the volume command to the Raspberry Pi
+        command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
+        stdin, stdout, stderr = pi3.exec_command(command)
+
+        # Wait for a short duration between volume changes
+        time.sleep(0.05)  # Adjust the sleep duration as needed
+    return "Volume faded successfully"
 @app.route('/resume_music', methods=['POST'])
 def resume_music():
     selected_file = request.form['file']
@@ -397,13 +450,24 @@ def play_music_garden():
     selected_file = request.form['file']
     current_file = selected_file
     pi = 'pi3'
-
+    print(selected_file)
     # Define the soundcard channel information
     soundcard_channel = 'hw:0,0'  # Adjust this based on your specific configuration
+    # Create a new FIFO file
+    if "Ambience" in selected_file:
+        load_command = f'echo "load /home/pi/Music/{current_file}" | sudo tee /tmp/mpg123_fifo'
+        print(current_file)
+        pi3.exec_command(load_command)
+        print(load_command)
+    else:
+        command = f'mpg123 -a {soundcard_channel} Music/{current_file} &'
+        pi3.exec_command(command)
+        print("hiii")
+    # Command to play the music using the specified soundcard channel
 
-    # Construct the command to play the music using the specified soundcard channel
-    command = f'mpg123 -a {soundcard_channel} Music/{selected_file} &'
-    pi3.exec_command(command)
+
+    # Send the load command to the FIFO file
+
 
     # Save the data to a JSON file on the server
     status = 'playing'
@@ -429,8 +493,8 @@ def play_music_garden():
     with open(file_path, 'w') as file:
         json.dump(file_data, file)
 
-    print("Data written successfully.")
     return 'Music started on pi2'
+
 
 @app.route('/get_file_status', methods=['GET'])
 def get_file_status():
@@ -518,9 +582,11 @@ def reset_puzzles():
     global aborted
     global code1
     global code2
+    global code3
     aborted = True
     code1 = False
     code2 = False
+    code3 = False
     update_snooze_status(False)
     pi3.exec_command('raspi-gpio set 16 op dl')
     pi2.exec_command('sudo pkill -f sinus_game.py')
@@ -794,7 +860,6 @@ def get_state():
     return jsonify({'state': state})
 
 API_URL_SENSORS = 'http://192.168.0.104:5000/sensor/status/'
-
 def get_sensor_status(sensor_number):
     try:
         response = requests.get(API_URL_SENSORS + str(sensor_number))
@@ -835,10 +900,13 @@ def get_sensor_status_pi2(sensor_number):
             return 'unknown'
     except requests.exceptions.RequestException:
         return 'unknown'
+with open('json/sensor_data.json', 'r') as json_file:
+    sensors = json.load(json_file)
 def monitor_sensor_statuses():
     global sequence
     global code1
     global code2
+    global code3
     while True:
         green_house_ir_status = get_ir_sensor_status(14)
         red_house_ir_status = get_ir_sensor_status(20)
@@ -850,17 +918,28 @@ def monitor_sensor_statuses():
         top_right_kraken = get_sensor_status_pi2(20)
         bottom_right_kraken = get_sensor_status_pi2(23)
         last_used_keypad_code = get_shed_keypad_code()
-        #print(code1)
-        #print(code2)
-        if last_used_keypad_code == "1111":
+        #print(last_used_keypad_code)
+        if last_used_keypad_code == "1527" and code1 == False:
             code1 = True
-        if last_used_keypad_code == "2222":
+            ssh.exec_command("raspi-gpio set 1 op dh")
+            time.sleep(1)
+            ssh.exec_command("raspi-gpio set 1 op dl")
+        if (last_used_keypad_code == "7867" or last_used_keypad_code == "8978") and code2 == False:
             code2 = True
-        if code1 and code2:
+            ssh.exec_command("raspi-gpio set 1 op dh")
+            time.sleep(1)
+            ssh.exec_command("raspi-gpio set 1 op dl")
+        if last_used_keypad_code == "0129" and code3 == False:
+            code3 = True
+            ssh.exec_command("raspi-gpio set 1 op dh")
+            time.sleep(1)
+            ssh.exec_command("raspi-gpio set 1 op dl")
+        if code1 and code2 and code3:
             print("executed")
             pi3.exec_command('raspi-gpio set 16 op dh')
             code1 = False
             code2 = False
+            code3 = False
         if top_left_kraken == "closed":
             pi2.exec_command('raspi-gpio set 12 op dh')
         else:
@@ -895,23 +974,24 @@ def monitor_sensor_statuses():
         if blue_house_ir_status == 'active' and sequence == 2:
             solve_task("tree-lights")
             pi3.exec_command("raspi-gpio set 23 op dh")
+            fade_out_thread = threading.Thread(target=fade_music_out)
+            fade_out_thread.start()
             time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dl")
-            pi3.exec_command("raspi-gpio set 21 op dl")
-            pi3.exec_command("raspi-gpio set 15 op dl")
+            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
             time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dh")
-            pi3.exec_command("raspi-gpio set 21 op dh")
-            pi3.exec_command("raspi-gpio set 15 op dh")
+            pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
             time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dl")
-            pi3.exec_command("raspi-gpio set 21 op dl")
-            pi3.exec_command("raspi-gpio set 15 op dl")
+            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
             time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dh")
-            pi3.exec_command("raspi-gpio set 21 op dh")
-            pi3.exec_command("raspi-gpio set 15 op dh")
+            pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
+            time.sleep(1)
+            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
             sequence = 0
+            time.sleep(1)
+            pi3.exec_command("mpg123 -a hw:0,0 Music/Tree-solve.mp3")
+            time.sleep(7)
+            fade_in_thread = threading.Thread(target=fade_music_in)
+            fade_in_thread.start()
         elif blue_house_ir_status == 'active' and sequence != 2:
             pi3.exec_command("raspi-gpio set 23 op dh")
             time.sleep(0.5)
@@ -921,6 +1001,57 @@ def monitor_sensor_statuses():
             sequence = 0
         time.sleep(0.1)
 # Start a new thread for monitoring sensor statuses
+@app.route('/add_sensor', methods=['GET', 'POST'])
+def add_sensor():
+    if request.method == 'POST':
+        # Retrieve form data
+        name = request.form['name']
+        sensor_type = request.form['type']
+        pin = int(request.form['pin'])
+        pi = request.form['pi']
+
+        # Create a new sensor dictionary with an initial state of "Not triggered"
+        new_sensor = {
+            "name": name,
+            "type": sensor_type,
+            "pin": pin,
+            "pi": pi,
+            "state": "Not triggered"
+        }
+
+        # Add the new sensor to the list
+        sensors.append(new_sensor)
+
+        # Save the updated sensor data to the JSON file
+        with open('json/sensor_data.json', 'w') as json_file:
+            json.dump(sensors, json_file, indent=4)
+        target_directory = '~/'
+        script_path = 'json/sensor_data.json'
+        target_usernames = {
+            "top-pi": "pi@192.168.0.104",
+            "middle-pi": "pi@192.168.0.105",
+            "tree-pi": "pi@192.168.0.114"
+        }
+
+        success_message = "Script sent successfully to the following IP addresses:<br>"
+
+        for target_ip in target_usernames.values():
+            # Construct the SCP command
+            scp_command = f'scp {script_path} {target_ip}:{target_directory}'
+
+            try:
+                # Execute the SCP command
+                subprocess.run(scp_command, shell=True, check=True)
+                success_message += f"- {target_ip}<br>"
+            except subprocess.CalledProcessError as e:
+                return f'Error occurred while sending script to {target_ip}: {e}'
+
+        return redirect(url_for('list_sensors'))
+
+    return render_template('add_sensor.html')
+@app.route('/list_sensors')
+def list_sensors():
+    return render_template('list_sensors.html', sensors=sensors)
 def start_bird_sounds():
     pi3.exec_command("mpg123 -a hw:1,0 Music/Pecker.mp3")
     print("1")
@@ -966,6 +1097,8 @@ def get_sinus_status():
 #def turn_off():
     maglock = request.form['maglock']
     return turn_off_maglock(maglock)
+
+
 
 def cleanup():
     pi2.exec_command('sudo pkill -f sinus_game.py')
@@ -1225,6 +1358,8 @@ if romy == False:
 def index():
     return render_template('index.html')
 if __name__ == '__main__':
+    client.loop_forever()
     signal.signal(signal.SIGINT, handle_interrupt)
     app.run(host='0.0.0.0', port=80)
-    atexit.register(cleanup)
+    if romy == False:
+        atexit.register(cleanup)
