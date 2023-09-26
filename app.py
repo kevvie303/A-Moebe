@@ -23,7 +23,7 @@ ssh = None
 stdin = None
 pi2 = None
 pi3 = None
-romy = False
+romy = True
 aborted = False
 fade_duration = 3  # Fade-out duration in seconds
 fade_interval = 0.1  # Interval between volume adjustments in seconds
@@ -76,21 +76,69 @@ def establish_ssh_connection():
         pi3 = paramiko.SSHClient()
         pi3.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         pi3.connect(ip3brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
-broker_ip = "192.168.0.103"  # IP address of the broker Raspberry Pi
+broker_ip = "192.168.18.229"  # IP address of the broker Raspberry Pi
 
 # Define the topic prefix to subscribe to (e.g., "sensor_state/")
 prefix_to_subscribe = "sensor_state/"
-
+sensor_states = {}
 # Callback function to process incoming MQTT messages
+
 def on_message(client, userdata, message):
     # Extract the topic and message payload
     topic = message.topic
-    sensor_name = topic[len(prefix_to_subscribe):]  # Extract sensor name from the topic
+    parts = topic.split("/")
+    sensor_name = parts[-1]  # Extract the last part of the topic (sensor name)
     sensor_state = message.payload.decode("utf-8")
-
+    sensor_states[sensor_name] = sensor_state
     # Process the received sensor state as needed
+    check_rule(sensor_name)
     print(f"Received sensor state for {sensor_name}: {sensor_state}")
-
+# Example rule function
+def check_rule(sensor_name):
+    global sequence
+    print("Rule checking for:", sensor_name, "with state:", sensor_states.get(sensor_name))
+    if sensor_name == 'blue_house_ir' and sensor_states.get(sensor_name) == 'Triggered':
+        print("Rule: Blue house IR sensor is triggered!")
+    if sensor_name == 'green_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence == 0:
+        pi3.exec_command("raspi-gpio set 15 op dh")
+        sequence = 1
+    if sensor_name == 'red_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence == 1:
+        pi3.exec_command("raspi-gpio set 21 op dh")
+        sequence = 2
+    elif sensor_name == 'red_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence <= 0:
+        pi3.exec_command("raspi-gpio set 21 op dh")
+        time.sleep(0.5)
+        pi3.exec_command("raspi-gpio set 21 op dl")
+        pi3.exec_command("raspi-gpio set 15 op dl")
+        sequence = 0
+    if sensor_name == 'blue_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence == 2:
+        solve_task("tree-lights")
+        pi3.exec_command("raspi-gpio set 23 op dh")
+        fade_out_thread = threading.Thread(target=fade_music_out)
+        fade_out_thread.start()
+        time.sleep(1)
+        pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+        time.sleep(1)
+        pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
+        time.sleep(1)
+        pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+        time.sleep(1)
+        pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
+        time.sleep(1)
+        pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+        sequence = 0
+        time.sleep(1)
+        pi3.exec_command("mpg123 -a hw:0,0 Music/Tree-solve.mp3")
+        time.sleep(7)
+        fade_in_thread = threading.Thread(target=fade_music_in)
+        fade_in_thread.start()
+    #elif sensor_name == 'blue_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence != 2:
+        pi3.exec_command("raspi-gpio set 23 op dh")
+        time.sleep(0.5)
+        pi3.exec_command("raspi-gpio set 23 op dl")
+        pi3.exec_command("raspi-gpio set 21 op dl")
+        pi3.exec_command("raspi-gpio set 15 op dl")
+        sequence = 0
 # Create an MQTT client instance
 client = mqtt.Client()
 
@@ -103,8 +151,7 @@ client.connect(broker_ip, 1883)
 # Subscribe to all topics under the specified prefix
 client.subscribe(prefix_to_subscribe + "#")  # Subscribe to all topics under the prefix
 # Function to execute the delete-locks.py script
-mqtt_thread = threading.Thread(target=client.loop_forever)
-mqtt_thread.start()
+client.loop_start()
 def execute_delete_locks_script():
     ssh.exec_command('python delete-locks.py')
 
@@ -959,47 +1006,6 @@ def monitor_sensor_statuses():
             pi2.exec_command('raspi-gpio set 8 op dl')
         if sinus_status == "solved" and aborted == False:
             pi2.exec_command("mpg123 -a hw:1,0 Music/pentakill.mp3")
-
-        if green_house_ir_status == 'active' and sequence == 0:
-            pi3.exec_command("raspi-gpio set 15 op dh")
-            sequence = 1
-        if red_house_ir_status == 'active' and sequence == 1:
-            pi3.exec_command("raspi-gpio set 21 op dh")
-            sequence = 2
-        elif red_house_ir_status == 'active' and sequence <= 0:
-            pi3.exec_command("raspi-gpio set 21 op dh")
-            time.sleep(0.5)
-            pi3.exec_command("raspi-gpio set 21 op dl")
-            pi3.exec_command("raspi-gpio set 15 op dl")
-            sequence = 0
-        if blue_house_ir_status == 'active' and sequence == 2:
-            solve_task("tree-lights")
-            pi3.exec_command("raspi-gpio set 23 op dh")
-            fade_out_thread = threading.Thread(target=fade_music_out)
-            fade_out_thread.start()
-            time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
-            time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
-            time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
-            time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
-            time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
-            sequence = 0
-            time.sleep(1)
-            pi3.exec_command("mpg123 -a hw:0,0 Music/Tree-solve.mp3")
-            time.sleep(7)
-            fade_in_thread = threading.Thread(target=fade_music_in)
-            fade_in_thread.start()
-        elif blue_house_ir_status == 'active' and sequence != 2:
-            pi3.exec_command("raspi-gpio set 23 op dh")
-            time.sleep(0.5)
-            pi3.exec_command("raspi-gpio set 23 op dl")
-            pi3.exec_command("raspi-gpio set 21 op dl")
-            pi3.exec_command("raspi-gpio set 15 op dl")
-            sequence = 0
         time.sleep(0.1)
 # Start a new thread for monitoring sensor statuses
 @app.route('/add_sensor', methods=['GET', 'POST'])
@@ -1199,6 +1205,7 @@ def handle_trigger():
         execute_code()
     return "Trigger handled."
 def handle_interrupt(signal, frame):
+    client.loop_stop()
     print("Interrupt received. Shutting down...")
     # Add any additional cleanup or termination logic here
     sys.exit()
