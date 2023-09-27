@@ -139,6 +139,23 @@ def check_rule(sensor_name):
         pi3.exec_command("raspi-gpio set 21 op dl")
         pi3.exec_command("raspi-gpio set 15 op dl")
         sequence = 0
+
+    if sensor_name == 'top_left_kraken' and sensor_states.get(sensor_name) == 'Triggered':
+        pi2.exec_command('raspi-gpio set 12 op dh')
+    else:
+        pi2.exec_command('raspi-gpio set 12 op dl')
+    if sensor_name == 'bottom_left_kraken' and sensor_states.get(sensor_name) == 'Triggered':
+        pi2.exec_command('raspi-gpio set 1 op dh')
+    else:
+        pi2.exec_command('raspi-gpio set 1 op dl')
+    if sensor_name == 'top_right_kraken' and sensor_states.get(sensor_name) == 'Triggered':
+        pi2.exec_command('raspi-gpio set 7 op dh')
+    else:
+        pi2.exec_command('raspi-gpio set 7 op dl')
+    if sensor_name == 'bottom_right_kraken' and sensor_states.get(sensor_name) == 'Triggered':
+        pi2.exec_command('raspi-gpio set 8 op dh')
+    else:
+        pi2.exec_command('raspi-gpio set 8 op dl')
 # Create an MQTT client instance
 client = mqtt.Client()
 
@@ -956,15 +973,15 @@ def monitor_sensor_statuses():
     global code2
     global code3
     while True:
-        green_house_ir_status = get_ir_sensor_status(14)
-        red_house_ir_status = get_ir_sensor_status(20)
-        blue_house_ir_status = get_ir_sensor_status(18)
-        entrance_door_status = get_sensor_status(14)
+        #green_house_ir_status = get_ir_sensor_status(14)
+        #red_house_ir_status = get_ir_sensor_status(20)
+        #blue_house_ir_status = get_ir_sensor_status(18)
+        #entrance_door_status = get_sensor_status(14)
         sinus_status = get_sinus_status()
-        top_left_kraken = get_sensor_status_pi2(15)
-        bottom_left_kraken = get_sensor_status_pi2(16)
-        top_right_kraken = get_sensor_status_pi2(20)
-        bottom_right_kraken = get_sensor_status_pi2(23)
+        #top_left_kraken = get_sensor_status_pi2(15)
+        #bottom_left_kraken = get_sensor_status_pi2(16)
+        #top_right_kraken = get_sensor_status_pi2(20)
+        #bottom_right_kraken = get_sensor_status_pi2(23)
         last_used_keypad_code = get_shed_keypad_code()
         #print(last_used_keypad_code)
         if last_used_keypad_code == "1527" and code1 == False:
@@ -988,22 +1005,6 @@ def monitor_sensor_statuses():
             code1 = False
             code2 = False
             code3 = False
-        if top_left_kraken == "closed":
-            pi2.exec_command('raspi-gpio set 12 op dh')
-        else:
-            pi2.exec_command('raspi-gpio set 12 op dl')
-        if bottom_left_kraken == "closed":
-            pi2.exec_command('raspi-gpio set 1 op dh')
-        else:
-            pi2.exec_command('raspi-gpio set 1 op dl')
-        if top_right_kraken == "closed":
-            pi2.exec_command('raspi-gpio set 7 op dh')
-        else:
-            pi2.exec_command('raspi-gpio set 7 op dl')
-        if bottom_right_kraken == "closed":
-            pi2.exec_command('raspi-gpio set 8 op dh')
-        else:
-            pi2.exec_command('raspi-gpio set 8 op dl')
         if sinus_status == "solved" and aborted == False:
             pi2.exec_command("mpg123 -a hw:1,0 Music/pentakill.mp3")
         time.sleep(0.1)

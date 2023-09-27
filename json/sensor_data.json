@@ -28,31 +28,24 @@
         "state": "Not triggered"
     },
     {
-        "name": "test",
-        "type": "IR",
-        "pin": 1,
-        "pi": "top-pi",
+        "name": "bottom_right_kraken",
+        "type": "Magnet",
+        "pin": 23,
+        "pi": "middle-pi",
         "state": "Not triggered"
     },
     {
-        "name": "testt",
-        "type": "IR",
-        "pin": 2,
-        "pi": "top-pi",
+        "name": "top_right_kraken",
+        "type": "Magnet",
+        "pin": 20,
+        "pi": "middle-pi",
         "state": "Not triggered"
     },
     {
-        "name": "testtt",
-        "type": "IR",
-        "pin": 3,
-        "pi": "top-pi",
-        "state": "Not triggered"
-    },
-    {
-        "name": "e",
-        "type": "IR",
-        "pin": 5,
-        "pi": "top-pi",
+        "name": "bottom_left_kraken",
+        "type": "Magnet",
+        "pin": 16,
+        "pi": "middle-pi",
         "state": "Not triggered"
     }
 ]

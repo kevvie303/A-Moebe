@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Sensor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fonts/fonts.css')}}">
+    <link rel="icon" href="static/img/favicon.png" type="image/png">
 </head>
 <body>
     <h1>Add a New Sensor</h1>
@@ -30,6 +34,6 @@
 
         <input type="submit" value="Submit">
     </form>
-    <a href="/">Back to List</a>
+    <a href="/list_sensors" class="button-style">Back to List</a>
 </body>
 </html>
