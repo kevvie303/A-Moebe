@@ -76,7 +76,7 @@ def establish_ssh_connection():
         pi3 = paramiko.SSHClient()
         pi3.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         pi3.connect(ip3brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
-broker_ip = "192.168.0.103"  # IP address of the broker Raspberry Pi
+broker_ip = "192.168.0.112"  # IP address of the broker Raspberry Pi
 
 # Define the topic prefix to subscribe to (e.g., "sensor_state/")
 prefix_to_subscribe = "sensor_state/"
@@ -90,11 +90,118 @@ def on_message(client, userdata, message):
     sensor_name = parts[-1]  # Extract the last part of the topic (sensor name)
     sensor_state = message.payload.decode("utf-8")
     sensor_states[sensor_name] = sensor_state
-    # Process the received sensor state as needed
-    check_rule(sensor_name)
+
+    print(f"Received MQTT message - Sensor: {sensor_name}, State: {sensor_state}")
+
+    if sensor_name in sensor_states:
+        print("jo")
+        sensor_states[sensor_name] = sensor_state
+        update_json_file()
+        print("State changed. Updated JSON.")
+    print(sensor_states)
+    if check_rule("green_house_ir"):
+    # Rule is satisfied, perform actions
+        pi3.exec_command("raspi-gpio set 15 op dh")
+        print("1")
+    if check_rule("top_left_kraken"):
+        pi2.exec_command('raspi-gpio set 12 op dh')
+    else:
+        pi2.exec_command('raspi-gpio set 12 op dl')
+    if check_rule("top_right_kraken"):
+        pi2.exec_command('raspi-gpio set 7 op dh')
+    else:
+        pi2.exec_command('raspi-gpio set 7 op dl')
+    if check_rule("bottom_right_kraken"):
+        pi2.exec_command('raspi-gpio set 8 op dh')
+    else:
+        pi2.exec_command('raspi-gpio set 8 op dl')
+    if check_rule("bottom_left_kraken"):
+        pi2.exec_command('raspi-gpio set 1 op dh')
+    else:
+        pi2.exec_command('raspi-gpio set 1 op dl')
+    global sequence
+    if check_rule("green_house_ir") and sequence == 0:
+        pi3.exec_command("raspi-gpio set 15 op dh")
+        print("1")
+        sequence = 1
+    if check_rule("red_house_ir") and sequence == 1:
+        pi3.exec_command("raspi-gpio set 21 op dh")
+        print("2")
+        sequence = 2
+    elif check_rule("red_house_ir") and sequence <= 0:
+        pi3.exec_command("raspi-gpio set 21 op dh")
+        time.sleep(0.5)
+        pi3.exec_command("raspi-gpio set 21 op dl")
+        pi3.exec_command("raspi-gpio set 15 op dl")
+        sequence = 0
+    if check_rule("blue_house_ir") and sequence == 2:
+        solve_task("tree-lights")
+        print("3")
+        pi3.exec_command("raspi-gpio set 23 op dh")
+        fade_out_thread = threading.Thread(target=fade_music_out)
+        fade_out_thread.start()
+        time.sleep(1)
+        pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+        time.sleep(1)
+        pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
+        time.sleep(1)
+        pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+        time.sleep(1)
+        pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
+        time.sleep(1)
+        pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+        sequence = 0
+        time.sleep(1)
+        pi3.exec_command("mpg123 -a hw:0,0 Music/Tree-solve.mp3")
+        time.sleep(7)
+        fade_in_thread = threading.Thread(target=fade_music_in)
+        fade_in_thread.start()
+    elif check_rule("blue_house_ir") and sequence != 2:
+        pi3.exec_command("raspi-gpio set 23 op dh")
+        time.sleep(0.5)
+        pi3.exec_command("raspi-gpio set 23 op dl")
+        pi3.exec_command("raspi-gpio set 21 op dl")
+        pi3.exec_command("raspi-gpio set 15 op dl")
+        sequence = 0
+
     #print(f"Received sensor state for {sensor_name}: {sensor_state}")
 # Example rule function
+def update_json_file():
+    try:
+        # Read existing JSON data
+        with open("json/sensor_data.json", 'r') as json_file:
+            sensor_data = json.load(json_file)
+
+        # Update sensor states in the JSON data
+        for sensor in sensor_data:
+            sensor_name = sensor["name"]
+            if sensor_name in sensor_states:
+                sensor["state"] = sensor_states[sensor_name]
+
+        # Write the updated JSON data back to the file
+        with open("json/sensor_data.json", 'w') as json_file:
+            json.dump(sensor_data, json_file, indent=4)
+
+    except Exception as e:
+        print(f"Error updating JSON file: {e}")
 def check_rule(sensor_name):
+    try:
+        # Read sensor data from the JSON file
+        with open("json/sensor_data.json", 'r') as json_file:
+            sensor_data = json.load(json_file)
+
+        # Find the sensor with the specified name
+        sensor = next((s for s in sensor_data if s["name"] == sensor_name), None)
+
+        if sensor and sensor["state"] == "Triggered":
+            return True
+        else:
+            return False
+
+    except Exception as e:
+        print(f"Error reading JSON file: {e}")
+        return False
+#def check_rule(sensor_name):
     global sequence
     if sensor_name == 'green_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence == 0:
         pi3.exec_command("raspi-gpio set 15 op dh")

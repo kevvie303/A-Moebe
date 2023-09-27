@@ -39,7 +39,7 @@
         "type": "Magnet",
         "pin": 20,
         "pi": "middle-pi",
-        "state": "Not triggered"
+        "state": "not Triggered"
     },
     {
         "name": "bottom_left_kraken",
