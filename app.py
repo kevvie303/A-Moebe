@@ -304,8 +304,10 @@ def start_scripts():
     #pi3.exec_command('python ir.py')
     sensor_thread.start()
     pi2.exec_command('python status.py')
+    pi2.exec_command('python mqtt.py')
     time.sleep(0.5)
     pi3.exec_command('python status.py')
+    pi3.exec_command('python mqtt.py')
     time.sleep(0.5)
     #scheduler.add_job(monitor_sensor_statuses, 'interval', seconds=0.1)
 
