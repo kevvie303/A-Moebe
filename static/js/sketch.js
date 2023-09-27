@@ -134,7 +134,73 @@ $(document).ready(function () {
     });
   });
 });
+    // Add a click event listener to the "light-button"
+    document.getElementById("light-button").addEventListener("click", function() {
+      // Open a new popup window
+      var popupWindow = window.open("", "_blank", "width=600, height=400");
 
+      // Check if the popup window was successfully opened
+      if (popupWindow) {
+          // Load the SVG image in the popup window from the Flask route
+          popupWindow.document.write('<div id="svg-container"></div>');
+
+          var svgContainer = popupWindow.document.getElementById("svg-container");
+          var svgObject = document.createElement("object");
+          svgObject.data = "/static/img/room-layout.svg";  // Adjust the path as needed
+          svgObject.type = "image/svg+xml";
+          svgObject.width = "400";
+          svgObject.height = "300";
+          svgContainer.appendChild(svgObject);
+
+          // Define button positions within the SVG
+          var buttons = [
+              { svgPath: "/static/img/light-bulb.svg", x: 90, y: 15, name: "Light-1" },
+              { svgPath: "/static/img/light-bulb.svg", x: 50, y: 80, name: "Light-2" },
+              { svgPath: "/static/img/light-bulb.svg", x: 120, y: 80, name: "Light-3" },
+              { svgPath: "/static/img/light-bulb.svg", x: 90, y: 120, name: "Light-4" }
+              // Add more buttons and positions as needed
+          ];
+
+          // Add buttons to control the lights
+          buttons.forEach(function(button) {
+              var buttonElement = popupWindow.document.createElement("img");
+              buttonElement.src = button.svgPath;
+              buttonElement.style.position = "absolute";
+              buttonElement.style.left = button.x + "px";
+              buttonElement.style.top = button.y + "px";
+              buttonElement.style.cursor = "pointer";
+              buttonElement.style.transform = "scale(0.5)";
+              buttonElement.addEventListener("click", function() {
+                  sendLightControlRequest(button.name);
+                  console.log("Clicked on " + button.name);
+              });
+
+              popupWindow.document.body.appendChild(buttonElement);
+          });
+      } else {
+          // Handle cases where popups are blocked or not supported
+          alert("Popup blocked. Please allow popups for this site.");
+      }
+  });
+
+function sendLightControlRequest(lightName) {
+  // Make an AJAX request using jQuery
+  $.ajax({
+      type: "POST",
+      url: "/control_light",
+      data: JSON.stringify({ "light_name": lightName }),
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      success: function(response) {
+          // Request was successful, handle the response if needed
+          console.log(response);
+      },
+      error: function() {
+          // Request failed, handle errors
+          console.error("Error making the light control request");
+      }
+  });
+}
 $(document).ready(function () {
   // Handle button click for both turning on and off
   $(".lock-buttons button").click(function () {

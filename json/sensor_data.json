@@ -1,51 +1,58 @@
 [
     {
         "name": "blue_house_ir",
-        "type": "IR",
+        "type": "Sensor",
         "pin": 18,
-        "pi": "top-pi",
+        "pi": "tree-pi",
         "state": "Not triggered"
     },
     {
         "name": "top_left_kraken",
-        "type": "Magnet",
+        "type": "Sensor",
         "pin": 15,
         "pi": "middle-pi",
         "state": "Triggered"
     },
     {
         "name": "green_house_ir",
-        "type": "IR",
+        "type": "Sensor",
         "pin": 14,
         "pi": "tree-pi",
         "state": "Not triggered"
     },
     {
         "name": "red_house_ir",
-        "type": "IR",
+        "type": "Sensor",
         "pin": 20,
         "pi": "tree-pi",
         "state": "Not triggered"
     },
     {
         "name": "bottom_right_kraken",
-        "type": "Magnet",
+        "type": "Sensor",
         "pin": 23,
         "pi": "middle-pi",
         "state": "Not triggered"
     },
     {
         "name": "top_right_kraken",
-        "type": "Magnet",
+        "type": "Sensor",
         "pin": 20,
         "pi": "middle-pi",
         "state": "not Triggered"
     },
     {
         "name": "bottom_left_kraken",
-        "type": "Magnet",
+        "type": "Sensor",
         "pin": 16,
         "pi": "middle-pi",
         "state": "Not triggered"
+    },
+    {
+        "name": "light-1-garden",
+        "type": "light",
+        "pin": 1,
+        "pi": "tree-pi",
+        "state": "initial"
     }
 ]

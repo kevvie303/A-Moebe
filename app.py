@@ -79,7 +79,7 @@ def establish_ssh_connection():
 broker_ip = "192.168.0.112"  # IP address of the broker Raspberry Pi
 
 # Define the topic prefix to subscribe to (e.g., "sensor_state/")
-prefix_to_subscribe = "sensor_state/"
+prefix_to_subscribe = "state_data/"
 sensor_states = {}
 # Callback function to process incoming MQTT messages
 
@@ -800,7 +800,29 @@ def wake_room():
     #pi3.exec_command('raspi-gpio set 8 op dl')
     update_snooze_status(False)
     return "room awakened"
+@app.route('/control_light', methods=['POST'])
+def control_light():
+    print("hi")
+    light_name = request.json.get('light_name')
+    print(light_name)
+    if light_name == "Light-1":
+        command = "raspi-gpio set 1 op dh"
+        print(light_name)
+    elif light_name == "Light-2":
+        command = "raspi-gpio set 7 op dh"
+        print(light_name)
+    elif light_name == "Light-3":
+        command = "raspi-gpio set 12 op dh"
+        print(light_name)
+    elif light_name == "Light-4":
+        command = "raspi-gpio set 8 op dh"
+        print(light_name)
+    else:
+        return jsonify({'error': 'Invalid light name'}), 400
 
+
+    pi3.exec_command(command)
+    return jsonify({'message': f'Light {light_name} control command executed successfully'})
 @app.route('/snooze_game', methods=['POST'])
 def snooze_game():
     light1off = 'raspi-gpio set 12 op dh'
@@ -1121,17 +1143,17 @@ def add_sensor():
     if request.method == 'POST':
         # Retrieve form data
         name = request.form['name']
-        sensor_type = request.form['type']
+        item_type = request.form['type']
         pin = int(request.form['pin'])
         pi = request.form['pi']
 
         # Create a new sensor dictionary with an initial state of "Not triggered"
         new_sensor = {
             "name": name,
-            "type": sensor_type,
+            "type": item_type,
             "pin": pin,
             "pi": pi,
-            "state": "Not triggered"
+            "state": "initial"
         }
 
         # Add the new sensor to the list
