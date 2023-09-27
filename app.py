@@ -92,18 +92,17 @@ def on_message(client, userdata, message):
     sensor_states[sensor_name] = sensor_state
     # Process the received sensor state as needed
     check_rule(sensor_name)
-    print(f"Received sensor state for {sensor_name}: {sensor_state}")
+    #print(f"Received sensor state for {sensor_name}: {sensor_state}")
 # Example rule function
 def check_rule(sensor_name):
     global sequence
-    print("Rule checking for:", sensor_name, "with state:", sensor_states.get(sensor_name))
-    if sensor_name == 'blue_house_ir' and sensor_states.get(sensor_name) == 'Triggered':
-        print("Rule: Blue house IR sensor is triggered!")
     if sensor_name == 'green_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence == 0:
         pi3.exec_command("raspi-gpio set 15 op dh")
+        print("1")
         sequence = 1
     if sensor_name == 'red_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence == 1:
         pi3.exec_command("raspi-gpio set 21 op dh")
+        print("2")
         sequence = 2
     elif sensor_name == 'red_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence <= 0:
         pi3.exec_command("raspi-gpio set 21 op dh")
@@ -113,6 +112,7 @@ def check_rule(sensor_name):
         sequence = 0
     if sensor_name == 'blue_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence == 2:
         solve_task("tree-lights")
+        print("3")
         pi3.exec_command("raspi-gpio set 23 op dh")
         fade_out_thread = threading.Thread(target=fade_music_out)
         fade_out_thread.start()
@@ -132,7 +132,7 @@ def check_rule(sensor_name):
         time.sleep(7)
         fade_in_thread = threading.Thread(target=fade_music_in)
         fade_in_thread.start()
-    #elif sensor_name == 'blue_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence != 2:
+    elif sensor_name == 'blue_house_ir' and sensor_states.get(sensor_name) == 'Triggered' and sequence != 2:
         pi3.exec_command("raspi-gpio set 23 op dh")
         time.sleep(0.5)
         pi3.exec_command("raspi-gpio set 23 op dl")
