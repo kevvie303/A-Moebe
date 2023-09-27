@@ -76,7 +76,7 @@ def establish_ssh_connection():
         pi3 = paramiko.SSHClient()
         pi3.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         pi3.connect(ip3brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
-broker_ip = "192.168.18.229"  # IP address of the broker Raspberry Pi
+broker_ip = "192.168.0.103"  # IP address of the broker Raspberry Pi
 
 # Define the topic prefix to subscribe to (e.g., "sensor_state/")
 prefix_to_subscribe = "sensor_state/"
