@@ -194,7 +194,7 @@ def check_rule(item_name):
         item = next((i for i in state_data if i["name"] == item_name), None)
 
         if item:
-            item_type = item.get("type", "sensor")  # Default to "sensor" if type is not specified
+            item_type = item.get("type")  # Default to "sensor" if type is not specified
 
             if item_type == "Sensor" and item["state"] == "Triggered":
                 return True
@@ -813,11 +813,11 @@ def control_light():
     print("hi")
     light_name = request.json.get('light_name')
     print(light_name)
-    if light_name == "Light-1":
+    if light_name == "Light-1" and check_rule("light-1-garden"):
+        command = "raspi-gpio set 1 op dh"
+    elif light_name == "Light-1":
         command = "raspi-gpio set 1 op dl"
         print(light_name)
-    elif light_name == "Light-1" and check_rule("light-1-garden"):
-        command = "raspi-gpio set 1 op dh"
     if light_name == "Light-2":
         command = "raspi-gpio set 7 op dh"
         print(light_name)
