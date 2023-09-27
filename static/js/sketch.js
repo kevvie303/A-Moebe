@@ -721,23 +721,33 @@ async function fetchTasks() {
     taskList.innerHTML = ""; // Clear existing list
 
     tasks.forEach((task) => {
+      // const taskListHidden = document.querySelector(".tasks-hidden");
+      const taskTitle = document.querySelector(".task-title");
+      const taskDescription = document.querySelector(".task-description");
+      const currentState = document.querySelector(".current-state strong");
       const li = document.createElement("li");
       li.classList.add("task-list-item");
-      li.textContent = `${task.task} - ${task.state} (${task.description})`;
+      li.textContent = `${task.task} - ${task.state}`;
+      taskTitle.textContent = `${task.task}`;
+      taskDescription.textContent = `${task.description}`;
 
       // Set the id attribute of the li element to the task name
       li.id = task.task;
       li.name = task.task;
 
       if (task.state !== "solved") {
+        const buttonContainer = document.querySelector(".button-container");
         const button = document.createElement("button");
+        buttonContainer.appendChild(button);
         button.textContent = "Mark as Solved";
         button.className = "button-style solved";
         button.addEventListener("click", () => markAsSolved(task.task));
         li.appendChild(button);
       }
       if (task.state == "solved") {
+        const buttonContainer = document.querySelector(".button-container");
         const button = document.createElement("button");
+        buttonContainer.appendChild(button);
         button.textContent = "Mark as Pending";
         button.className = "button-style pending";
         button.addEventListener("click", () => markAsPending(task.task));
