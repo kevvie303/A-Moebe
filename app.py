@@ -184,20 +184,28 @@ def update_json_file():
 
     except Exception as e:
         print(f"Error updating JSON file: {e}")
-def check_rule(sensor_name):
+def check_rule(item_name):
     try:
         # Read sensor data from the JSON file
         with open("json/sensor_data.json", 'r') as json_file:
-            sensor_data = json.load(json_file)
+            state_data = json.load(json_file)
 
         # Find the sensor with the specified name
-        sensor = next((s for s in sensor_data if s["name"] == sensor_name), None)
+        item = next((i for i in state_data if i["name"] == item_name), None)
 
-        if sensor and sensor["state"] == "Triggered":
-            return True
+        if item:
+            item_type = item.get("type", "sensor")  # Default to "sensor" if type is not specified
+
+            if item_type == "Sensor" and item["state"] == "Triggered":
+                return True
+            elif item_type == "light" and item["state"] == "On":
+                return True
+            elif item_type == "maglock" and item["state"] == "Locked":
+                return True
+            else:
+                return False
         else:
             return False
-
     except Exception as e:
         print(f"Error reading JSON file: {e}")
         return False
@@ -806,21 +814,19 @@ def control_light():
     light_name = request.json.get('light_name')
     print(light_name)
     if light_name == "Light-1":
-        command = "raspi-gpio set 1 op dh"
+        command = "raspi-gpio set 1 op dl"
         print(light_name)
-    elif light_name == "Light-2":
+    elif light_name == "Light-1" and check_rule("light-1-garden"):
+        command = "raspi-gpio set 1 op dh"
+    if light_name == "Light-2":
         command = "raspi-gpio set 7 op dh"
         print(light_name)
-    elif light_name == "Light-3":
+    if light_name == "Light-3":
         command = "raspi-gpio set 12 op dh"
         print(light_name)
-    elif light_name == "Light-4":
+    if light_name == "Light-4":
         command = "raspi-gpio set 8 op dh"
         print(light_name)
-    else:
-        return jsonify({'error': 'Invalid light name'}), 400
-
-
     pi3.exec_command(command)
     return jsonify({'message': f'Light {light_name} control command executed successfully'})
 @app.route('/snooze_game', methods=['POST'])
