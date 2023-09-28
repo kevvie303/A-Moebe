@@ -1,152 +1,18 @@
-.landing-page .rooms,
-.media {
-  margin: 0 20px;
-}
+@import "partials/landingpage";
 
-.landing-page .rooms {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.landing-page .rooms .retriever-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.landing-page .rooms .retriever-container .retriever-link {
-  align-self: center;
-  background: var(--secondary-background-color);
-  padding: 30px;
-  border-radius: 15px;
-  width: 80%;
-}
-
-.landing-page .rooms .retriever-container .retriever-link .preview {
-  display: flex;
-  justify-content: space-around;
-  border-radius: 15px;
-  gap: 10px;
-}
-
-.landing-page .rooms .retriever-container .retriever-link p {
-  align-self: end;
-}
-
-.landing-page .rooms .retriever-container .retriever-link p:first-of-type {
-  color: var(--secondary-button-color);
-}
-
-.landing-page .rooms .retriever-container .retriever-link p:last-of-type {
-  color: var(--primary-button-color);
-}
-
-.landing-page .rooms .retriever-container .controls {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-}
-
-.landing-page .rooms .retriever-container .controls .control {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-}
-
-.landing-page .rooms .retriever-container .controls .info {
-  display: flex;
-  width: fit-content;
-}
-
-.landing-page .rooms .retriever-container .controls .control a,
-.landing-page .rooms .retriever-container .controls .control button {
-  width: 150px;
-}
-
-.landing-page .rooms .retriever-container .controls .info a {
-  width: fit-content;
-}
-
-.landing-page .media {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/*
-  #############
-  media queries
-  #############
-  */
-@media (min-width: 576px) {
-  .landing-page .rooms .retriever-container .retriever-link {
-    width: 70%;
-  }
-  .landing-page .rooms .retriever-container .retriever-link .preview {
-    justify-content: space-evenly;
-    gap: 0;
-  }
-  .landing-page .rooms .retriever-container .retriever-link .preview p {
-    font-size: 18px;
-  }
-  .landing-page .rooms .retriever-container .controls a {
-    width: 20%;
-  }
-}
-@media (min-width: 768px) {
-  .landing-page .rooms .retriever-container .retriever-link {
-    width: 500px;
-  }
-  .landing-page .rooms .retriever-container .controls a {
-    width: 150px;
-  }
-  .landing-page .rooms {
-    gap: 30px;
-  }
-  .landing-page .rooms .retriever-container {
-    gap: 30px;
-  }
-  .landing-page .rooms .retriever-container .controls {
-    gap: 20px;
-  }
-}
-@media (min-width: 992px) {
-  .landing-page .rooms .retriever-container .retriever-link .preview p {
-    font-size: 20px;
-  }
-}
-@media (min-width: 1200px) {
-  .landing-page .rooms .retriever-container .controls a {
-    font-size: 18px;
-  }
-  .landing-page .rooms .retriever-container .retriever-link .preview p {
-    font-size: 20px;
-  }
-  .landing-page .rooms {
-    gap: 40px;
-  }
-  .landing-page .rooms .retriever-container {
-    gap: 40px;
-  }
-  .landing-page .rooms .retriever-container .controls {
-    gap: 30px;
-  }
-}
 /* 
 ################
 custom variables
 ################
 */
+
 :root {
   --background-color: #b1eeb0;
   --secondary-background-color: #ffffff;
+
   --button-color: #6aafef;
   --button-color-hover: #4a90d2;
+
   --locked: #f36060;
   --unlocked: #53c951;
   --pending: #8c8c8c;
@@ -156,13 +22,16 @@ custom variables
     --secondary-button-color-darker: #b20000;
     --tertiary-button-color: #6AAFEF;
     --tertiary-button-color-darker: #0065d0; */
+
   --text-color: #000000;
   --secondary-text-color: #ffffff;
+
   --sm: 576px;
   --md: 768px;
   --lg: 992px;
   --xl: 1200px;
   --xxl: 1400px;
+
   --icon-sm: 20px;
   --icon-md: 24px;
   --icon-lg: 40px;
@@ -205,6 +74,7 @@ custom variables
   standard styling
   ################
   */
+
 *,
 html,
 ul {
@@ -277,64 +147,84 @@ body {
   media queries
   #############
   */
+
 @media (min-width: 576px) {
   body {
     gap: 30px;
   }
+
   h1 {
     font-size: 28px;
   }
+
   h2 {
     font-size: 24px;
   }
+
   h3 {
     font-size: 22px;
   }
 }
+
 @media (min-width: 768px) {
   body {
     gap: 40px;
   }
+
   h1 {
     font-size: 30px;
   }
+
   h2 {
     font-size: 26px;
   }
+
   h3 {
     font-size: 24px;
   }
 }
+
 @media (min-width: 992px) {
   h1 {
     font-size: 32px;
   }
+
   h2 {
     font-size: 28px;
   }
+
   h3 {
     font-size: 26px;
   }
 }
+
 @media (min-width: 1200px) {
   h1 {
     font-size: 34px;
   }
+
   h2 {
     font-size: 30px;
   }
+
   h3 {
     font-size: 28px;
   }
+
   p {
     font-size: 18px;
   }
 }
+
+@media (min-width: 1400px) {
+}
+
 /*
   #######
   buttons
   #######
   */
+
 button {
   background: none;
   border: none;
@@ -368,6 +258,7 @@ button {
   button states
   #############
   */
+
 button:active {
   border: 1px solid black;
 }
@@ -382,6 +273,7 @@ button:focus {
   header
   ######
   */
+
 header .back-button {
   width: var(--icon-sm);
   height: var(--icon-md);
@@ -409,16 +301,19 @@ header .logo-container {
     height: 80px;
   }
 }
+
 /*
   #########
   room page
   #########
   */
+
 /*
   ################
   retriever header
   ################
   */
+
 .back-button {
   position: absolute;
   top: 10px;
@@ -436,16 +331,19 @@ header .logo-container {
     margin-bottom: -20px;
   }
 }
+
 @media (min-width: 768px) {
   .retriever-logo {
     margin-bottom: -30px;
   }
 }
+
 /*
   #######
   pop ups
   #######
   */
+
 .media-hidden,
 .time-hidden,
 .pi-hidden,
@@ -489,6 +387,7 @@ header .logo-container {
   media
   #####
   */
+
 .media-hidden .media div {
   display: flex;
   flex-direction: column;
@@ -508,6 +407,7 @@ header .logo-container {
   time
   ####
   */
+
 .time-hidden .time .time-display {
   display: flex;
   flex-direction: column;
@@ -552,6 +452,7 @@ header .logo-container {
   pi
   ##
   */
+
 .pi-hidden .pi .reboot,
 .pi-hidden .pi .backup {
   display: flex;
@@ -576,6 +477,7 @@ header .logo-container {
   game
   ####
   */
+
 .game-hidden .game-controls .game-buttons {
   display: flex;
   flex-direction: row;
@@ -609,6 +511,7 @@ header .logo-container {
   tasks
   #####
   */
+
 .tasks-hidden .task-control .task-control-container {
   display: flex;
   flex-direction: column;
@@ -632,11 +535,19 @@ header .logo-container {
   width: 100%;
 }
 
-.tasks-hidden .task-control .task-control-container .button-container button.solved-button {
+.tasks-hidden
+  .task-control
+  .task-control-container
+  .button-container
+  button.solved-button {
   background: var(--unlocked);
 }
 
-.tasks-hidden .task-control .task-control-container .button-container button.overdue-button {
+.tasks-hidden
+  .task-control
+  .task-control-container
+  .button-container
+  button.overdue-button {
   background: var(--locked);
 }
 
@@ -645,6 +556,7 @@ header .logo-container {
   media queries
   #############
   */
+
 @media (min-width: 576px) {
   .media-hidden .media,
   .time-hidden .time,
@@ -657,6 +569,7 @@ header .logo-container {
     margin-right: auto;
   }
 }
+
 @media (min-width: 768px) {
   .media-hidden .media,
   .time-hidden .time,
@@ -668,11 +581,13 @@ header .logo-container {
     padding: 30px 40px;
   }
 }
+
 /*
   ############################
   file selection/media control
   ############################
   */
+
 .selection-container {
   display: flex;
   flex-direction: column;
@@ -692,6 +607,7 @@ header .logo-container {
   file selection
   ##############
   */
+
 .file-selection-container .file-selection-list .file-select {
   display: flex;
   flex-direction: column;
@@ -707,7 +623,11 @@ header .logo-container {
   gap: 5px;
 }
 
-.file-selection-container .file-selection-list .file-select .button-container button {
+.file-selection-container
+  .file-selection-list
+  .file-select
+  .button-container
+  button {
   width: 100%;
   font-size: 14px;
 }
@@ -717,6 +637,7 @@ header .logo-container {
   media control
   #############
   */
+
 .media-selection-container form {
   display: flex;
   flex-direction: column;
@@ -742,6 +663,7 @@ header .logo-container {
   main
   ####
   */
+
 #nav-snooze-status {
   text-align: center; /* Center the text horizontally */
   font-weight: bold; /* Make the text bold */
@@ -781,28 +703,33 @@ header .logo-container {
   media queries
   #############
   */
+
 @media (min-width: 576px) {
   .important-controls {
     justify-content: center;
     gap: 80px;
   }
 }
+
 @media (min-width: 768px) {
   .important-controls {
     justify-content: center;
     gap: 120px;
   }
 }
+
 @media (min-width: 992px) {
   .important-controls {
     gap: 150px;
   }
 }
+
 /*
   ########
   sections
   ########
   */
+
 .control-container {
   display: flex;
   flex-direction: column;
@@ -830,11 +757,13 @@ header .logo-container {
   Tasks
   #####
   */
+
 /*
   #####
   locks
   #####
   */
+
 .control-container .locks .lock {
   display: flex;
   flex-direction: row;
@@ -854,6 +783,7 @@ header .logo-container {
   lock status
   ###########
   */
+
 .control-container .lock-status .status,
 .control-container .locks .lock-control {
   display: flex;
@@ -876,6 +806,7 @@ header .logo-container {
   tasks
   #####
   */
+
 .control-container .tasks .task #task-list {
   list-style-type: none;
   text-align: left;
@@ -886,6 +817,7 @@ header .logo-container {
   pin info button
   ###############
   */
+
 .pin-info {
   width: fit-content;
   align-self: center;
@@ -896,20 +828,24 @@ header .logo-container {
   media queries
   #############
   */
+
 /*
   ##################
   big phones/tablets
   ##################
   */
+
 /*
     --md: 768px;
     --lg: 992px;
     --xl: 1200px;
     --xxl: 1400px; */
+
 @media (min-width: 576px) {
   .control-container {
     gap: 30px;
   }
+
   .control-container .locks,
   .control-container .lock-status,
   .control-container .tasks {
@@ -918,44 +854,56 @@ header .logo-container {
     margin: 0;
   }
 }
+
 @media (min-width: 768px) {
   .retriever-logo {
     height: 110px;
   }
+
   .control-container {
     gap: 40px;
   }
+
   .control-container .locks,
   .control-container .lock-status,
   .control-container .tasks {
     width: 500px;
     padding: 30px 40px;
   }
+
   .control-container .locks .lock-control .lock,
   .control-container .lock-status .status p {
     margin: 0 30px;
   }
+
   .icon {
     width: var(--icon-md);
     height: var(--icon-md);
   }
 }
+
+@media (min-width: 992px) {
+}
+
 @media (min-width: 1200px) {
   .retriever-logo {
     height: 140px;
     margin-bottom: -35px;
   }
+
   .lock-buttons .turn-on-button,
   .lock-buttons .turn-off-button {
     width: 30px;
     height: 30px;
   }
 }
+
 /*
   ######
   footer
   ######
   */
+
 footer {
   text-align: center;
   font-style: italic;
@@ -968,6 +916,7 @@ footer {
   modal
   #####
   */
+
 .modal {
   display: none;
   position: fixed;
@@ -1012,7 +961,6 @@ footer {
   text-decoration: none;
   cursor: pointer;
 }
-
-input[type=text] {
+input[type="text"] {
   width: 100%; /* Set the width to 100% of their container */
-}/*# sourceMappingURL=styles.css.map */
+}
