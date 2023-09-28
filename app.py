@@ -23,7 +23,7 @@ ssh = None
 stdin = None
 pi2 = None
 pi3 = None
-romy = False
+romy = True
 aborted = False
 fade_duration = 3  # Fade-out duration in seconds
 fade_interval = 0.1  # Interval between volume adjustments in seconds
@@ -76,7 +76,7 @@ def establish_ssh_connection():
         pi3 = paramiko.SSHClient()
         pi3.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         pi3.connect(ip3brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
-broker_ip = "192.168.0.112"  # IP address of the broker Raspberry Pi
+broker_ip = "192.168.18.229"  # IP address of the broker Raspberry Pi
 
 # Define the topic prefix to subscribe to (e.g., "sensor_state/")
 prefix_to_subscribe = "state_data/"
@@ -387,7 +387,6 @@ def media_control():
     finally:
         # Close the SFTP client and SSH connection
         sftp.close()
-
 @app.route('/delete_music', methods=['POST'])
 def delete_music():
     file = request.form.get('file')
@@ -820,15 +819,21 @@ def control_light():
     elif light_name == "Light-1":
         command = "raspi-gpio set 1 op dl"
         print(light_name)
-    if light_name == "Light-2":
+    if light_name == "Light-2" and check_rule("light-2-garden"):
         command = "raspi-gpio set 7 op dh"
+    elif light_name == "Light=2":
+        command = "raspi-gpio set 7 op dl"
         print(light_name)
-    if light_name == "Light-3":
+    if light_name == "Light-3" and check_rule("light-3-garden"):
         command = "raspi-gpio set 12 op dh"
         print(light_name)
-    if light_name == "Light-4":
+    elif light_name == "Light-3":
+        command = "raspi-gpio set 12 op dl"
+    if light_name == "Light-4" and check_rule("light-4-garden"):
         command = "raspi-gpio set 8 op dh"
         print(light_name)
+    elif light_name == "Light-4":
+        command = "raspi-gpio set 8 op dl"
     pi3.exec_command(command)
     return jsonify({'message': f'Light {light_name} control command executed successfully'})
 @app.route('/snooze_game', methods=['POST'])
