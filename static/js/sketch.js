@@ -134,73 +134,76 @@ $(document).ready(function () {
     });
   });
 });
-    // Add a click event listener to the "light-button"
-    document.getElementById("light-button").addEventListener("click", function() {
-      // Open a new popup window
-      var popupWindow = window.open("", "_blank", "width=600, height=400");
-
-      // Check if the popup window was successfully opened
-      if (popupWindow) {
-          // Load the SVG image in the popup window from the Flask route
-          popupWindow.document.write('<div id="svg-container"></div>');
-
-          var svgContainer = popupWindow.document.getElementById("svg-container");
-          var svgObject = document.createElement("object");
-          svgObject.data = "/static/img/room-layout.svg";  // Adjust the path as needed
-          svgObject.type = "image/svg+xml";
-          svgObject.width = "400";
-          svgObject.height = "300";
-          svgContainer.appendChild(svgObject);
-
-          // Define button positions within the SVG
-          var buttons = [
-              { svgPath: "/static/img/light-bulb.svg", x: 90, y: 15, name: "Light-1" },
-              { svgPath: "/static/img/light-bulb.svg", x: 50, y: 80, name: "Light-2" },
-              { svgPath: "/static/img/light-bulb.svg", x: 120, y: 80, name: "Light-3" },
-              { svgPath: "/static/img/light-bulb.svg", x: 90, y: 120, name: "Light-4" }
-              // Add more buttons and positions as needed
-          ];
-
-          // Add buttons to control the lights
-          buttons.forEach(function(button) {
-              var buttonElement = popupWindow.document.createElement("img");
-              buttonElement.src = button.svgPath;
-              buttonElement.style.position = "absolute";
-              buttonElement.style.left = button.x + "px";
-              buttonElement.style.top = button.y + "px";
-              buttonElement.style.cursor = "pointer";
-              buttonElement.style.transform = "scale(0.5)";
-              buttonElement.addEventListener("click", function() {
-                  sendLightControlRequest(button.name);
-                  console.log("Clicked on " + button.name);
-              });
-
-              popupWindow.document.body.appendChild(buttonElement);
-          });
-      } else {
-          // Handle cases where popups are blocked or not supported
-          alert("Popup blocked. Please allow popups for this site.");
-      }
+// Add a click event listener to the "light-button"
+$(document).ready(function() {
+  document.getElementById("light-button").addEventListener("click", function () {
+    // Open a new popup window
+    var popupWindow = window.open("", "_blank", "width=600, height=400");
+  
+    // Check if the popup window was successfully opened
+    if (popupWindow) {
+      // Load the SVG image in the popup window from the Flask route
+      popupWindow.document.write('<div id="svg-container"></div>');
+  
+      var svgContainer = popupWindow.document.getElementById("svg-container");
+      var svgObject = document.createElement("object");
+      svgObject.data = "/static/img/room-layout.svg"; // Adjust the path as needed
+      svgObject.type = "image/svg+xml";
+      svgObject.width = "400";
+      svgObject.height = "300";
+      svgContainer.appendChild(svgObject);
+  
+      // Define button positions within the SVG
+      var buttons = [
+        { svgPath: "/static/img/light-bulb.svg", x: 90, y: 15, name: "Light-1" },
+        { svgPath: "/static/img/light-bulb.svg", x: 50, y: 80, name: "Light-2" },
+        { svgPath: "/static/img/light-bulb.svg", x: 120, y: 80, name: "Light-3" },
+        { svgPath: "/static/img/light-bulb.svg", x: 90, y: 120, name: "Light-4" },
+        // Add more buttons and positions as needed
+      ];
+  
+      // Add buttons to control the lights
+      buttons.forEach(function (button) {
+        var buttonElement = popupWindow.document.createElement("img");
+        buttonElement.src = button.svgPath;
+        buttonElement.style.position = "absolute";
+        buttonElement.style.left = button.x + "px";
+        buttonElement.style.top = button.y + "px";
+        buttonElement.style.cursor = "pointer";
+        buttonElement.style.transform = "scale(0.5)";
+        buttonElement.addEventListener("click", function () {
+          sendLightControlRequest(button.name);
+          console.log("Clicked on " + button.name);
+        });
+  
+        popupWindow.document.body.appendChild(buttonElement);
+      });
+    } else {
+      // Handle cases where popups are blocked or not supported
+      alert("Popup blocked. Please allow popups for this site.");
+    }
   });
-
-function sendLightControlRequest(lightName) {
-  // Make an AJAX request using jQuery
-  $.ajax({
+  
+  function sendLightControlRequest(lightName) {
+    // Make an AJAX request using jQuery
+    $.ajax({
       type: "POST",
       url: "/control_light",
-      data: JSON.stringify({ "light_name": lightName }),
+      data: JSON.stringify({ light_name: lightName }),
       contentType: "application/json; charset=utf-8",
       dataType: "json",
-      success: function(response) {
-          // Request was successful, handle the response if needed
-          console.log(response);
+      success: function (response) {
+        // Request was successful, handle the response if needed
+        console.log(response);
       },
-      error: function() {
-          // Request failed, handle errors
-          console.error("Error making the light control request");
-      }
-  });
-}
+      error: function () {
+        // Request failed, handle errors
+        console.error("Error making the light control request");
+      },
+    });
+  }
+});
+
 $(document).ready(function () {
   // Handle button click for both turning on and off
   $(".lock-buttons button").click(function () {
@@ -446,6 +449,12 @@ $(document).ready(function () {
       var formattedTimePlayed = formatTime(timePlayed);
       $("#time-left").text(formattedTimeLeft);
       $("#time-played").text(formattedTimePlayed);
+
+      $(".time-display #time-left").text(formattedTimeLeft);
+      $(".time-display #time-played").text(formattedTimePlayed);
+
+      $("#retriever-link .preview #time-played").text(formattedTimePlayed);
+      $("#retriever-link .preview #time-left").text(formattedTimeLeft);
     });
   }
 
@@ -686,7 +695,7 @@ $(document).ready(function () {
   });
 });
 
-function updateState() {
+/*function updateState() {
   $.ajax({
     url: "/get_state", // Endpoint in your app.py to fetch the state
     type: "GET",
@@ -698,9 +707,9 @@ function updateState() {
       $("#current-state").text("Walkman: unknown");
     },
   });
-}
+}*/
 // Update the state every 5 seconds (5000 milliseconds)
-setInterval(updateState, 5000);
+//setInterval(updateState, 5000);
 
 $(document).ready(function () {
   function updateStatusDisplay() {
@@ -813,46 +822,62 @@ async function fetchTasks() {
     taskList.innerHTML = ""; // Clear existing list
 
     tasks.forEach((task) => {
-      // const taskListHidden = document.querySelector(".tasks-hidden");
-      const taskTitle = document.querySelector(".task-title");
-      const taskDescription = document.querySelector(".task-description");
-      const currentState = document.querySelector(".current-state strong");
-      const li = document.createElement("li");
-      li.classList.add("task-list-item");
-      li.textContent = `${task.task} - ${task.state}`;
-      taskTitle.textContent = `${task.task}`;
-      taskDescription.textContent = `${task.description}`;
+      // Create a p element for displaying tasks and states
+      const taskStatus = document.createElement("p");
+      taskStatus.id = task.task;
+      taskStatus.innerHTML = `${task.task}: <strong>${task.state}</strong>`;
 
-      // Set the id attribute of the li element to the task name
-      li.id = task.task;
-      li.name = task.task;
+      // Attach a click event to the p element
+      taskStatus.addEventListener("click", () => {
+        openTaskPopup(task);
+      });
 
-      if (task.state !== "solved") {
-        const buttonContainer = document.querySelector(".button-container");
-        const button = document.createElement("button");
-        buttonContainer.appendChild(button);
-        button.textContent = "Mark as Solved";
-        button.className = "button-style solved";
-        button.addEventListener("click", () => markAsSolved(task.task));
-        li.appendChild(button);
-      }
-      if (task.state == "solved") {
-        const buttonContainer = document.querySelector(".button-container");
-        const button = document.createElement("button");
-        buttonContainer.appendChild(button);
-        button.textContent = "Mark as Pending";
-        button.className = "button-style pending";
-        button.addEventListener("click", () => markAsPending(task.task));
-        li.appendChild(button);
-      }
-
-      taskList.appendChild(li);
+      taskList.appendChild(taskStatus);
     });
   } catch (error) {
     console.error("Error fetching tasks:", error);
   }
 }
-const interval = setInterval(fetchTasks, 1500);
+
+function openTaskPopup(task) {
+  const taskPopup = document.querySelector(".tasks-hidden");
+  const taskTitle = taskPopup.querySelector(".task-title");
+  const taskDescription = taskPopup.querySelector(".task-description");
+  const currentState = taskPopup.querySelector(".current-state strong");
+  const solvedButton = taskPopup.querySelector(".solved-button");
+  const pendingButton = taskPopup.querySelector(".pending-button");
+
+  // Populate the popup with task details
+  taskTitle.textContent = task.task;
+  taskDescription.textContent = task.description;
+  currentState.textContent = task.state;
+
+  // Clear any existing event listeners
+  solvedButton.onclick = null;
+  pendingButton.onclick = null;
+
+  // Show the appropriate button based on the task state
+  if (task.state === "solved") {
+    solvedButton.style.display = "none";
+    pendingButton.style.display = "block";
+    pendingButton.onclick = () => markAsPending(task.task);
+  } else {
+    solvedButton.style.display = "block";
+    pendingButton.style.display = "none";
+    solvedButton.onclick = () => markAsSolved(task.task);
+  }
+
+  // Display the popup
+  taskPopup.classList.remove("hidden");
+}
+
+// Add an event listener to close the popup
+const closePopupButton = document.querySelector(".close-tasks");
+closePopupButton.addEventListener("click", () => {
+  const taskPopup = document.querySelector(".tasks-hidden");
+  taskPopup.classList.add("hidden");
+});
+
 async function markAsSolved(taskName) {
   console.log(`Marking ${taskName} as solved...`);
   try {
@@ -863,14 +888,16 @@ async function markAsSolved(taskName) {
     const data = await response.json();
     console.log(data.message);
 
+    closeTaskPopup(); // Close the popup
     fetchTasks(); // Refresh the list
+    console.log()
   } catch (error) {
     console.error("Error marking as solved:", error);
   }
 }
 
 async function markAsPending(taskName) {
-  console.log(`Marking ${taskName} as solved...`);
+  console.log(`Marking ${taskName} as pending...`);
   try {
     const response = await fetch(`/pend_task/${taskName}`, {
       method: "POST",
@@ -879,11 +906,18 @@ async function markAsPending(taskName) {
     const data = await response.json();
     console.log(data.message);
 
+    closeTaskPopup(); // Close the popup
     fetchTasks(); // Refresh the list
   } catch (error) {
-    console.error("Error marking as solved:", error);
+    console.error("Error marking as pending:", error);
   }
 }
+
+function closeTaskPopup() {
+  const taskPopup = document.querySelector(".tasks-hidden");
+  taskPopup.classList.add("hidden");
+}
+
 
 fetchTasks();
 

@@ -746,8 +746,16 @@ header .logo-container {
   text-align: center; /* Center the text horizontally */
   font-weight: bold; /* Make the text bold */
 }
-
+#navbar-container {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: 100; /* Make sure it's on top of other content */
+  background-color: white; /* Set the background color you prefer */
+}
 .important-controls {
+  position: sticky;
+  top: 0;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -1016,3 +1024,7 @@ footer {
 input[type=text] {
   width: 100%; /* Set the width to 100% of their container */
 }/*# sourceMappingURL=styles.css.map */
+#task-list p {
+  display: flex;
+  justify-content: space-between;
+}

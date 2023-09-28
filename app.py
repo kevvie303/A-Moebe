@@ -708,7 +708,7 @@ def solve_task(task_name):
     file_path = os.path.join(current_dir, 'json', 'tasks.json')
 
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r+') as file:
             tasks = json.load(file)
 
         for task in tasks:
@@ -727,7 +727,7 @@ def pend_task(task_name):
     file_path = os.path.join(current_dir, 'json', 'tasks.json')
 
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r+') as file:
             tasks = json.load(file)
 
         for task in tasks:
@@ -736,7 +736,6 @@ def pend_task(task_name):
 
         with open(file_path, 'w') as file:
             json.dump(tasks, file, indent=4)
-
         return jsonify({'message': 'Task updated successfully'})
     except (FileNotFoundError, json.JSONDecodeError):
         return jsonify({'message': 'Error updating task'})

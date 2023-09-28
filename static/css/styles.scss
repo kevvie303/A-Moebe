@@ -964,3 +964,8 @@ footer {
 input[type="text"] {
   width: 100%; /* Set the width to 100% of their container */
 }
+
+#task-list p {
+  display: flex;
+  justify-content: space-between;
+}

@@ -123,3 +123,21 @@ closePiButton.addEventListener("click", () => {
   piPopup.classList.remove("shown");
   piPopup.classList.add("hidden");
 });
+document.addEventListener("DOMContentLoaded", function () {
+  let navbarContainer = document.getElementById("navbar-container");
+  let lastScrollY = window.scrollY;
+
+  function updateNavbarPosition() {
+      let currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY) {
+          // Scrolling down, make the navbar sticky
+          navbarContainer.style.position = "sticky";
+      } else {
+          // Scrolling up, make the navbar absolute
+          navbarContainer.style.position = "absolute";
+      }
+      lastScrollY = currentScrollY;
+  }
+
+  window.addEventListener("scroll", updateNavbarPosition);
+});
