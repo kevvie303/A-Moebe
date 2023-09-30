@@ -159,6 +159,7 @@ $(document).ready(function() {
         { svgPath: "/static/img/light-bulb.svg", x: 50, y: 80, name: "Light-2" },
         { svgPath: "/static/img/light-bulb.svg", x: 120, y: 80, name: "Light-3" },
         { svgPath: "/static/img/light-bulb.svg", x: 90, y: 120, name: "Light-4" },
+        { svgPath: "/static/img/light-bulb.svg", x: 90, y: 160, name: "Light-5" },
         // Add more buttons and positions as needed
       ];
   

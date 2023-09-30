@@ -76,7 +76,7 @@ def establish_ssh_connection():
         pi3 = paramiko.SSHClient()
         pi3.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         pi3.connect(ip3brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
-broker_ip = "192.168.18.229"  # IP address of the broker Raspberry Pi
+broker_ip = "192.168.0.112"  # IP address of the broker Raspberry Pi
 
 # Define the topic prefix to subscribe to (e.g., "sensor_state/")
 prefix_to_subscribe = "state_data/"
@@ -803,6 +803,7 @@ def get_snooze_status():
 def wake_room():
     # Update the snooze status to 'false'
     pi3.exec_command('raspi-gpio set 12 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 1 op dl \n raspi-gpio set 8 op dl')
+    ssh.exec_command('raspi-gpio set 15 op dl')
     #pi3.exec_command('raspi-gpio set 7 op dl')
     #pi3.exec_command('raspi-gpio set 1 op dl')
     #pi3.exec_command('raspi-gpio set 8 op dl')
@@ -833,7 +834,16 @@ def control_light():
         print(light_name)
     elif light_name == "Light-4":
         command = "raspi-gpio set 8 op dl"
-    pi3.exec_command(command)
+    if light_name == "Light-5" and check_rule("light-1-shed"):
+        command = "raspi-gpio set 15 op dh"
+        print(light_name)
+    elif light_name == "Light-5":
+        command = "raspi-gpio set 15 op dl"
+
+    if light_name == "Light-5":
+        ssh.exec_command(command)
+    else:
+        pi3.exec_command(command)
     return jsonify({'message': f'Light {light_name} control command executed successfully'})
 @app.route('/snooze_game', methods=['POST'])
 def snooze_game():
@@ -845,6 +855,7 @@ def snooze_game():
     pi3.exec_command(lightsoff)
     ssh.exec_command('raspi-gpio set 17 op dh')
     ssh.exec_command('raspi-gpio set 27 op dh')
+    ssh.exec_command('raspi-gpio set 15 op dh')
     pi3.exec_command('raspi-gpio set 16 op dh')
     pi3.exec_command('raspi-gpio set 25 op dh')
     update_snooze_status(True)
