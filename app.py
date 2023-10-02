@@ -514,7 +514,7 @@ def pause_music():
 def fade_music_out():
 
         # Gradually reduce the volume from 80 to 40
-    for volume in range(75, 15, -1):
+    for volume in range(25, 10, -1):
         # Send the volume command to the Raspberry Pi
         command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
         stdin, stdout, stderr = pi3.exec_command(command)
@@ -526,7 +526,7 @@ def fade_music_out():
 def fade_music_in():
 
         # Gradually reduce the volume from 80 to 40
-    for volume in range(15, 75, 1):
+    for volume in range(10, 25, 1):
         # Send the volume command to the Raspberry Pi
         command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
         stdin, stdout, stderr = pi3.exec_command(command)
@@ -1162,7 +1162,7 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/bloemen.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect != 5 or not 2:
+                if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
                     fade_music_in()
             elif (last_used_keypad_code == "7867" or last_used_keypad_code == "8978") and code2 == False:
                 code2 = True
@@ -1173,7 +1173,7 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/vlieger.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect != 5 or not 2:
+                if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
                     fade_music_in()
             elif last_used_keypad_code == "0128" and code3 == False:
                 code3 = True
@@ -1184,7 +1184,7 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/plantenbak.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect != 5 or not 2:
+                if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
                     fade_music_in()
             elif last_used_keypad_code == "5038" and code4 == False:
                 code4 = True
@@ -1195,7 +1195,7 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/hek.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect != 5 or not 2:
+                if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
                     fade_music_in()
             else:
                 ssh.exec_command("raspi-gpio set 12 op dh")
@@ -1205,7 +1205,7 @@ def monitor_sensor_statuses():
                 print("executed")
                 time.sleep(7)
                 pi3.exec_command('mpg123 -a hw:0,0 Music/shed_open.mp3')
-                time.sleep(6)
+                time.sleep(5)
                 fade_music_in()
                 pi3.exec_command('raspi-gpio set 16 op dh')
                 code1 = False
@@ -1602,11 +1602,13 @@ def check_all_scripts():
     return results
 @app.route('/prepare', methods=['POST'])
 def prepare_game():
+    global codesCorrect
     print("Preparing game...")  # Add this line for debugging
     # Perform the checks and generate the result message
     retriever_status = get_retriever_status()
     print(retriever_status)
     if retriever_status != {'status': 'prepared'}:
+        codesCorrect = 0
         pi2.exec_command('sudo pkill -f sinus_game.py')
         ssh.exec_command('sudo pkill -f status.py')
         time.sleep(5)
