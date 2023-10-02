@@ -1028,3 +1028,6 @@ input[type=text] {
   display: flex;
   justify-content: space-between;
 }
+.centered-text {
+  text-align: center;
+}

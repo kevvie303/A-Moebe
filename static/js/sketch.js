@@ -489,11 +489,13 @@ $(document).ready(function () {
     intervalId = setInterval(function () {
       updateTimers();
     }, 1000);
-    $("#continue-button").hide();
+    $(".tasks, .locks, .lock-status, .pin-info").show();
+    $("#continue-button, #prepare-result").hide();
     $("#pause-button").show();
   });
 
   $("#end-game-button").click(function () {
+    $(".tasks, .locks, .lock-status, .pin-info").show();
     clearInterval(intervalId);
     updateTimers();
     $.post("/timer/stop", function (data) {
@@ -590,9 +592,9 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-  // Check the snooze status from the JSON file
-  $.get("/get_snooze_status", function (data) {
-    if (data.snoozed) {
+  // Check the retriever status from the JSON file
+  $.get("/get_retriever_status", function (data) {
+    if (data.status === 'snoozed') {
       // Display snoozed status in the nav
       $("#nav-snooze-status").text("Room Snoozed");
       // Show the "Wake" button
@@ -603,16 +605,30 @@ $(document).ready(function () {
 
   // Handle the "Wake" button click
   $("#wake-button").click(function () {
-    // Send a request to reset snooze status to false
+    // Send a request to reset retriever status to 'awake'
     $.post("/wake_room", function (data) {
       console.log(data);
       // Hide the "Wake" button
       $("#wake-button").hide();
       $(".important-controls").show();
       // Update the snooze status in the navigation
-      $("#nav-snooze-status").hide();
+      $("#nav-snooze-status").text("Room Awake");
     });
   });
+      // Check the retriever status from the JSON file
+      $.get("/get_retriever_status", function (data) {
+        if (data.status === 'prepared') {
+            // Hide everything from the comment "HIDE FROM HERE"
+            hideFromHere();
+        }
+    });
+        // Function to hide everything from the comment "HIDE FROM HERE"
+        function hideFromHere() {
+          // Add CSS to hide the sections
+          console.log("test")
+          $(".tasks, .locks, .lock-status, .pin-info").hide();
+
+      }
 });
 
 function openMediaControlPage() {
@@ -1131,5 +1147,86 @@ document.addEventListener("DOMContentLoaded", function () {
       .addEventListener("click", function () {
         document.getElementById("edit-task-modal").style.display = "none";
       });
+  });
+});
+$(document).ready(function() {
+  var updateStatusInterval = setInterval(updateRetrieverStatus, 1000); // Name the interval variable updateStatusInterval
+  var updatePlayStatus;
+  var prepareButton = $("#prepare-game-button");
+  var prepareResult = $("#prepare-result");
+  var prepareStatus = $("#prepare-status");
+  var resultsSection = $("#results-section");
+
+  // Function to perform the preparation steps
+  function performPreparation() {
+      prepareButton.hide();
+      prepareResult.show();
+      $(".tasks, .locks, .lock-status, .pin-info").hide();
+      prepareStatus.html("Preparing...");
+      clearInterval(updateStatusInterval);
+      $.ajax({
+          type: 'POST',
+          url: '/prepare',
+          success: function(response) {
+              prepareStatus.html("Prepared - Status: OK. Game will start when door is open or start game has been clicked");
+
+              // Debugging: Output the response.message to the console
+              console.log(response.message);
+
+              resultsSection.empty();
+
+              // Loop through the JSON data and create a neat display
+              for (var device in response.message) {
+                  var deviceStatus = response.message[device];
+                  var deviceDiv = $("<div>").addClass("device-status centered-text"); // Apply the centered-text class
+                  var header = $("<h3>").text(device);
+                  deviceDiv.append(header);
+
+                  for (var script in deviceStatus) {
+                      var status = deviceStatus[script];
+                      var statusText = status ? "Running" : "Not Running";
+                      var scriptDiv = $("<div>").addClass("script-status centered-text"); // Apply the centered-text class
+                      scriptDiv.html(`<p>${script}: ${statusText}</p`);
+                      deviceDiv.append(scriptDiv);
+                  }
+
+                  resultsSection.append(deviceDiv);
+              }
+          },
+          error: function() {
+              prepareStatus.html("Error occurred during preparation.");
+          }
+      });
+  }
+  function updateRetrieverStatus() {
+    console.log("hi")
+    $.get("/get_retriever_status", function(data) {
+      if (data.status === 'prepared') {
+          prepareButton.hide();
+          performPreparation(); // Trigger the preparation function
+          updatePlayStatus = setInterval(updatePlayingStatus, 1000)
+      }
+  });
+  }
+  function updatePlayingStatus() {
+    $.get("/get_retriever_status", function(data) {
+      if (data.status === 'playing') {
+          clearInterval(updatePlayStatus);
+          prepareButton.hide();
+          $(".tasks, .locks, .lock-status, .pin-info").show();
+          $("#prepare-result").hide();
+      }
+  });
+  }
+  $.get("/get_retriever_status", function(data) {
+    if (data.status === 'playing') {
+        clearInterval(updatePlayStatus);
+        prepareButton.hide();
+        $(".tasks, .locks, .lock-status, .pin-info").show();
+        $("#prepare-result, #snooze-game-button").hide();
+    }
+  });
+  prepareButton.click(function() {
+      performPreparation(); // Trigger the preparation function on button click
   });
 });

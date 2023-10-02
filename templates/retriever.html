@@ -144,6 +144,7 @@
             <div class="game-buttons">
                 <button id="start-game-button" class="button-style">Start game</button>
                 <button id="snooze-game-button" class="button-style">Snooze game</button>
+                <button id="prepare-game-button" class="button-style">Prepare game</button>
                 <!-- <button id="pause-button"><img class="icon" src="static/img/pause.svg" alt="Pause game button"></button>
                 <button id="continue-button" style="display: none;"><img src="static/img/pause.svg" alt="Pause game button"></button> -->
                 <button class=" abort-button button-style">Abort game</button>
@@ -160,7 +161,7 @@
         </article>
     </section>
 
-    <!-- tasks section -->
+    <!-- HIDE FROM HERE -->
     <section class="tasks-hidden hidden">
         <article class="task-control">
             <button class="close-tasks close"><img src="static/img/abort.svg" alt="Close button"></button>
@@ -184,7 +185,11 @@
     <nav id="nav-snooze-status"></nav>
     <button id="wake-button" class="button-style" style="display: none;">Wake</button>
     <section class="control-container">
-
+        <div id="prepare-result" class="hidden">
+            <p id="prepare-status" class="centered-text">Preparing...</p>
+            <div id="results-section">
+            </div>
+        </div>
     <!-- main -->
 
     <section class="tasks">

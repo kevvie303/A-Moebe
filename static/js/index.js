@@ -123,21 +123,21 @@ closePiButton.addEventListener("click", () => {
   piPopup.classList.remove("shown");
   piPopup.classList.add("hidden");
 });
-document.addEventListener("DOMContentLoaded", function () {
-  let navbarContainer = document.getElementById("navbar-container");
-  let lastScrollY = window.scrollY;
+// document.addEventListener("DOMContentLoaded", function () {
+//   let navbarContainer = document.getElementById("navbar-container");
+//   let lastScrollY = window.scrollY;
 
-  function updateNavbarPosition() {
-      let currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY) {
-          // Scrolling down, make the navbar sticky
-          navbarContainer.style.position = "sticky";
-      } else {
-          // Scrolling up, make the navbar absolute
-          navbarContainer.style.position = "absolute";
-      }
-      lastScrollY = currentScrollY;
-  }
+//   function updateNavbarPosition() {
+//       let currentScrollY = window.scrollY;
+//       if (currentScrollY > lastScrollY) {
+//           // Scrolling down, make the navbar sticky
+//           navbarContainer = "sticky";
+//       } else {
+//           // Scrolling up, make the navbar absolute
+//           navbarContainer = "absolute";
+//       }
+//       lastScrollY = currentScrollY;
+//   }
 
-  window.addEventListener("scroll", updateNavbarPosition);
-});
+//   window.addEventListener("scroll", updateNavbarPosition);
+// });
