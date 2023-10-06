@@ -160,7 +160,7 @@ def on_message(client, userdata, message):
         pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
         sequence = 0
         time.sleep(1)
-        pi3.exec_command("mpg123 -a hw:0,0 Music/Tree-solve.mp3")
+        pi3.exec_command("mpg123 -a hw:0,0 Music/boom.mp3")
         time.sleep(7)
         fade_in_thread = threading.Thread(target=fade_music_in)
         fade_in_thread.start()
