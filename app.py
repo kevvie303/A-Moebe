@@ -910,7 +910,7 @@ def snooze_game():
     light4off = 'raspi-gpio set 8 op dh'
     lightsoff = f"{light1off}; {light2off}; {light3off}; {light4off}"
     pi3.exec_command(lightsoff)
-    ssh.exec_command('raspi-gpio set 17 op dh')
+    ssh.exec_command('raspi-gpio set 17 op dh \n raspi-gpio set 10 op dh')
     ssh.exec_command('raspi-gpio set 27 op dh')
     ssh.exec_command('raspi-gpio set 15 op dh \n raspi-gpio set 25 op dh')
     pi3.exec_command('raspi-gpio set 16 op dh')
