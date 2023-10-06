@@ -82,5 +82,12 @@
         "pin": 15,
         "pi": "top-pi",
         "state": "On"
+    },
+    {
+        "name": "light-1-alley",
+        "type": "light",
+        "pin": 25,
+        "pi": "top-pi",
+        "state": "On"
     }
 ]
