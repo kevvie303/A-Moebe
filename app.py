@@ -1213,6 +1213,10 @@ def monitor_sensor_statuses():
                 time.sleep(5)
                 if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
                     fade_music_in()
+                elif codesCorrect == 2:
+                    return
+                elif code5 == False:
+                    fade_music_in()
             elif (last_used_keypad_code == "7867" or last_used_keypad_code == "8978") and code2 == False:
                 code2 = True
                 codesCorrect += 1
@@ -1223,6 +1227,10 @@ def monitor_sensor_statuses():
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
                 if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
+                    fade_music_in()
+                elif codesCorrect == 2:
+                    return
+                elif code5 == False:
                     fade_music_in()
             elif last_used_keypad_code == "0128" and code3 == False:
                 code3 = True
@@ -1235,6 +1243,10 @@ def monitor_sensor_statuses():
                 time.sleep(5)
                 if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
                     fade_music_in()
+                elif codesCorrect == 2:
+                    return
+                elif code5 == False:
+                    fade_music_in()
             elif last_used_keypad_code == "5038" and code4 == False:
                 code4 = True
                 codesCorrect += 1
@@ -1245,6 +1257,10 @@ def monitor_sensor_statuses():
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
                 if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
+                    fade_music_in()
+                elif codesCorrect == 2:
+                    return
+                elif code5 == False:
                     fade_music_in()
             else:
                 ssh.exec_command("raspi-gpio set 12 op dh")
