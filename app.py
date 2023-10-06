@@ -527,6 +527,16 @@ def fade_music_out():
         # Wait for a short duration between volume changes
         time.sleep(0.05)  # Adjust the sleep duration as needed
     return "Volume faded successfully"
+def fade_music_out2():
+
+        # Gradually reduce the volume from 80 to 40
+    for volume in range(65, 1, -1):
+        # Send the volume command to the Raspberry Pi
+        command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
+        stdin, stdout, stderr = pi3.exec_command(command)
+        stdin, stdout, stderr = pi2.exec_command(command)
+        # Wait for a short duration between volume changes
+        time.sleep(0.05)  # Adjust the sleep duration as needed
 @app.route('/fade_music_in', methods=['POST'])
 def fade_music_in():
 
@@ -1038,6 +1048,9 @@ def control_maglock():
             return 'Maglock entrance-door-lock is now locked'
         elif action == "unlocked":
             pi3.exec_command("raspi-gpio set 25 op dh")
+            retriever_status = get_retriever_status()
+            if retriever_status == {'status': 'prepared'}:
+                start_timer()
             return 'Maglock entrance-door-lock is now unlocked'
     elif maglock == "doghouse-lock":
         if action == "locked":
@@ -1066,6 +1079,9 @@ def control_maglock():
             return 'blacklight locked'
         elif action == "unlocked":
             ssh.exec_command("raspi-gpio set 21 op dh")
+            retriever_status = get_retriever_status()
+            if retriever_status == {'status': 'playing'}:
+                stop_timer()
             return 'exit unlocked'
     elif maglock == "lab-hatch-lock":
         if action == "locked":
@@ -1466,8 +1482,6 @@ def update_timer():
 def start_timer():
     global timer_thread, timer_value, speed, timer_running
     update_retriever_status('playing')
-    load_command = f'echo "load /home/pi/Music/Ambience.mp3" | sudo tee /tmp/mpg123_fifo'
-    pi3.exec_command(load_command)
     if timer_thread is None or not timer_thread.is_alive():
         timer_value = 3600  # Reset timer value to 60 minutes
         write_timer_value(timer_value)
@@ -1475,15 +1489,18 @@ def start_timer():
         timer_thread = threading.Thread(target=update_timer)
         timer_thread.daemon = True
         timer_thread.start()
-
+        fade_music_out2()
+    fade_music_in()
+    load_command = f'echo "load /home/pi/Music/Ambience.mp3" | sudo tee /tmp/mpg123_fifo'
+    pi3.exec_command(load_command)
     return 'Timer started'
 
 @app.route('/timer/stop', methods=['POST'])
 def stop_timer():
     global timer_thread, timer_running, timer_value
-
+    update_retriever_status('awake')
+    stop_music()
     if timer_thread is not None and timer_thread.is_alive():
-        timer_value = 0
         write_timer_value(timer_value)
         timer_thread = threading.Thread(target=update_timer)
         timer_running = False
@@ -1625,6 +1642,7 @@ def prepare_game():
     print(retriever_status)
     if retriever_status != {'status': 'prepared'}:
         codesCorrect = 0
+        pi3.exec_command('echo "volume 65" | sudo tee /tmp/mpg123_fifo')
         pi2.exec_command('sudo pkill -f sinus_game.py')
         ssh.exec_command('sudo pkill -f status.py')
         time.sleep(5)
@@ -1638,7 +1656,10 @@ def prepare_game():
     response = {
         "message": results
     }
+
     print("Preparation complete.")
+    load_command = f'echo "load /home/pi/Music/Lounge.mp3" | sudo tee /tmp/mpg123_fifo'
+    pi3.exec_command(load_command)
     update_retriever_status('prepared')
     return jsonify(response), 200
 

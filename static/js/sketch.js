@@ -627,7 +627,7 @@ $(document).ready(function () {
         function hideFromHere() {
           // Add CSS to hide the sections
           console.log("test")
-          $(".tasks, .locks, .lock-status, .pin-info").hide();
+          $(".tasks, .lock-status, .pin-info").hide();
 
       }
 });
@@ -1162,7 +1162,7 @@ $(document).ready(function() {
   function performPreparation() {
       prepareButton.hide();
       prepareResult.show();
-      $(".tasks, .locks, .lock-status, .pin-info").hide();
+      $(".tasks, .lock-status, .pin-info").hide();
       prepareStatus.html("Preparing...");
       clearInterval(updateStatusInterval);
       $.ajax({
