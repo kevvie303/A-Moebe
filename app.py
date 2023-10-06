@@ -42,6 +42,7 @@ code1 = False
 code2 = False
 code3 = False
 code4 = False
+code5 = False
 codesCorrect = 0
 #logging.basicConfig(level=logging.DEBUG)  # Use appropriate log level
 active_ssh_connections = {}
@@ -98,6 +99,7 @@ sensor_states = {}
 
 def on_message(client, userdata, message):
     # Extract the topic and message payload
+    global code1, code2, code3, code4, code5
     topic = message.topic
     parts = topic.split("/")
     sensor_name = parts[-1]  # Extract the last part of the topic (sensor name)
@@ -148,6 +150,7 @@ def on_message(client, userdata, message):
         sequence = 0
     if check_rule("blue_house_ir") and sequence == 2:
         solve_task("tree-lights")
+        code5 = True
         print("3")
         pi3.exec_command("raspi-gpio set 23 op dh")
         fade_out_thread = threading.Thread(target=fade_music_out)
@@ -166,8 +169,23 @@ def on_message(client, userdata, message):
         time.sleep(1)
         pi3.exec_command("mpg123 -a hw:0,0 Music/boom.mp3")
         time.sleep(7)
-        fade_in_thread = threading.Thread(target=fade_music_in)
-        fade_in_thread.start()
+        if code1 and code2 and code3 and code4 and code5:
+            print("executed")
+            time.sleep(7)
+            pi3.exec_command('mpg123 -a hw:0,0 Music/shed_open.mp3')
+            time.sleep(5)
+            fade_music_in()
+            pi3.exec_command('raspi-gpio set 16 op dh')
+            code1 = False
+            code2 = False
+            code3 = False
+            code4 = False
+            code5 = False
+            codesCorrect == 0
+        else:
+            fade_in_thread = threading.Thread(target=fade_music_in)
+            fade_in_thread.start()
+
     elif check_rule("blue_house_ir") and sequence != 2:
         pi3.exec_command("raspi-gpio set 23 op dh")
         time.sleep(0.5)
@@ -792,11 +810,13 @@ def reset_puzzles():
     global code2
     global code3
     global code4
+    global code5
     aborted = True
     code1 = False
     code2 = False
     code3 = False
     code4 = False
+    code5 = False
     update_retriever_status('awake')
     pi3.exec_command('raspi-gpio set 16 op dl')
     pi2.exec_command('sudo pkill -f sinus_game.py')
@@ -1166,10 +1186,7 @@ with open('json/sensor_data.json', 'r') as json_file:
     sensors = json.load(json_file)
 def monitor_sensor_statuses():
     global sequence
-    global code1
-    global code2
-    global code3
-    global code4
+    global code1, code2, code3, code4, code5
     global codesCorrect
     global last_keypad_code
     while True:
@@ -1233,7 +1250,7 @@ def monitor_sensor_statuses():
                 ssh.exec_command("raspi-gpio set 12 op dh")
                 time.sleep(1)
                 ssh.exec_command("raspi-gpio set 12 op dl")
-            if code1 and code2 and code3 and code4:
+            if code1 and code2 and code3 and code4 and code5:
                 print("executed")
                 time.sleep(7)
                 pi3.exec_command('mpg123 -a hw:0,0 Music/shed_open.mp3')
@@ -1244,6 +1261,7 @@ def monitor_sensor_statuses():
                 code2 = False
                 code3 = False
                 code4 = False
+                code5 = False
                 codesCorrect == 0
             if codesCorrect == 2:
                 codesCorrect += 1
