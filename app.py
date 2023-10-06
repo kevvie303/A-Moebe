@@ -72,6 +72,7 @@ def establish_ssh_connection():
         pi2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         pi2.connect(ip2brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
         pi2.exec_command('pkill -f mqtt.py')
+
     global pi3
     if pi3 is None or not pi3.get_transport().is_active():
         pi3 = paramiko.SSHClient()
@@ -316,8 +317,9 @@ def start_scripts():
     sensor_thread.start()
     monitor_thread.start()
     update_retriever_status('awake')
-    pi2.exec_command('python status.py')
     pi2.exec_command('python mqtt.py')
+    time.sleep(0.5)
+    pi2.exec_command('python status.py')    
     time.sleep(0.5)
     pi3.exec_command('python mqtt.py')
     time.sleep(0.5)
@@ -502,7 +504,7 @@ def pause_music():
                 pi.exec_command(command)
                 time.sleep(fade_interval)
 
-                # Check if the volume reached 0
+                # Check if the volume reached 0 
                 if volume <= 0:
                     # Pause the music by sending a SIGSTOP signal to the mpg123 process
                     command = f'pkill -STOP -f "mpg123 Music/{selected_file}"'
@@ -521,7 +523,7 @@ def fade_music_out():
         # Send the volume command to the Raspberry Pi
         command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
         stdin, stdout, stderr = pi3.exec_command(command)
-
+        stdin, stdout, stderr = pi2.exec_command(command)
         # Wait for a short duration between volume changes
         time.sleep(0.05)  # Adjust the sleep duration as needed
     return "Volume faded successfully"
@@ -533,7 +535,7 @@ def fade_music_in():
         # Send the volume command to the Raspberry Pi
         command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
         stdin, stdout, stderr = pi3.exec_command(command)
-
+        stdin, stdout, stderr = pi2.exec_command(command)
         # Wait for a short duration between volume changes
         time.sleep(0.05)  # Adjust the sleep duration as needed
     return "Volume faded successfully"
@@ -960,8 +962,15 @@ def play_music_lab():
     soundcard_channel = 'hw:1,0'  # Adjust this based on your specific configuration
 
     # Construct the command to play the music using the specified soundcard channel
-    command = f'mpg123 -a {soundcard_channel} Music/{selected_file} &'
-    pi2.exec_command(command)
+    if "Background" in selected_file:
+        load_command = f'echo "load /home/pi/Music/{current_file}" | sudo tee /tmp/mpg123_fifo'
+        print(current_file)
+        pi2.exec_command(load_command)
+        print(load_command)
+    else:
+        command = f'mpg123 -a {soundcard_channel} Music/{current_file} &'
+        pi2.exec_command(command)
+        print("hiii")
 
     # Save the data to a JSON file on the server
     status = 'playing'
@@ -996,7 +1005,7 @@ def set_starting_volume(soundcard_channel):
 @app.route('/stop_music', methods=['POST'])
 def stop_music():
     # Stop the music on pi2
-    stdin, stdout, stderr = pi2.exec_command('pkill -9 mpg123')
+    stdin, stdout, stderr = pi2.exec_command('pkill -9 mpg123 \n echo "stop" | sudo tee /tmp/mpg123_fifo')
     stdin, stdout, stderr = pi3.exec_command('pkill -9 mpg123 \n echo "stop" | sudo tee /tmp/mpg123_fifo')
     # Wipe the entire JSON file by overwriting it with an empty list
     file_path = os.path.join(current_dir, 'json', 'file_status.json')
@@ -1025,52 +1034,52 @@ def control_maglock():
     
     if maglock == "entrance-door-lock":
         if action == "locked":
-            pi3.exec_command("raspi-gpio set 25 dl")
+            pi3.exec_command("raspi-gpio set 25 op dl")
             return 'Maglock entrance-door-lock is now locked'
         elif action == "unlocked":
-            pi3.exec_command("raspi-gpio set 25 dh")
+            pi3.exec_command("raspi-gpio set 25 op dh")
             return 'Maglock entrance-door-lock is now unlocked'
     elif maglock == "doghouse-lock":
         if action == "locked":
-            pi3.exec_command("raspi-gpio set 4 dl")
+            pi3.exec_command("raspi-gpio set 4 op dl")
             return 'Maglock doghouse-lock is now locked'
         elif action == "unlocked":
-            pi3.exec_command("raspi-gpio set 4 dh")
+            pi3.exec_command("raspi-gpio set 4 op dh")
             return 'Maglock doghouse-lock is now unlocked'
     elif maglock == "shed-door-lock":
         if action == "locked":
-            pi3.exec_command("raspi-gpio set 16 dl")
+            pi3.exec_command("raspi-gpio set 16 op dl")
             return 'shed locked'
         elif action == "unlocked":
-            pi3.exec_command("raspi-gpio set 16 dh")
+            pi3.exec_command("raspi-gpio set 16 op dh")
             return 'shed unlocked'
     elif maglock == "blacklight":
         if action == "locked":
-            ssh.exec_command("raspi-gpio set 17 dl")
+            ssh.exec_command("raspi-gpio set 17 op dl")
             return 'blacklight locked'
         elif action == "unlocked":
-            ssh.exec_command("raspi-gpio set 17 dh")
+            ssh.exec_command("raspi-gpio set 17 op dh")
             return 'blacklight unlocked'
     elif maglock == "exit-door-lock":
         if action == "locked":
-            ssh.exec_command("raspi-gpio set 21 dl")
+            ssh.exec_command("raspi-gpio set 21 op dl")
             return 'blacklight locked'
         elif action == "unlocked":
-            ssh.exec_command("raspi-gpio set 21 dh")
+            ssh.exec_command("raspi-gpio set 21 op dh")
             return 'exit unlocked'
     elif maglock == "lab-hatch-lock":
         if action == "locked":
-            ssh.exec_command("raspi-gpio set 20 dl")
+            ssh.exec_command("raspi-gpio set 20 op dl")
             return 'blacklight locked'
         elif action == "unlocked":
-            ssh.exec_command("raspi-gpio set 20 dh")
+            ssh.exec_command("raspi-gpio set 20 op dh")
             return 'exit unlocked'
     elif maglock == "sliding-door-lock":
         if action == "locked":
-            ssh.exec_command("raspi-gpio set 16 dl")
+            ssh.exec_command("raspi-gpio set 16 op dl")
             return 'blacklight locked'
         elif action == "unlocked":
-            ssh.exec_command("raspi-gpio set 16 dh")
+            ssh.exec_command("raspi-gpio set 16 op dh")
             return 'exit unlocked'
     else:
         return 'Invalid maglock or action'
