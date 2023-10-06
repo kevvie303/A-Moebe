@@ -892,7 +892,12 @@ def control_light():
         print(light_name)
     elif light_name == "Light-6":
         command = "raspi-gpio set 25 op dl"
-    if light_name == "Light-5" or light_name == "Light-6":
+    if light_name == "Light-7" and check_rule("blacklight"):
+        command = "raspi-gpio set 17 op dh \n raspi-gpio set 10 op dh"
+        print(light_name)
+    elif light_name == "Light-7":
+        command = "raspi-gpio set 17 op dl \n raspi-gpio set 10 op dl"
+    if light_name == "Light-5" or light_name == "Light-6" or light_name == "Light-7":
         ssh.exec_command(command)
     else:
         pi3.exec_command(command)

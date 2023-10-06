@@ -161,6 +161,7 @@ $(document).ready(function() {
         { svgPath: "/static/img/light-bulb.svg", x: 90, y: 120, name: "Light-4" },
         { svgPath: "/static/img/light-bulb.svg", x: 90, y: 160, name: "Light-5" },
         { svgPath: "/static/img/light-bulb.svg", x: 240, y: 210, name: "Light-6" },
+        { svgPath: "/static/img/light-bulb.svg", x: 110, y: 230, name: "Light-7" },
         // Add more buttons and positions as needed
       ];
   
@@ -1165,6 +1166,7 @@ $(document).ready(function() {
       $(".tasks, .lock-status, .pin-info").hide();
       prepareStatus.html("Preparing...");
       clearInterval(updateStatusInterval);
+      updatePlayStatus = setInterval(updatePlayingStatus, 1000)
       $.ajax({
           type: 'POST',
           url: '/prepare',
@@ -1205,13 +1207,14 @@ $(document).ready(function() {
       if (data.status === 'prepared') {
           prepareButton.hide();
           performPreparation(); // Trigger the preparation function
-          updatePlayStatus = setInterval(updatePlayingStatus, 1000)
+
       }
   });
   }
   function updatePlayingStatus() {
     $.get("/get_retriever_status", function(data) {
       if (data.status === 'playing') {
+          console.log("hii")
           clearInterval(updatePlayStatus);
           prepareButton.hide();
           $(".tasks, .locks, .lock-status, .pin-info").show();

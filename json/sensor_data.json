@@ -89,5 +89,19 @@
         "pin": 25,
         "pi": "top-pi",
         "state": "On"
+    },
+    {
+        "name": "blacklight",
+        "type": "light",
+        "pin": 17,
+        "pi": "top-pi",
+        "state": "initial"
+    },
+    {
+        "name": "portal-light",
+        "type": "light",
+        "pin": 10,
+        "pi": "top-pi",
+        "state": "initial"
     }
 ]
