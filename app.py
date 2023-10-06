@@ -819,7 +819,7 @@ def get_retriever_status():
 def wake_room():
     # Update the retriever status to 'awake'
     pi3.exec_command('raspi-gpio set 12 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 1 op dl \n raspi-gpio set 8 op dl')
-    ssh.exec_command('raspi-gpio set 15 op dl')
+    ssh.exec_command('raspi-gpio set 15 op dl \n raspi-gpio set 25 op dl')
     update_retriever_status('awake')
     return "room awakened"
 @app.route('/control_light', methods=['POST'])
@@ -852,8 +852,12 @@ def control_light():
         print(light_name)
     elif light_name == "Light-5":
         command = "raspi-gpio set 15 op dl"
-
-    if light_name == "Light-5":
+    if light_name == "Light-6" and check_rule("light-1-alley"):
+        command = "raspi-gpio set 25 op dh"
+        print(light_name)
+    elif light_name == "Light-6":
+        command = "raspi-gpio set 25 op dl"
+    if light_name == "Light-5" or light_name == "Light-6":
         ssh.exec_command(command)
     else:
         pi3.exec_command(command)
@@ -868,7 +872,7 @@ def snooze_game():
     pi3.exec_command(lightsoff)
     ssh.exec_command('raspi-gpio set 17 op dh')
     ssh.exec_command('raspi-gpio set 27 op dh')
-    ssh.exec_command('raspi-gpio set 15 op dh')
+    ssh.exec_command('raspi-gpio set 15 op dh \n raspi-gpio set 25 op dh')
     pi3.exec_command('raspi-gpio set 16 op dh')
     pi3.exec_command('raspi-gpio set 25 op dh')
     update_retriever_status('snoozed')
