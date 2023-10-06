@@ -65,16 +65,19 @@ def establish_ssh_connection():
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.connect(ip1brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
+        ssh.exec_command('pkill -f mqtt.py')
     global pi2
     if pi2 is None or not pi2.get_transport().is_active():
         pi2 = paramiko.SSHClient()
         pi2.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         pi2.connect(ip2brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
+        pi2.exec_command('pkill -f mqtt.py')
     global pi3
     if pi3 is None or not pi3.get_transport().is_active():
         pi3 = paramiko.SSHClient()
         pi3.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         pi3.connect(ip3brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
+        pi3.exec_command('pkill -f mqtt.py')
 
 def monitor_ssh_connections():
     while True:
