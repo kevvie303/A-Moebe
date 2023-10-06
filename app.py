@@ -1263,9 +1263,9 @@ def add_sensor():
                 try:
                     # Create an SFTP session over the existing SSH connection
                     sftp = session.open_sftp()
-
+                    print(sftp)
                     # Transfer the file to the Raspberry Pi
-                    sftp.put('json/sensor_data.json', '~/sensor_data.json')
+                    sftp.put('json/sensor_data.json', '/home/pi/sensor_data.json')
 
                     success_message += f"- {session.get_transport().getpeername()[0]}<br>"
 
