@@ -1260,6 +1260,7 @@ $(document).ready(function() {
         clearInterval(updateWakeStatus);
         prepareButton.show();
         $("#prepare-game-button").show();
+        $("#prepare-result, #snooze-game-button").hide();
     }
   });
   prepareButton.click(function() {

@@ -118,9 +118,9 @@ def on_message(client, userdata, message):
         pi3.exec_command("raspi-gpio set 15 op dh")
         print("1")
     if check_rule("top_left_kraken"):
-        pi2.exec_command('raspi-gpio set 12 op dh')
+        pi2.exec_command('raspi-gpio set 4 op dh')
     else:
-        pi2.exec_command('raspi-gpio set 12 op dl')
+        pi2.exec_command('raspi-gpio set 4 op dl')
     if check_rule("top_right_kraken"):
         pi2.exec_command('raspi-gpio set 7 op dh')
     else:
