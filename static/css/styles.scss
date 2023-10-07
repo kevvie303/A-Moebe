@@ -664,6 +664,10 @@ header .logo-container {
   ####
   */
 
+main {
+  overflow-x: hidden;
+}
+
 #nav-snooze-status {
   text-align: center; /* Center the text horizontally */
   font-weight: bold; /* Make the text bold */
@@ -738,7 +742,8 @@ header .logo-container {
 
 .control-container .locks,
 .control-container .lock-status,
-.control-container .tasks {
+.control-container .tasks,
+.control-container #prepare-result {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -752,6 +757,99 @@ header .logo-container {
   background: var(--secondary-background-color);
 }
 
+/*
+#############
+light control
+#############
+*/
+
+.control-container {
+  .light-container {
+    display: flex;
+    justify-content: center;
+    margin: 0 20px;
+    .lights {
+      position: relative;
+      width: 500px;
+      .light-buttons {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        img {
+          position: absolute;
+          cursor: pointer;
+          width: var(--icon-lg);
+
+          &:nth-of-type(1) {
+            left: 90px;
+            top: 30px;
+          }
+          &:nth-of-type(2) {
+            left: 140px;
+            top: 150px;
+          }
+          &:nth-of-type(3) {
+            left: 40px;
+            top: 150px;
+          }
+          &:nth-of-type(4) {
+            left: 90px;
+            top: 190px;
+          }
+          &:nth-of-type(5) {
+            left: 90px;
+            top: 270px;
+          }
+          &:nth-of-type(6) {
+            left: 365px;
+            top: 370px;
+          }
+          &:nth-of-type(7) {
+            left: 120px;
+            top: 400px;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .control-container {
+    .light-container {
+      .lights {
+        .light-buttons {
+          img {
+            width: var(--icon-sm);
+          }
+        }
+      }
+    }
+  }
+}
+
+/*
+#########
+preparing
+#########
+*/
+
+.control-container {
+  #prepare-result {
+    #results-section {
+      #device-status {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        #prepare-status-container {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+      }
+    }
+  }
+}
 /*
   #####
   Tasks
@@ -848,7 +946,8 @@ header .logo-container {
 
   .control-container .locks,
   .control-container .lock-status,
-  .control-container .tasks {
+  .control-container .tasks,
+  .control-container #prepare-result {
     width: 400px;
     align-self: center;
     margin: 0;
@@ -866,8 +965,10 @@ header .logo-container {
 
   .control-container .locks,
   .control-container .lock-status,
-  .control-container .tasks {
-    width: 500px;
+  .control-container .tasks,
+  .control-container #prepare-result {
+    width: 450px;
+    // width: 500px;
     padding: 30px 40px;
   }
 
@@ -969,3 +1070,9 @@ input[type="text"] {
   display: flex;
   justify-content: space-between;
 }
+
+/*
+##########
+poeplampen
+##########
+*/

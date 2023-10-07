@@ -1,20 +1,18 @@
-.landing-page .rooms,
-.media {
-  margin: 0 20px;
-}
-
+/*
+############
+landing page
+############
+*/
 .landing-page .rooms {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
 .landing-page .rooms .retriever-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
 .landing-page .rooms .retriever-container .retriever-link {
   align-self: center;
   background: var(--secondary-background-color);
@@ -22,26 +20,21 @@
   border-radius: 15px;
   width: 80%;
 }
-
 .landing-page .rooms .retriever-container .retriever-link .preview {
   display: flex;
   justify-content: space-around;
   border-radius: 15px;
   gap: 10px;
 }
-
 .landing-page .rooms .retriever-container .retriever-link p {
   align-self: end;
 }
-
 .landing-page .rooms .retriever-container .retriever-link p:first-of-type {
   color: var(--secondary-button-color);
 }
-
 .landing-page .rooms .retriever-container .retriever-link p:last-of-type {
   color: var(--primary-button-color);
 }
-
 .landing-page .rooms .retriever-container .controls {
   display: flex;
   flex-direction: column;
@@ -49,7 +42,6 @@
   align-items: center;
   width: 100%;
 }
-
 .landing-page .rooms .retriever-container .controls .control {
   display: flex;
   flex-direction: row;
@@ -57,32 +49,29 @@
   gap: 10px;
   width: 100%;
 }
-
-.landing-page .rooms .retriever-container .controls .info {
-  display: flex;
-  width: fit-content;
-}
-
 .landing-page .rooms .retriever-container .controls .control a,
 .landing-page .rooms .retriever-container .controls .control button {
   width: 150px;
 }
-
+.landing-page .rooms .retriever-container .controls .info {
+  display: flex;
+  width: fit-content;
+}
 .landing-page .rooms .retriever-container .controls .info a {
   width: fit-content;
 }
-
-.landing-page .media {
+.landing-page .rooms .media {
+  margin: 0 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
 /*
-  #############
-  media queries
-  #############
-  */
+#############
+media queries
+#############
+*/
 @media (min-width: 576px) {
   .landing-page .rooms .retriever-container .retriever-link {
     width: 70%;
@@ -99,20 +88,20 @@
   }
 }
 @media (min-width: 768px) {
-  .landing-page .rooms .retriever-container .retriever-link {
-    width: 500px;
-  }
-  .landing-page .rooms .retriever-container .controls a {
-    width: 150px;
-  }
   .landing-page .rooms {
     gap: 30px;
   }
   .landing-page .rooms .retriever-container {
     gap: 30px;
   }
+  .landing-page .rooms .retriever-container .retriever-link {
+    width: 500px;
+  }
   .landing-page .rooms .retriever-container .controls {
     gap: 20px;
+  }
+  .landing-page .rooms .retriever-container .controls a {
+    width: 150px;
   }
 }
 @media (min-width: 992px) {
@@ -121,12 +110,6 @@
   }
 }
 @media (min-width: 1200px) {
-  .landing-page .rooms .retriever-container .controls a {
-    font-size: 18px;
-  }
-  .landing-page .rooms .retriever-container .retriever-link .preview p {
-    font-size: 20px;
-  }
   .landing-page .rooms {
     gap: 40px;
   }
@@ -135,6 +118,12 @@
   }
   .landing-page .rooms .retriever-container .controls {
     gap: 30px;
+  }
+  .landing-page .rooms .retriever-container .controls a {
+    font-size: 18px;
+  }
+  .landing-page .rooms .retriever-container .retriever-link .preview p {
+    font-size: 20px;
   }
 }
 /* 
@@ -742,20 +731,16 @@ header .logo-container {
   main
   ####
   */
+main {
+  overflow-x: hidden;
+}
+
 #nav-snooze-status {
   text-align: center; /* Center the text horizontally */
   font-weight: bold; /* Make the text bold */
 }
-#navbar-container {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  z-index: 100; /* Make sure it's on top of other content */
-  background-color: white; /* Set the background color you prefer */
-}
+
 .important-controls {
-  position: sticky;
-  top: 0;
   display: flex;
   flex-direction: row;
   justify-content: space-around;
@@ -819,7 +804,8 @@ header .logo-container {
 
 .control-container .locks,
 .control-container .lock-status,
-.control-container .tasks {
+.control-container .tasks,
+.control-container #prepare-result {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -831,6 +817,80 @@ header .logo-container {
   border-radius: 15px;
   padding: 20px 30px;
   background: var(--secondary-background-color);
+}
+
+/*
+#############
+light control
+#############
+*/
+.control-container .light-container {
+  display: flex;
+  justify-content: center;
+  margin: 0 20px;
+}
+.control-container .light-container .lights {
+  position: relative;
+  width: 500px;
+}
+.control-container .light-container .lights .light-buttons {
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+.control-container .light-container .lights .light-buttons img {
+  position: absolute;
+  cursor: pointer;
+  width: var(--icon-lg);
+}
+.control-container .light-container .lights .light-buttons img:nth-of-type(1) {
+  left: 90px;
+  top: 30px;
+}
+.control-container .light-container .lights .light-buttons img:nth-of-type(2) {
+  left: 140px;
+  top: 150px;
+}
+.control-container .light-container .lights .light-buttons img:nth-of-type(3) {
+  left: 40px;
+  top: 150px;
+}
+.control-container .light-container .lights .light-buttons img:nth-of-type(4) {
+  left: 90px;
+  top: 190px;
+}
+.control-container .light-container .lights .light-buttons img:nth-of-type(5) {
+  left: 90px;
+  top: 270px;
+}
+.control-container .light-container .lights .light-buttons img:nth-of-type(6) {
+  left: 365px;
+  top: 370px;
+}
+.control-container .light-container .lights .light-buttons img:nth-of-type(7) {
+  left: 120px;
+  top: 400px;
+}
+
+@media (max-width: 576px) {
+  .control-container .light-container .lights .light-buttons img {
+    width: var(--icon-sm);
+  }
+}
+/*
+#########
+preparing
+#########
+*/
+.control-container #prepare-result #results-section #device-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.control-container #prepare-result #results-section #device-status #prepare-status-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 /*
@@ -920,7 +980,8 @@ header .logo-container {
   }
   .control-container .locks,
   .control-container .lock-status,
-  .control-container .tasks {
+  .control-container .tasks,
+  .control-container #prepare-result {
     width: 400px;
     align-self: center;
     margin: 0;
@@ -935,8 +996,9 @@ header .logo-container {
   }
   .control-container .locks,
   .control-container .lock-status,
-  .control-container .tasks {
-    width: 500px;
+  .control-container .tasks,
+  .control-container #prepare-result {
+    width: 450px;
     padding: 30px 40px;
   }
   .control-container .locks .lock-control .lock,
@@ -1023,11 +1085,15 @@ footer {
 
 input[type=text] {
   width: 100%; /* Set the width to 100% of their container */
-}/*# sourceMappingURL=styles.css.map */
+}
+
 #task-list p {
   display: flex;
   justify-content: space-between;
 }
-.centered-text {
-  text-align: center;
-}
+
+/*
+##########
+poeplampen
+##########
+*//*# sourceMappingURL=styles.css.map */

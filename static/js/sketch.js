@@ -135,78 +135,119 @@ $(document).ready(function () {
   });
 });
 // Add a click event listener to the "light-button"
-$(document).ready(function() {
-  document.getElementById("light-button").addEventListener("click", function () {
-    // Open a new popup window
-    var popupWindow = window.open("", "_blank", "width=600, height=400");
-  
-    // Check if the popup window was successfully opened
-    if (popupWindow) {
-      // Load the SVG image in the popup window from the Flask route
-      popupWindow.document.write('<div id="svg-container"></div>');
-  
-      var svgContainer = popupWindow.document.getElementById("svg-container");
-      var svgObject = document.createElement("object");
-      svgObject.data = "/static/img/room-layout.svg"; // Adjust the path as needed
-      svgObject.type = "image/svg+xml";
-      svgObject.width = "400";
-      svgObject.height = "300";
-      svgContainer.appendChild(svgObject);
-  
-      // Define button positions within the SVG
-      var buttons = [
-        { svgPath: "/static/img/light-bulb.svg", x: 90, y: 15, name: "Light-1" },
-        { svgPath: "/static/img/light-bulb.svg", x: 50, y: 80, name: "Light-2" },
-        { svgPath: "/static/img/light-bulb.svg", x: 120, y: 80, name: "Light-3" },
-        { svgPath: "/static/img/light-bulb.svg", x: 90, y: 120, name: "Light-4" },
-        { svgPath: "/static/img/light-bulb.svg", x: 90, y: 160, name: "Light-5" },
-        { svgPath: "/static/img/light-bulb.svg", x: 240, y: 210, name: "Light-6" },
-        { svgPath: "/static/img/light-bulb.svg", x: 110, y: 230, name: "Light-7" },
-        // Add more buttons and positions as needed
-      ];
-  
-      // Add buttons to control the lights
-      buttons.forEach(function (button) {
-        var buttonElement = popupWindow.document.createElement("img");
-        buttonElement.src = button.svgPath;
-        buttonElement.style.position = "absolute";
-        buttonElement.style.left = button.x + "px";
-        buttonElement.style.top = button.y + "px";
-        buttonElement.style.cursor = "pointer";
-        buttonElement.style.transform = "scale(0.5)";
-        buttonElement.addEventListener("click", function () {
-          sendLightControlRequest(button.name);
-          console.log("Clicked on " + button.name);
-        });
-  
-        popupWindow.document.body.appendChild(buttonElement);
-      });
-    } else {
-      // Handle cases where popups are blocked or not supported
-      alert("Popup blocked. Please allow popups for this site.");
-    }
-  });
-  
-  function sendLightControlRequest(lightName) {
-    // Make an AJAX request using jQuery
-    $.ajax({
-      type: "POST",
-      url: "/control_light",
-      data: JSON.stringify({ light_name: lightName }),
-      contentType: "application/json; charset=utf-8",
-      dataType: "json",
-      success: function (response) {
-        // Request was successful, handle the response if needed
-        console.log(response);
-      },
-      error: function () {
-        // Request failed, handle errors
-        console.error("Error making the light control request");
-      },
-    });
-  }
-});
+$(document).ready(function () {
+  document
+    .getElementById("light-button")
+    .addEventListener("click", function () {
+      // Open a new popup window
+      var popupWindow = window.open("", "_blank", "width=600, height=400");
 
+      // Check if the popup window was successfully opened
+      if (popupWindow) {
+        // Load the SVG image in the popup window from the Flask route
+        popupWindow.document.write('<div id="svg-container"></div>');
+
+        var svgContainer = popupWindow.document.getElementById("svg-container");
+        var svgObject = document.createElement("object");
+        svgObject.data = "/static/img/room-layout.svg"; // Adjust the path as needed
+        svgObject.type = "image/svg+xml";
+        svgObject.width = "400";
+        svgObject.height = "300";
+        svgContainer.appendChild(svgObject);
+
+        lightSeven = [
+          {
+            name: "Light-7",
+          },
+        ];
+
+        // Define button positions within the SVG
+        var buttons = [
+          {
+            svgPath: "/static/img/light-bulb.svg",
+            x: 90,
+            y: 15,
+            name: "Light-1",
+          },
+          {
+            svgPath: "/static/img/light-bulb.svg",
+            x: 50,
+            y: 80,
+            name: "Light-2",
+          },
+          {
+            svgPath: "/static/img/light-bulb.svg",
+            x: 120,
+            y: 80,
+            name: "Light-3",
+          },
+          {
+            svgPath: "/static/img/light-bulb.svg",
+            x: 90,
+            y: 120,
+            name: "Light-4",
+          },
+          {
+            svgPath: "/static/img/light-bulb.svg",
+            x: 90,
+            y: 160,
+            name: "Light-5",
+          },
+          {
+            svgPath: "/static/img/light-bulb.svg",
+            x: 240,
+            y: 210,
+            name: "Light-6",
+          },
+          {
+            svgPath: "/static/img/light-bulb.svg",
+            x: 110,
+            y: 230,
+            name: "Light-7",
+          },
+          // Add more buttons and positions as needed
+        ];
+
+        // Add buttons to control the lights
+        buttons.forEach(function (button) {
+          var buttonElement = popupWindow.document.createElement("img");
+          buttonElement.src = button.svgPath;
+          buttonElement.style.position = "absolute";
+          buttonElement.style.left = button.x + "px";
+          buttonElement.style.top = button.y + "px";
+          buttonElement.style.cursor = "pointer";
+          buttonElement.style.transform = "scale(0.5)";
+          buttonElement.addEventListener("click", function () {
+            sendLightControlRequest(button.name);
+            console.log("Clicked on " + button.name);
+          });
+
+          popupWindow.document.body.appendChild(buttonElement);
+        });
+      } else {
+        // Handle cases where popups are blocked or not supported
+        alert("Popup blocked. Please allow popups for this site.");
+      }
+    });
+});
+function sendLightControlRequest(lightName) {
+  // Make an AJAX request using jQuery
+  $.ajax({
+    type: "POST",
+    url: "/control_light",
+    data: JSON.stringify({ light_name: lightName }),
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    success: function (response) {
+      // Request was successful, handle the response if needed
+      console.log(response);
+    },
+    error: function () {
+      // Request failed, handle errors
+      console.error("Error making the light control request");
+    },
+  });
+}
 $(document).ready(function () {
   // Handle button click for both turning on and off
   $(".lock-buttons button").click(function () {
@@ -239,7 +280,7 @@ $(document).ready(function () {
 
   function generateMaglockElementId(maglockNumber, maglockURL) {
     // Replace non-alphanumeric characters in the URL with underscores
-    var sanitizedURL = maglockURL.replace(/[^a-zA-Z0-9]/g, '_');
+    var sanitizedURL = maglockURL.replace(/[^a-zA-Z0-9]/g, "_");
     return `maglock${maglockNumber}_${sanitizedURL}_status`;
   }
 
@@ -253,7 +294,10 @@ $(document).ready(function () {
           maglockStatus === "locked" ? "Locked" : "Unlocked";
 
         // Create a unique identifier for this maglock
-        var maglockElementId = generateMaglockElementId(maglockNumber, maglockURL);
+        var maglockElementId = generateMaglockElementId(
+          maglockNumber,
+          maglockURL
+        );
 
         // Check if the maglockStatus for this maglock is already stored
         if (maglockStatuses[maglockElementId] === undefined) {
@@ -521,6 +565,8 @@ $(document).ready(function () {
 
   $("#end-game-button").click(function () {
     $(".tasks, .locks, .lock-status, .pin-info").show();
+    $("#prepare-result").hide();
+    $("#pause-button").show();
     clearInterval(intervalId);
     updateTimers();
     $.post("/timer/stop", function (data) {
@@ -619,7 +665,7 @@ $(document).ready(function () {
 $(document).ready(function () {
   // Check the retriever status from the JSON file
   $.get("/get_retriever_status", function (data) {
-    if (data.status === 'snoozed') {
+    if (data.status === "snoozed") {
       // Display snoozed status in the nav
       $("#nav-snooze-status").text("Room Snoozed");
       // Show the "Wake" button
@@ -640,20 +686,19 @@ $(document).ready(function () {
       $("#nav-snooze-status").text("Room Awake");
     });
   });
-      // Check the retriever status from the JSON file
-      $.get("/get_retriever_status", function (data) {
-        if (data.status === 'prepared') {
-            // Hide everything from the comment "HIDE FROM HERE"
-            hideFromHere();
-        }
-    });
-        // Function to hide everything from the comment "HIDE FROM HERE"
-        function hideFromHere() {
-          // Add CSS to hide the sections
-          console.log("test")
-          $(".tasks, .lock-status, .pin-info").hide();
-
-      }
+  // Check the retriever status from the JSON file
+  $.get("/get_retriever_status", function (data) {
+    if (data.status === "prepared") {
+      // Hide everything from the comment "HIDE FROM HERE"
+      hideFromHere();
+    }
+  });
+  // Function to hide everything from the comment "HIDE FROM HERE"
+  function hideFromHere() {
+    // Add CSS to hide the sections
+    console.log("test");
+    $(".tasks, .lock-status, .pin-info").hide();
+  }
 });
 
 function openMediaControlPage() {
@@ -932,7 +977,7 @@ async function markAsSolved(taskName) {
 
     closeTaskPopup(); // Close the popup
     fetchTasks(); // Refresh the list
-    console.log()
+    console.log();
   } catch (error) {
     console.error("Error marking as solved:", error);
   }
@@ -959,7 +1004,6 @@ function closeTaskPopup() {
   const taskPopup = document.querySelector(".tasks-hidden");
   taskPopup.classList.add("hidden");
 }
-
 
 fetchTasks();
 
@@ -1174,7 +1218,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 });
-$(document).ready(function() {
+$(document).ready(function () {
   var updateStatusInterval = setInterval(updateRetrieverStatus, 1000); // Name the interval variable updateStatusInterval
   var updatePlayStatus;
   var updateWakeStatus;
@@ -1185,84 +1229,91 @@ $(document).ready(function() {
 
   // Function to perform the preparation steps
   function performPreparation() {
-      prepareButton.hide();
-      prepareResult.show();
-      $(".tasks, .lock-status, .pin-info").hide();
-      prepareStatus.html("Preparing...");
-      clearInterval(updateStatusInterval);
-      updatePlayStatus = setInterval(updatePlayingStatus, 1000)
-      $.ajax({
-          type: 'POST',
-          url: '/prepare',
-          success: function(response) {
-              prepareStatus.html("Prepared - Status: OK. Game will start when door is open or start game has been clicked");
+    prepareButton.hide();
+    prepareResult.show();
+    $(".tasks, .lock-status, .pin-info").hide();
+    prepareStatus.html("Preparing...");
+    clearInterval(updateStatusInterval);
+    updatePlayStatus = setInterval(updatePlayingStatus, 1000);
+    $.ajax({
+      type: "POST",
+      url: "/prepare",
+      success: function (response) {
+        prepareStatus.html(
+          "Prepared - Status: OK. Game will start when door is open or start game has been clicked"
+        );
 
-              // Debugging: Output the response.message to the console
-              console.log(response.message);
+        // Debugging: Output the response.message to the console
+        console.log(response.message);
 
-              resultsSection.empty();
+        resultsSection.empty();
 
-              // Loop through the JSON data and create a neat display
-              for (var device in response.message) {
-                  var deviceStatus = response.message[device];
-                  var deviceDiv = $("<div>").addClass("device-status centered-text"); // Apply the centered-text class
-                  var header = $("<h3>").text(device);
-                  deviceDiv.append(header);
+        // Loop through the JSON data and create a neat display
+        // Loop through the JSON data and create a neat display
+        for (var device in response.message) {
+          var deviceStatus = response.message[device];
+          var deviceDiv = $("<div>").addClass("device-status"); // Apply the centered-text class
+          var header = $("<h3>").text(device);
+          deviceDiv.append(header);
 
-                  for (var script in deviceStatus) {
-                      var status = deviceStatus[script];
-                      var statusText = status ? "Running" : "Not Running";
-                      var scriptDiv = $("<div>").addClass("script-status centered-text"); // Apply the centered-text class
-                      scriptDiv.html(`<p>${script}: ${statusText}</p`);
-                      deviceDiv.append(scriptDiv);
-                  }
+          var statusContainer = $("<div>").addClass("prepare-status-container"); // Create a container for status elements
 
-                  resultsSection.append(deviceDiv);
-              }
-          },
-          error: function() {
-              prepareStatus.html("Error occurred during preparation.");
+          for (var script in deviceStatus) {
+            var status = deviceStatus[script];
+            var statusText = status ? "Running" : "Not Running";
+            var scriptDiv = $("<div>").addClass("script-status"); // Apply the centered-text class
+            scriptDiv.html(`<p>${script}: ${statusText}</p`);
+            statusContainer.append(scriptDiv);
           }
-      });
+
+          // Append the status container under the deviceDiv
+          deviceDiv.append(statusContainer);
+          resultsSection.append(deviceDiv);
+        }
+      },
+      error: function () {
+        prepareStatus.html("Error occurred during preparation.");
+      },
+    });
   }
   function updateRetrieverStatus() {
-    console.log("hi")
-    $.get("/get_retriever_status", function(data) {
-      if (data.status === 'prepared') {
-          prepareButton.hide();
-          performPreparation(); // Trigger the preparation function
-
+    console.log("hi");
+    $.get("/get_retriever_status", function (data) {
+      if (data.status === "prepared") {
+        prepareButton.hide();
+        performPreparation(); // Trigger the preparation function
       }
-  });
+    });
   }
   function updatePlayingStatus() {
-    $.get("/get_retriever_status", function(data) {
-      if (data.status === 'playing') {
-          console.log("hii")
-          clearInterval(updatePlayStatus);
-          prepareButton.hide();
-          $(".tasks, .locks, .lock-status, .pin-info").show();
-          $("#prepare-result").hide();
-      }
-  });
-  }
-  $.get("/get_retriever_status", function(data) {
-    if (data.status === 'playing') {
+    $.get("/get_retriever_status", function (data) {
+      if (data.status === "playing") {
+        console.log("hii");
         clearInterval(updatePlayStatus);
         prepareButton.hide();
         $(".tasks, .locks, .lock-status, .pin-info").show();
-        $("#prepare-result, #snooze-game-button").hide();
+        $("#prepare-result").hide();
+      }
+    });
+  }
+  $.get("/get_retriever_status", function (data) {
+    if (data.status === "playing") {
+      clearInterval(updatePlayStatus);
+      prepareButton.hide();
+      $(".tasks, .locks, .lock-status, .pin-info").show();
+      $("#prepare-result, #snooze-game-button").hide();
     }
   });
-  $.get("/get_retriever_status", function(data) {
-    if (data.status === 'awake') {
-        console.log("hii")
-        clearInterval(updateWakeStatus);
-        prepareButton.show();
-        $("#prepare-game-button").show();
+  $.get("/get_retriever_status", function (data) {
+    if (data.status === "awake") {
+      console.log("hii");
+      clearInterval(updateWakeStatus);
+      prepareButton.show();
+      $("#prepare-game-button").show();
+      $("#prepare-result").hide();
     }
   });
-  prepareButton.click(function() {
-      performPreparation(); // Trigger the preparation function on button click
+  prepareButton.click(function () {
+    performPreparation(); // Trigger the preparation function on button click
   });
 });
