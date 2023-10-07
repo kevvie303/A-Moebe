@@ -1122,6 +1122,13 @@ def control_maglock():
         elif action == "unlocked":
             ssh.exec_command("raspi-gpio set 16 op dh")
             return 'exit unlocked'
+    elif maglock == "ball-drop-lock":
+        if action == "locked":
+            ssh.exec_command("raspi-gpio set 6 op dl")
+            return 'blacklight locked'
+        elif action == "unlocked":
+            ssh.exec_command("raspi-gpio set 6 op dh")
+            return 'exit unlocked'
     else:
         return 'Invalid maglock or action'
 

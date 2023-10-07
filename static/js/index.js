@@ -21,6 +21,7 @@ const abortButton = document.querySelector(".abort-button");
 const confirmButton = document.getElementById("end-game-button");
 const startButton = document.getElementById("start-game-button");
 const snoozeButton = document.getElementById("snooze-game-button");
+const prepareButton = document.getElementById("prepare-game-button");
 const abortPopup = document.querySelector(".abort");
 const confirmPopup = document.querySelector(".confirmation");
 
@@ -112,6 +113,13 @@ snoozeButton.addEventListener("click", () => {
   gamePopup.classList.add("hidden");
 });
 
+prepareButton.addEventListener("click", () => {
+  confirmPopup.classList.remove("shown");
+  confirmPopup.classList.add("hidden");
+
+  gamePopup.classList.remove("shown");
+  gamePopup.classList.add("hidden");
+});
 /* tasks */
 
 piButton.addEventListener("click", () => {

@@ -224,10 +224,25 @@ $(document).ready(function () {
         console.log(error);
       },
     });
+    console.log(maglockName + action);
+    if (maglockName === "exit-door-lock" && action === "unlocked") {
+      updateAwakeStatus();
+    }
   });
+  function updateAwakeStatus() {
+    $("#prepare-game-button").show();
+  }
 });
 
 $(document).ready(function () {
+  var maglockStatuses = {}; // Object to store maglock statuses
+
+  function generateMaglockElementId(maglockNumber, maglockURL) {
+    // Replace non-alphanumeric characters in the URL with underscores
+    var sanitizedURL = maglockURL.replace(/[^a-zA-Z0-9]/g, '_');
+    return `maglock${maglockNumber}_${sanitizedURL}_status`;
+  }
+
   function updateMaglockStatus(maglockNumber, maglockName, maglockURL) {
     $.ajax({
       type: "GET",
@@ -237,19 +252,27 @@ $(document).ready(function () {
         var maglockStatusText =
           maglockStatus === "locked" ? "Locked" : "Unlocked";
 
-        // Create or update the maglock status element
-        var maglockStatusElement = $(`#maglock${maglockNumber}-status`);
-        if (maglockStatusElement.length) {
-          maglockStatusElement.html(
-            `${maglockName}: <strong>${maglockStatusText}</strong>`
-          );
-        } else {
+        // Create a unique identifier for this maglock
+        var maglockElementId = generateMaglockElementId(maglockNumber, maglockURL);
+
+        // Check if the maglockStatus for this maglock is already stored
+        if (maglockStatuses[maglockElementId] === undefined) {
+          // If not, create a new element
           var newMaglockStatusElement = $("<p>").html(
             `${maglockName}: <strong>${maglockStatusText}</strong>`
           );
-          newMaglockStatusElement.attr("id", `maglock${maglockNumber}-status`);
+          newMaglockStatusElement.attr("id", maglockElementId);
           $("#maglock-status-container").append(newMaglockStatusElement);
+        } else {
+          // If yes, update the existing element
+          var maglockStatusElement = $(`#${maglockElementId}`);
+          maglockStatusElement.html(
+            `${maglockName}: <strong>${maglockStatusText}</strong>`
+          );
         }
+
+        // Store the updated maglock status in the object
+        maglockStatuses[maglockElementId] = maglockStatusText;
       },
       error: function (error) {
         console.log(error);
@@ -1154,6 +1177,7 @@ document.addEventListener("DOMContentLoaded", function () {
 $(document).ready(function() {
   var updateStatusInterval = setInterval(updateRetrieverStatus, 1000); // Name the interval variable updateStatusInterval
   var updatePlayStatus;
+  var updateWakeStatus;
   var prepareButton = $("#prepare-game-button");
   var prepareResult = $("#prepare-result");
   var prepareStatus = $("#prepare-status");
@@ -1228,6 +1252,14 @@ $(document).ready(function() {
         prepareButton.hide();
         $(".tasks, .locks, .lock-status, .pin-info").show();
         $("#prepare-result, #snooze-game-button").hide();
+    }
+  });
+  $.get("/get_retriever_status", function(data) {
+    if (data.status === 'awake') {
+        console.log("hii")
+        clearInterval(updateWakeStatus);
+        prepareButton.show();
+        $("#prepare-game-button").show();
     }
   });
   prepareButton.click(function() {
