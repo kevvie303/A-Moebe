@@ -42,13 +42,6 @@
         "state": "not Triggered"
     },
     {
-        "name": "bottom_left_kraken",
-        "type": "Sensor",
-        "pin": 16,
-        "pi": "middle-pi",
-        "state": "Not triggered"
-    },
-    {
         "name": "light-1-garden",
         "type": "light",
         "pin": 1,
