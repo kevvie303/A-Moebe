@@ -19,12 +19,12 @@ import paho.mqtt.client as mqtt
 load_dotenv()
 app = Flask(__name__)
 #command = 'python relay_control.py'
-loadMqtt = False
+loadMqtt = True
 ssh = None
 stdin = None
 pi2 = None
 pi3 = None
-romy = True
+romy = False
 last_keypad_code = None
 aborted = False
 fade_duration = 3  # Fade-out duration in seconds
@@ -91,7 +91,7 @@ def monitor_ssh_connections():
 # Start the monitoring thread
 monitor_thread = threading.Thread(target=monitor_ssh_connections)
 monitor_thread.daemon = True  # Make the thread a daemon to exit when the main program exits
-broker_ip = "192.168.0.115"  # IP address of the broker Raspberry Pi
+broker_ip = "192.168.0.103"  # IP address of the broker Raspberry Pi
 
 # Define the topic prefix to subscribe to (e.g., "sensor_state/")
 prefix_to_subscribe = "state_data/"
