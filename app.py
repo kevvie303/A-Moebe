@@ -1695,6 +1695,16 @@ def check_all_scripts():
 @app.route('/prepare', methods=['POST'])
 def prepare_game():
     global codesCorrect
+    global code1
+    global code2
+    global code3
+    global code4
+    global code5
+    code1 = False
+    code2 = False
+    code3 = False
+    code4 = False
+    code5 = False
     print("Preparing game...")  # Add this line for debugging
     # Perform the checks and generate the result message
     retriever_status = get_retriever_status()
