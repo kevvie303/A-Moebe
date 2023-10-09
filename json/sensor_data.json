@@ -96,5 +96,13 @@
         "pin": 10,
         "pi": "top-pi",
         "state": "initial"
+    },
+    {
+        "name": "bottom_left_kraken",
+        "type": "sensor",
+        "pin": 16,
+        "pi": "middle-pi",
+        "state": "Triggered"
     }
+
 ]
