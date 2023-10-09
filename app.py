@@ -19,11 +19,12 @@ import paho.mqtt.client as mqtt
 load_dotenv()
 app = Flask(__name__)
 #command = 'python relay_control.py'
+loadMqtt = False
 ssh = None
 stdin = None
 pi2 = None
 pi3 = None
-romy = False
+romy = True
 last_keypad_code = None
 aborted = False
 fade_duration = 3  # Fade-out duration in seconds
@@ -90,7 +91,7 @@ def monitor_ssh_connections():
 # Start the monitoring thread
 monitor_thread = threading.Thread(target=monitor_ssh_connections)
 monitor_thread.daemon = True  # Make the thread a daemon to exit when the main program exits
-broker_ip = "192.168.0.112"  # IP address of the broker Raspberry Pi
+broker_ip = "192.168.0.115"  # IP address of the broker Raspberry Pi
 
 # Define the topic prefix to subscribe to (e.g., "sensor_state/")
 prefix_to_subscribe = "state_data/"
@@ -302,18 +303,19 @@ def check_rule(item_name):
     else:
         pi2.exec_command('raspi-gpio set 8 op dl')
 # Create an MQTT client instance
-client = mqtt.Client()
+if loadMqtt == True:
+    client = mqtt.Client()
 
-# Set the callback function for incoming MQTT messages
-client.on_message = on_message
+    # Set the callback function for incoming MQTT messages
+    client.on_message = on_message
 
-# Connect to the MQTT broker
-client.connect(broker_ip, 1883)
+    # Connect to the MQTT broker
+    client.connect(broker_ip, 1883)
 
-# Subscribe to all topics under the specified prefix
-client.subscribe(prefix_to_subscribe + "#")  # Subscribe to all topics under the prefix
-# Function to execute the delete-locks.py script
-client.loop_start()
+    # Subscribe to all topics under the specified prefix
+    client.subscribe(prefix_to_subscribe + "#")  # Subscribe to all topics under the prefix
+    # Function to execute the delete-locks.py script
+    client.loop_start()
 def execute_delete_locks_script():
     ssh.exec_command('python delete-locks.py')
 
@@ -1705,7 +1707,7 @@ def prepare_game():
 
     print("Preparation complete.")
     load_command = f'echo "load /home/pi/Music/Lounge.mp3" | sudo tee /tmp/mpg123_fifo'
-    pi3.exec_command(load_command)
+    #pi3.exec_command(load_command)
     update_retriever_status('prepared')
     return jsonify(response), 200
 

@@ -664,6 +664,10 @@ header .logo-container {
   ####
   */
 
+main {
+  overflow-x: hidden;
+}
+
 #nav-snooze-status {
   text-align: center; /* Center the text horizontally */
   font-weight: bold; /* Make the text bold */
@@ -734,11 +738,63 @@ header .logo-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  // display: grid;
+  // grid-template-columns: repeat(3, 1fr);
+  // grid-row-gap: 20px;
+  // .light-container {
+  //   grid-area: 1/2;
+  // }
+  // .tasks {
+  //   grid-area: 2/2;
+  // }
+  // .locks {
+  //   grid-area: 3/2;
+  // }
+  // .lock-status {
+  //   grid-area: 4/2;
+  //   // align-self: baseline;
+  // }
+  // .pin-info {
+  //   grid-area: 5/2;
+  // }
+}
+
+// .control-container {
+//   display: grid;
+//   grid-template-columns: repeat(3, 1fr);
+//   // grid-template-rows: repeat(4, 1fr);
+//   .light-container {
+//     grid-area: 1/3;
+//   }
+//   .tasks {
+//     grid-area: 1/2;
+//   }
+//   .locks {
+//     grid-area: 2/2;
+//   }
+//   .lock-status {
+//     grid-area: 3/2;
+//     align-self: baseline;
+//   }
+//   .pin-info {
+//     grid-area: 4/2;
+//   }
+// }
+
+@media (min-width: 576px) {
+  .control-container {
+  }
+}
+
+@media (min-width: 576px) and (max-width: 768px) {
+  .control-container {
+  }
 }
 
 .control-container .locks,
 .control-container .lock-status,
-.control-container .tasks {
+.control-container .tasks,
+.control-container #prepare-result {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -752,6 +808,166 @@ header .logo-container {
   background: var(--secondary-background-color);
 }
 
+/*
+#############
+light control
+#############
+*/
+
+.control-container {
+  .light-container {
+    display: flex;
+    justify-content: center;
+    margin: 0 20px;
+    .lights {
+      position: relative;
+      width: 250px;
+      .light-buttons {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        img {
+          position: absolute;
+          cursor: pointer;
+          width: var(--icon-sm);
+
+          &:nth-of-type(1) {
+            left: 40px;
+            top: 20px;
+          }
+          &:nth-of-type(2) {
+            left: 70px;
+            top: 80px;
+          }
+          &:nth-of-type(3) {
+            left: 15px;
+            top: 80px;
+          }
+          &:nth-of-type(4) {
+            left: 40px;
+            top: 100px;
+          }
+          &:nth-of-type(5) {
+            left: 40px;
+            top: 135px;
+          }
+          &:nth-of-type(6) {
+            left: 180px;
+            top: 180px;
+          }
+          &:nth-of-type(7) {
+            left: 50px;
+            top: 200px;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 1200px) {
+  .control-container {
+    .light-container {
+      position: absolute;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      margin: 0 20px;
+      .lights {
+        position: relative;
+        // width: 500px;
+        .light-buttons {
+          position: absolute;
+          top: 0;
+          width: 100%;
+          img {
+            position: absolute;
+            cursor: pointer;
+            width: var(--icon-sm);
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 1400px) {
+  .control-container {
+    .light-container {
+      position: absolute;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      margin: 0 20px;
+      .lights {
+        position: relative;
+        width: 400px;
+        .light-buttons {
+          position: absolute;
+          top: 0;
+          width: 100%;
+          img {
+            position: absolute;
+            cursor: pointer;
+            width: var(--icon-lg);
+
+            &:nth-of-type(1) {
+              left: 60px;
+              top: 30px;
+            }
+            &:nth-of-type(2) {
+              left: 100px;
+              top: 110px;
+            }
+            &:nth-of-type(3) {
+              left: 30px;
+              top: 110px;
+            }
+            &:nth-of-type(4) {
+              left: 60px;
+              top: 150px;
+            }
+            &:nth-of-type(5) {
+              left: 60px;
+              top: 215px;
+            }
+            &:nth-of-type(6) {
+              left: 290px;
+              top: 300px;
+            }
+            &:nth-of-type(7) {
+              left: 90px;
+              top: 310px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/*
+#########
+preparing
+#########
+*/
+
+.control-container {
+  #prepare-result {
+    #results-section {
+      #device-status {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        #prepare-status-container {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+      }
+    }
+  }
+}
 /*
   #####
   Tasks
@@ -848,7 +1064,8 @@ header .logo-container {
 
   .control-container .locks,
   .control-container .lock-status,
-  .control-container .tasks {
+  .control-container .tasks,
+  .control-container #prepare-result {
     width: 400px;
     align-self: center;
     margin: 0;
@@ -866,8 +1083,10 @@ header .logo-container {
 
   .control-container .locks,
   .control-container .lock-status,
-  .control-container .tasks {
-    width: 500px;
+  .control-container .tasks,
+  .control-container #prepare-result {
+    width: 450px;
+    // width: 500px;
     padding: 30px 40px;
   }
 
@@ -969,3 +1188,9 @@ input[type="text"] {
   display: flex;
   justify-content: space-between;
 }
+
+/*
+##########
+poeplampen
+##########
+*/
