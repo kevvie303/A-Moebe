@@ -1224,6 +1224,7 @@ def monitor_sensor_statuses():
             last_keypad_code = last_used_keypad_code  # Update the last keypad code
             if last_used_keypad_code == "1527" and code1 == False:
                 code1 = True
+                print(code1)
                 codesCorrect += 1
                 ssh.exec_command("raspi-gpio set 1 op dh")
                 fade_music_out()
@@ -1234,12 +1235,13 @@ def monitor_sensor_statuses():
                 if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
                     fade_music_in()
                 elif codesCorrect == 2:
-                    return
+                    print(codesCorrect)
                 elif code5 == False:
                     fade_music_in()
             elif (last_used_keypad_code == "7867" or last_used_keypad_code == "8978") and code2 == False:
                 code2 = True
                 codesCorrect += 1
+                print(code1)
                 ssh.exec_command("raspi-gpio set 1 op dh")
                 fade_music_out()
                 time.sleep(2)
@@ -1249,12 +1251,13 @@ def monitor_sensor_statuses():
                 if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
                     fade_music_in()
                 elif codesCorrect == 2:
-                    return
+                    print(codesCorrect)
                 elif code5 == False:
                     fade_music_in()
             elif last_used_keypad_code == "0128" and code3 == False:
                 code3 = True
                 codesCorrect += 1
+                print(code1)
                 ssh.exec_command("raspi-gpio set 1 op dh")
                 fade_music_out()
                 time.sleep(2)
@@ -1264,11 +1267,12 @@ def monitor_sensor_statuses():
                 if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
                     fade_music_in()
                 elif codesCorrect == 2:
-                    return
+                    print(codesCorrect)
                 elif code5 == False:
                     fade_music_in()
             elif last_used_keypad_code == "5038" and code4 == False:
                 code4 = True
+                print(code1)
                 codesCorrect += 1
                 ssh.exec_command("raspi-gpio set 1 op dh")
                 fade_music_out()
@@ -1279,7 +1283,7 @@ def monitor_sensor_statuses():
                 if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
                     fade_music_in()
                 elif codesCorrect == 2:
-                    return
+                    print(codesCorrect)
                 elif code5 == False:
                     fade_music_in()
             else:
@@ -1544,9 +1548,10 @@ def start_timer():
         timer_thread.daemon = True
         timer_thread.start()
         fade_music_out2()
-    fade_music_in()
     load_command = f'echo "load /home/pi/Music/Ambience.mp3" | sudo tee /tmp/mpg123_fifo'
     pi3.exec_command(load_command)
+    time.sleep(0.5)
+    fade_music_in()
     return 'Timer started'
 
 @app.route('/timer/stop', methods=['POST'])
@@ -1702,7 +1707,7 @@ def prepare_game():
         time.sleep(5)
         ssh.exec_command('sudo -E python status.py')
         time.sleep(3)
-        pi2.exec_command('sudo python sinus_game.py')
+        pi2.exec_command('sudo python sinus_game.py \n python status.py')
     time.sleep(1)
     results = check_all_scripts()
     
@@ -1713,7 +1718,7 @@ def prepare_game():
 
     print("Preparation complete.")
     load_command = f'echo "load /home/pi/Music/Lounge.mp3" | sudo tee /tmp/mpg123_fifo'
-    #pi3.exec_command(load_command)
+    pi3.exec_command(load_command)
     update_retriever_status('prepared')
     return jsonify(response), 200
 
