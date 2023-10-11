@@ -114,6 +114,12 @@ def on_message(client, userdata, message):
         update_json_file()
         print("State changed. Updated JSON.")
     print(sensor_states)
+    if check_rule("maze-sensor"):
+        task_state = check_task_state("paw-maze")
+        print(task_state)
+        if task_state == "pending":
+            solve_task("paw-maze")
+            pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
     if check_rule("green_house_ir"):
     # Rule is satisfied, perform actions
         pi3.exec_command("raspi-gpio set 15 op dh")
@@ -150,43 +156,43 @@ def on_message(client, userdata, message):
         pi3.exec_command("raspi-gpio set 15 op dl")
         sequence = 0
     if check_rule("blue_house_ir") and sequence == 2:
-        solve_task("tree-lights")
-        code5 = True
-        print("3")
-        pi3.exec_command("raspi-gpio set 23 op dh")
-        fade_out_thread = threading.Thread(target=fade_music_out)
-        fade_out_thread.start()
-        time.sleep(1)
-        pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
-        time.sleep(1)
-        pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
-        time.sleep(1)
-        pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
-        time.sleep(1)
-        pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
-        time.sleep(1)
-        pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
-        sequence = 0
-        time.sleep(1)
-        pi3.exec_command("mpg123 -a hw:0,0 Music/boom.mp3")
-        time.sleep(7)
-        if code1 and code2 and code3 and code4 and code5:
-            print("executed")
+        task_state = check_task_state("paw-maze")
+        if task_state == "pending":
+            solve_task("tree-lights")
+            code5 = True
+            print("3")
+            pi3.exec_command("raspi-gpio set 23 op dh")
+            fade_out_thread = threading.Thread(target=fade_music_out)
+            fade_out_thread.start()
+            time.sleep(1)
+            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+            time.sleep(1)
+            pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
+            time.sleep(1)
+            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+            time.sleep(1)
+            pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
+            time.sleep(1)
+            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+            sequence = 0
+            time.sleep(1)
+            pi3.exec_command("mpg123 -a hw:0,0 Music/boom.mp3")
             time.sleep(7)
-            pi3.exec_command('mpg123 -a hw:0,0 Music/schuur_open.mp3')
-            time.sleep(5)
-            fade_music_in()
-            pi3.exec_command('raspi-gpio set 16 op dh')
-            code1 = False
-            code2 = False
-            code3 = False
-            code4 = False
-            code5 = False
-            codesCorrect == 0
-        else:
-            fade_in_thread = threading.Thread(target=fade_music_in)
-            fade_in_thread.start()
-
+            if code1 and code2 and code3 and code4 and code5:
+                print("executed")
+                time.sleep(7)
+                pi3.exec_command('mpg123 -a hw:0,0 Music/schuur_open.mp3')
+                time.sleep(5)
+                fade_music_in()
+                pi3.exec_command('raspi-gpio set 16 op dh')
+                code1 = False
+                code2 = False
+                code3 = False
+                code4 = False
+                code5 = False
+            else:
+                fade_in_thread = threading.Thread(target=fade_music_in)
+                fade_in_thread.start()
     elif check_rule("blue_house_ir") and sequence != 2:
         pi3.exec_command("raspi-gpio set 23 op dh")
         time.sleep(0.5)
@@ -196,7 +202,15 @@ def on_message(client, userdata, message):
         sequence = 0
 
     #print(f"Received sensor state for {sensor_name}: {sensor_state}")
-# Example rule function
+def check_task_state(task_name):
+    json_file_path = 'json/tasks.json'  # Set the path to your JSON file
+    with open(json_file_path, 'r') as json_file:
+        task_data = json.load(json_file)
+
+    for task in task_data:
+        if task["task"] == task_name:
+            return task["state"]
+    return "Task not found"
 def update_json_file():
     try:
         # Read existing JSON data
@@ -813,6 +827,8 @@ def reset_puzzles():
     global code3
     global code4
     global code5
+    global codesCorrect
+    codesCorrect == 0
     aborted = True
     code1 = False
     code2 = False
@@ -1118,6 +1134,7 @@ def control_maglock():
             return 'labhatch locked'
         elif action == "unlocked":
             ssh.exec_command("raspi-gpio set 20 op dh")
+            solve_task("squeekence")
             if retriever_status == {'status': 'playing'}:
                 time.sleep(4)
                 pi2.exec_command("mpg123 -a hw:2,0 Music/lab_intro.mp3")
@@ -1228,6 +1245,7 @@ def monitor_sensor_statuses():
         if last_used_keypad_code != last_keypad_code:
             last_keypad_code = last_used_keypad_code  # Update the last keypad code
             if last_used_keypad_code == "1527" and code1 == False:
+                solve_task("flowers")
                 code1 = True
                 print(code1)
                 codesCorrect += 1
@@ -1244,6 +1262,7 @@ def monitor_sensor_statuses():
                 elif code5 == False:
                     fade_music_in()
             elif (last_used_keypad_code == "7867" or last_used_keypad_code == "8978") and code2 == False:
+                solve_task("kite-count")
                 code2 = True
                 codesCorrect += 1
                 print(code1)
@@ -1260,6 +1279,7 @@ def monitor_sensor_statuses():
                 elif code5 == False:
                     fade_music_in()
             elif last_used_keypad_code == "0128" and code3 == False:
+                solve_task("number-feel")
                 code3 = True
                 codesCorrect += 1
                 print(code1)
@@ -1276,6 +1296,7 @@ def monitor_sensor_statuses():
                 elif code5 == False:
                     fade_music_in()
             elif last_used_keypad_code == "5038" and code4 == False:
+                solve_task("fence-decrypt")
                 code4 = True
                 print(code1)
                 codesCorrect += 1
@@ -1307,7 +1328,6 @@ def monitor_sensor_statuses():
                 code3 = False
                 code4 = False
                 code5 = False
-                codesCorrect == 0
             if codesCorrect == 2:
                 codesCorrect += 1
                 time.sleep(7)
@@ -1315,6 +1335,7 @@ def monitor_sensor_statuses():
                 time.sleep(6)
                 fade_music_in()
         if sinus_status == "solved" and aborted == False:
+            solve_task("sinus-game")
             pi2.exec_command("mpg123 -a hw:1,0 Music/pentakill.mp3")
         time.sleep(0.1)
 # Start a new thread for monitoring sensor statuses
@@ -1705,6 +1726,7 @@ def prepare_game():
     global code3
     global code4
     global code5
+    codesCorrect == 0
     code1 = False
     code2 = False
     code3 = False
