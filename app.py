@@ -173,7 +173,7 @@ def on_message(client, userdata, message):
         if code1 and code2 and code3 and code4 and code5:
             print("executed")
             time.sleep(7)
-            pi3.exec_command('mpg123 -a hw:0,0 Music/shed_open.mp3')
+            pi3.exec_command('mpg123 -a hw:0,0 Music/schuur_open.mp3')
             time.sleep(5)
             fade_music_in()
             pi3.exec_command('raspi-gpio set 16 op dh')
@@ -914,7 +914,7 @@ def snooze_game():
     pi3.exec_command(lightsoff)
     ssh.exec_command('raspi-gpio set 17 op dh \n raspi-gpio set 10 op dh')
     ssh.exec_command('raspi-gpio set 27 op dh')
-    ssh.exec_command('raspi-gpio set 15 op dh \n raspi-gpio set 25 op dh')
+    ssh.exec_command('raspi-gpio set 15 op dh \n raspi-gpio set 25 op dh \n raspi-gpio set 6 op dh \n raspi-gpio set 16 op dh \n raspi-gpio set 20 op dh \n raspi-gpio set 21 op dh')
     pi3.exec_command('raspi-gpio set 16 op dh')
     pi3.exec_command('raspi-gpio set 25 op dh')
     update_retriever_status('snoozed')
@@ -1085,6 +1085,8 @@ def control_maglock():
             return 'Maglock doghouse-lock is now locked'
         elif action == "unlocked":
             pi3.exec_command("raspi-gpio set 4 op dh")
+            if retriever_status == {'status': 'playing'}:
+                pi3.exec_command("mpg123 -a hw:0,0 Music/hok.mp3")
             return 'Maglock doghouse-lock is now unlocked'
     elif maglock == "shed-door-lock":
         if action == "locked":
@@ -1113,9 +1115,12 @@ def control_maglock():
     elif maglock == "lab-hatch-lock":
         if action == "locked":
             ssh.exec_command("raspi-gpio set 20 op dl")
-            return 'blacklight locked'
+            return 'labhatch locked'
         elif action == "unlocked":
             ssh.exec_command("raspi-gpio set 20 op dh")
+            if retriever_status == {'status': 'playing'}:
+                time.sleep(4)
+                pi2.exec_command("mpg123 -a hw:2,0 Music/lab_intro.mp3")
             return 'exit unlocked'
     elif maglock == "sliding-door-lock":
         if action == "locked":
@@ -1293,7 +1298,7 @@ def monitor_sensor_statuses():
             if code1 and code2 and code3 and code4 and code5:
                 print("executed")
                 time.sleep(7)
-                pi3.exec_command('mpg123 -a hw:0,0 Music/shed_open.mp3')
+                pi3.exec_command('mpg123 -a hw:0,0 Music/schuur_open.mp3')
                 time.sleep(5)
                 fade_music_in()
                 pi3.exec_command('raspi-gpio set 16 op dh')
