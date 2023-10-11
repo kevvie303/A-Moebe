@@ -471,7 +471,7 @@ $(document).ready(function () {
   $("#end-game-button").click(function () {
     $(".tasks, .locks, .lock-status, .pin-info").show();
     $("#prepare-result").hide();
-    $("#pause-button").show();
+    $("#pause-button, #prepare-game-button").show();
     clearInterval(intervalId);
     updateTimers();
     $.post("/timer/stop", function (data) {
@@ -801,6 +801,7 @@ function updatePiStatus() {
 // Start updating status on page load
 $(document).ready(function () {
   updatePiStatus();
+  setInterval(fetchTasks, 2000);
 });
 
 async function fetchTasks() {

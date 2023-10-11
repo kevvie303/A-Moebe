@@ -45,6 +45,8 @@ code3 = False
 code4 = False
 code5 = False
 codesCorrect = 0
+bird_job = None
+squeak_job = None
 #logging.basicConfig(level=logging.DEBUG)  # Use appropriate log level
 active_ssh_connections = {}
 CORS(app)
@@ -100,7 +102,7 @@ sensor_states = {}
 
 def on_message(client, userdata, message):
     # Extract the topic and message payload
-    global code1, code2, code3, code4, code5
+    global code1, code2, code3, code4, code5, bird_job, squeak_job
     topic = message.topic
     parts = topic.split("/")
     sensor_name = parts[-1]  # Extract the last part of the topic (sensor name)
@@ -119,6 +121,7 @@ def on_message(client, userdata, message):
         print(task_state)
         if task_state == "pending":
             solve_task("paw-maze")
+            squeak_job = scheduler.add_job(start_squeak, 'interval', seconds=30)
             pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
     if check_rule("green_house_ir"):
     # Rule is satisfied, perform actions
@@ -159,6 +162,9 @@ def on_message(client, userdata, message):
         task_state = check_task_state("paw-maze")
         if task_state == "pending":
             solve_task("tree-lights")
+            if bird_job:
+                scheduler.remove_job(bird_job.id)
+                print (bird_job)
             code5 = True
             print("3")
             pi3.exec_command("raspi-gpio set 23 op dh")
@@ -1082,6 +1088,7 @@ def lock_entrance_door():
     ssh.exec_command("raspi-gpio set 17 dl")
     return "locked door"
 def control_maglock():
+    global squeak_job
     maglock = request.form.get('maglock')
     action = request.form.get('action')
     
@@ -1101,6 +1108,7 @@ def control_maglock():
             return 'Maglock doghouse-lock is now locked'
         elif action == "unlocked":
             pi3.exec_command("raspi-gpio set 4 op dh")
+            retriever_status = get_retriever_status()
             if retriever_status == {'status': 'playing'}:
                 pi3.exec_command("mpg123 -a hw:0,0 Music/hok.mp3")
             return 'Maglock doghouse-lock is now unlocked'
@@ -1134,7 +1142,9 @@ def control_maglock():
             return 'labhatch locked'
         elif action == "unlocked":
             ssh.exec_command("raspi-gpio set 20 op dh")
+            scheduler.remove_job(squeak_job.id)
             solve_task("squeekence")
+            retriever_status = get_retriever_status()
             if retriever_status == {'status': 'playing'}:
                 time.sleep(4)
                 pi2.exec_command("mpg123 -a hw:2,0 Music/lab_intro.mp3")
@@ -1244,7 +1254,7 @@ def monitor_sensor_statuses():
         last_used_keypad_code = get_shed_keypad_code()
         if last_used_keypad_code != last_keypad_code:
             last_keypad_code = last_used_keypad_code  # Update the last keypad code
-            if last_used_keypad_code == "1527" and code1 == False:
+            if last_used_keypad_code == "1528" and code1 == False:
                 solve_task("flowers")
                 code1 = True
                 print(code1)
@@ -1390,15 +1400,16 @@ def add_sensor():
 def list_sensors():
     return render_template('list_sensors.html', sensors=sensors)
 def start_bird_sounds():
-    pi3.exec_command("mpg123 -a hw:1,0 Music/Pecker.mp3")
+    pi3.exec_command("mpg123 -a hw:1,0 Music/Duck.mp3")
     print("1")
     time.sleep(8)
-    pi3.exec_command("mpg123 -a hw:1,0 Music/Owl.mp3")
+    pi3.exec_command("mpg123 -a hw:1,0 Music/Eagle.mp3")
     print("2")
     time.sleep(8)
     pi3.exec_command("mpg123 -a hw:1,0 Music/Gull.mp3")
     print("3")
-
+def start_squeak():
+    pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
 
 API_URL_IR_SENSORS = 'http://192.168.0.114:5001/ir-sensor/status/'
 
@@ -1564,7 +1575,8 @@ def update_timer():
 
 @app.route('/timer/start', methods=['POST'])
 def start_timer():
-    global timer_thread, timer_value, speed, timer_running
+    global timer_thread, timer_value, speed, timer_running, bird_job
+    bird_job = scheduler.add_job(start_bird_sounds, 'interval', minutes=1)
     update_retriever_status('playing')
     if timer_thread is None or not timer_thread.is_alive():
         timer_value = 3600  # Reset timer value to 60 minutes
@@ -1574,6 +1586,7 @@ def start_timer():
         timer_thread.daemon = True
         timer_thread.start()
         fade_music_out2()
+    time.sleep(0.5)
     load_command = f'echo "load /home/pi/Music/Ambience.mp3" | sudo tee /tmp/mpg123_fifo'
     pi3.exec_command(load_command)
     time.sleep(0.5)
@@ -1744,25 +1757,26 @@ def prepare_game():
         time.sleep(5)
         ssh.exec_command('sudo -E python status.py')
         time.sleep(3)
-        pi2.exec_command('sudo python sinus_game.py \n python status.py')
+        pi2.exec_command('sudo python sinus_game.py')
     time.sleep(1)
+
+    print("Preparation complete.")
+    if retriever_status != {'status': 'prepared'}:
+        pi2.exec_command("python status.py")
+        load_command = f'echo "load /home/pi/Music/Lounge.mp3" | sudo tee /tmp/mpg123_fifo'
+        pi3.exec_command(load_command)
     results = check_all_scripts()
     
     print(results)
     response = {
         "message": results
     }
-
-    print("Preparation complete.")
-    load_command = f'echo "load /home/pi/Music/Lounge.mp3" | sudo tee /tmp/mpg123_fifo'
-    pi3.exec_command(load_command)
     update_retriever_status('prepared')
     return jsonify(response), 200
 
 if romy == False:
     turn_on_api()
     start_scripts()
-    #scheduler.add_job(start_bird_sounds, 'interval', minutes=1)
 
 @app.route('/')
 def index():
