@@ -162,7 +162,7 @@ def on_message(client, userdata, message):
         task_state = check_task_state("paw-maze")
         if task_state == "pending":
             solve_task("tree-lights")
-            scheduler.remove_job(bird_job.id)
+            #scheduler.remove_job(bird_job.id)
             code5 = True
             print("3")
             pi3.exec_command("raspi-gpio set 23 op dh")
@@ -1577,7 +1577,7 @@ def update_timer():
 @app.route('/timer/start', methods=['POST'])
 def start_timer():
     global timer_thread, timer_value, speed, timer_running, bird_job
-    bird_job = scheduler.add_job(start_bird_sounds, 'interval', minutes=1)
+    #bird_job = scheduler.add_job(start_bird_sounds, 'interval', minutes=1)
     update_retriever_status('playing')
     if timer_thread is None or not timer_thread.is_alive():
         timer_value = 3600  # Reset timer value to 60 minutes
