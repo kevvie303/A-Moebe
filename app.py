@@ -162,9 +162,7 @@ def on_message(client, userdata, message):
         task_state = check_task_state("paw-maze")
         if task_state == "pending":
             solve_task("tree-lights")
-            if bird_job:
-                scheduler.remove_job(bird_job.id)
-                print (bird_job)
+            scheduler.remove_job(bird_job.id)
             code5 = True
             print("3")
             pi3.exec_command("raspi-gpio set 23 op dh")
@@ -1143,11 +1141,14 @@ def control_maglock():
         elif action == "unlocked":
             ssh.exec_command("raspi-gpio set 20 op dh")
             scheduler.remove_job(squeak_job.id)
-            solve_task("squeekence")
+            solve_task("squeekuence")
             retriever_status = get_retriever_status()
             if retriever_status == {'status': 'playing'}:
                 time.sleep(4)
                 pi2.exec_command("mpg123 -a hw:2,0 Music/lab_intro.mp3")
+                time.sleep(4)
+                load_command = f'echo "load /home/pi/Music/Background.mp3" | sudo tee /tmp/mpg123_fifo'
+                pi2.exec_command(load_command)
             return 'exit unlocked'
     elif maglock == "sliding-door-lock":
         if action == "locked":
