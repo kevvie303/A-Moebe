@@ -110,5 +110,33 @@
         "pin": 18,
         "pi": "middle-pi",
         "state": "Not Triggered"
+    },
+    {
+        "name": "top_left_light",
+        "type": "light",
+        "pin": 4,
+        "pi": "middle-pi",
+        "state": "On"
+    },
+    {
+        "name": "top_right_light",
+        "type": "light",
+        "pin": 7,
+        "pi": "middle-pi",
+        "state": "On"
+    },
+    {
+        "name": "bottom_right_light",
+        "type": "light",
+        "pin": 8,
+        "pi": "middle-pi",
+        "state": "On"
+    },
+    {
+        "name": "bottom_left_light",
+        "type": "light",
+        "pin": 1,
+        "pi": "middle-pi",
+        "state": "On"
     }
 ]

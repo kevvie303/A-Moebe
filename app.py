@@ -44,6 +44,10 @@ code2 = False
 code3 = False
 code4 = False
 code5 = False
+kraken1 = False
+kraken2 = False
+kraken3 = False
+kraken4 = False
 codesCorrect = 0
 bird_job = None
 squeak_job = None
@@ -102,7 +106,7 @@ sensor_states = {}
 
 def on_message(client, userdata, message):
     # Extract the topic and message payload
-    global code1, code2, code3, code4, code5, bird_job, squeak_job
+    global code1, code2, code3, code4, code5, bird_job, squeak_job, kraken1, kraken2, kraken3, kraken4
     topic = message.topic
     parts = topic.split("/")
     sensor_name = parts[-1]  # Extract the last part of the topic (sensor name)
@@ -121,28 +125,34 @@ def on_message(client, userdata, message):
         print(task_state)
         if task_state == "pending":
             solve_task("paw-maze")
-            squeak_job = scheduler.add_job(start_squeak, 'interval', seconds=30)
+            scheduler.add_job(start_squeak, 'interval', seconds=30, id='squeakjob')
             pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
     if check_rule("green_house_ir"):
     # Rule is satisfied, perform actions
         pi3.exec_command("raspi-gpio set 15 op dh")
         print("1")
-    if check_rule("top_left_kraken"):
+    if check_rule("top_left_kraken") and kraken1 == False:
         pi2.exec_command('raspi-gpio set 4 op dh')
-    else:
-        pi2.exec_command('raspi-gpio set 4 op dl')
-    if check_rule("top_right_kraken"):
+        kraken1 = True
+    if check_rule("top_right_kraken") and kraken2 == False:
         pi2.exec_command('raspi-gpio set 7 op dh')
-    else:
-        pi2.exec_command('raspi-gpio set 7 op dl')
-    if check_rule("bottom_right_kraken"):
+        kraken2 = True
+    if check_rule("bottom_right_kraken") and kraken3 == False:
         pi2.exec_command('raspi-gpio set 8 op dh')
-    else:
-        pi2.exec_command('raspi-gpio set 8 op dl')
-    if check_rule("bottom_left_kraken"):
+        kraken3 = True
+    if check_rule("bottom_left_kraken") and kraken4 == False:
         pi2.exec_command('raspi-gpio set 1 op dh')
+        kraken4 = True
+    if check_rule("top_left_light") or check_rule("top_right_light") or check_rule("bottom_left_light") or check_rule("bottom_right_light"):
+        print("not solved")
     else:
-        pi2.exec_command('raspi-gpio set 1 op dl')
+        pi2.exec_command("mpg123 -a hw:2,0 Music/gelukt.mp3 \n raspi-gpio set 4 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 8 op dl \n raspi-gpio set 1 op dl")
+        time.sleep(3)
+        ssh.exec_command("raspi-gpio set 16 op dh")
+        time.sleep(7.5)
+        ssh.exec_command("raspi-gpio set 6 op dh")
+        load_command = f'echo "load /home/pi/Music/Dogsout.mp3" | sudo tee /tmp/mpg123_fifo'
+        pi2.exec_command(load_command)
     global sequence
     if check_rule("green_house_ir") and sequence == 0:
         pi3.exec_command("raspi-gpio set 15 op dh")
@@ -159,10 +169,10 @@ def on_message(client, userdata, message):
         pi3.exec_command("raspi-gpio set 15 op dl")
         sequence = 0
     if check_rule("blue_house_ir") and sequence == 2:
-        task_state = check_task_state("paw-maze")
+        task_state = check_task_state("tree-lights")
         if task_state == "pending":
             solve_task("tree-lights")
-            #scheduler.remove_job(bird_job.id)
+            scheduler.remove_job('birdjob')
             code5 = True
             print("3")
             pi3.exec_command("raspi-gpio set 23 op dh")
@@ -555,13 +565,17 @@ def pause_music():
         return 'No file selected to pause'
 @app.route('/fade_music_out', methods=['POST'])
 def fade_music_out():
-
+    task_state = check_task_state("squeekuence")
         # Gradually reduce the volume from 80 to 40
     for volume in range(25, 10, -1):
         # Send the volume command to the Raspberry Pi
         command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
-        stdin, stdout, stderr = pi3.exec_command(command)
-        stdin, stdout, stderr = pi2.exec_command(command)
+        
+        if task_state == "solved":
+            stdin, stdout, stderr = pi2.exec_command(command)
+        else:
+            stdin, stdout, stderr = pi3.exec_command(command)
+        
         # Wait for a short duration between volume changes
         time.sleep(0.05)  # Adjust the sleep duration as needed
     return "Volume faded successfully"
@@ -575,15 +589,25 @@ def fade_music_out2():
         stdin, stdout, stderr = pi2.exec_command(command)
         # Wait for a short duration between volume changes
         time.sleep(0.05)  # Adjust the sleep duration as needed
+def fade_music_out3():
+        # Gradually reduce the volume from 80 to 40
+    for volume in range(25, 0, -1):
+        # Send the volume command to the Raspberry Pi
+        command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
+        stdin, stdout, stderr = pi2.exec_command(command)
+        # Wait for a short duration between volume changes
+        time.sleep(0.05)  # Adjust the sleep duration as needed
 @app.route('/fade_music_in', methods=['POST'])
 def fade_music_in():
-
+    task_state = check_task_state("squeekuence")
         # Gradually reduce the volume from 80 to 40
     for volume in range(10, 25, 1):
         # Send the volume command to the Raspberry Pi
         command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
-        stdin, stdout, stderr = pi3.exec_command(command)
-        stdin, stdout, stderr = pi2.exec_command(command)
+        if task_state == "solved":
+            stdin, stdout, stderr = pi2.exec_command(command)
+        else:
+            stdin, stdout, stderr = pi3.exec_command(command)
         # Wait for a short duration between volume changes
         time.sleep(0.05)  # Adjust the sleep duration as needed
     return "Volume faded successfully"
@@ -779,6 +803,10 @@ def solve_task(task_name):
         for task in tasks:
             if task['task'] == task_name:
                 task['state'] = 'solved'
+        if task_name == "paw-maze":
+            print(task)
+            scheduler.add_job(start_squeak, 'interval', seconds=30, id='squeakjob')
+            pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
 
         with open(file_path, 'w') as file:
             json.dump(tasks, file, indent=4)
@@ -919,7 +947,11 @@ def control_light():
         print(light_name)
     elif light_name == "Light-7":
         command = "raspi-gpio set 17 op dl \n raspi-gpio set 10 op dl"
-    if light_name == "Light-5" or light_name == "Light-6" or light_name == "Light-7":
+    if light_name == "Light-8":
+        command = "raspi-gpio set 4 op dh"
+    if light_name == "Light-8":
+        pi2.exec_command(command)
+    elif light_name == "Light-5" or light_name == "Light-6" or light_name == "Light-7":
         ssh.exec_command(command)
     else:
         pi3.exec_command(command)
@@ -1132,6 +1164,7 @@ def control_maglock():
             ssh.exec_command("raspi-gpio set 21 op dh")
             retriever_status = get_retriever_status()
             if retriever_status == {'status': 'playing'}:
+                fade_music_out3()
                 stop_timer()
             return 'exit unlocked'
     elif maglock == "lab-hatch-lock":
@@ -1140,15 +1173,20 @@ def control_maglock():
             return 'labhatch locked'
         elif action == "unlocked":
             ssh.exec_command("raspi-gpio set 20 op dh")
-            scheduler.remove_job(squeak_job.id)
             solve_task("squeekuence")
             retriever_status = get_retriever_status()
+            print(retriever_status)
             if retriever_status == {'status': 'playing'}:
+                print("executed")
                 time.sleep(4)
                 pi2.exec_command("mpg123 -a hw:2,0 Music/lab_intro.mp3")
                 time.sleep(4)
                 load_command = f'echo "load /home/pi/Music/Background.mp3" | sudo tee /tmp/mpg123_fifo'
                 pi2.exec_command(load_command)
+                time.sleep(1)
+                command = f'echo "volume 8" | sudo tee /tmp/mpg123_fifo'
+                stdin, stdout, stderr = pi3.exec_command(command)
+            scheduler.remove_job('squeakjob')
             return 'exit unlocked'
     elif maglock == "sliding-door-lock":
         if action == "locked":
@@ -1266,7 +1304,7 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/bloemen.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
+                if codesCorrect == 1 or codesCorrect == 2 or codesCorrect == 4:
                     fade_music_in()
                 elif codesCorrect == 2:
                     print(codesCorrect)
@@ -1283,7 +1321,7 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/vlieger.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
+                if codesCorrect == 1 or codesCorrect == 2 or codesCorrect == 4:
                     fade_music_in()
                 elif codesCorrect == 2:
                     print(codesCorrect)
@@ -1300,7 +1338,7 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/plantenbak.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
+                if codesCorrect == 1 or codesCorrect == 2 or codesCorrect == 4:
                     fade_music_in()
                 elif codesCorrect == 2:
                     print(codesCorrect)
@@ -1317,7 +1355,7 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/hek.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect == 1 or codesCorrect == 3 or codesCorrect == 4:
+                if codesCorrect == 1 or codesCorrect == 2 or codesCorrect == 4:
                     fade_music_in()
                 elif codesCorrect == 2:
                     print(codesCorrect)
@@ -1339,7 +1377,7 @@ def monitor_sensor_statuses():
                 code3 = False
                 code4 = False
                 code5 = False
-            if codesCorrect == 2:
+            if codesCorrect == 3:
                 codesCorrect += 1
                 time.sleep(7)
                 pi3.exec_command('mpg123 -a hw:0,0 Music/goed_bezig.mp3')
@@ -1401,14 +1439,11 @@ def add_sensor():
 def list_sensors():
     return render_template('list_sensors.html', sensors=sensors)
 def start_bird_sounds():
+    pi3.exec_command("mpg123 -a hw:1,0 Music/Gull.mp3")
+    time.sleep(8)
     pi3.exec_command("mpg123 -a hw:1,0 Music/Duck.mp3")
-    print("1")
     time.sleep(8)
     pi3.exec_command("mpg123 -a hw:1,0 Music/Eagle.mp3")
-    print("2")
-    time.sleep(8)
-    pi3.exec_command("mpg123 -a hw:1,0 Music/Gull.mp3")
-    print("3")
 def start_squeak():
     pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
 
@@ -1577,7 +1612,7 @@ def update_timer():
 @app.route('/timer/start', methods=['POST'])
 def start_timer():
     global timer_thread, timer_value, speed, timer_running, bird_job
-    #bird_job = scheduler.add_job(start_bird_sounds, 'interval', minutes=1)
+    scheduler.add_job(start_bird_sounds, 'interval', minutes=1, id='birdjob')
     update_retriever_status('playing')
     if timer_thread is None or not timer_thread.is_alive():
         timer_value = 3600  # Reset timer value to 60 minutes
@@ -1596,8 +1631,14 @@ def start_timer():
 
 @app.route('/timer/stop', methods=['POST'])
 def stop_timer():
-    global timer_thread, timer_running, timer_value
+    global timer_thread, timer_running, timer_value, kraken1, kraken2, kraken3, kraken4
     update_retriever_status('awake')
+    kraken1 = False
+    kraken2 = False
+    kraken3 = False
+    kraken4 = False
+    pi2.exec_command("raspi-gpio set 4 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 8 op dl \n raspi-gpio set 1 op dl")
+    reset_task_statuses()
     stop_music()
     if timer_thread is not None and timer_thread.is_alive():
         write_timer_value(timer_value)
@@ -1659,7 +1700,6 @@ def get_pause_state():
 @app.route('/get-pi-status', methods=['GET'])
 def get_pi_status():
     global ssh, pi2, pi3
-
     # Define the names and IP addresses of the Pis
     pi_names = {
         "top-pi": "192.168.0.104",
@@ -1734,7 +1774,7 @@ def check_all_scripts():
     return results
 @app.route('/prepare', methods=['POST'])
 def prepare_game():
-    global codesCorrect
+    global codesCorrect, kraken1, kraken2, kraken3, kraken4
     global code1
     global code2
     global code3
@@ -1746,6 +1786,11 @@ def prepare_game():
     code3 = False
     code4 = False
     code5 = False
+    kraken1 = False
+    kraken2 = False
+    kraken3 = False
+    kraken4 = False
+    pi2.exec_command("raspi-gpio set 4 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 8 op dl \n raspi-gpio set 1 op dl")
     print("Preparing game...")  # Add this line for debugging
     # Perform the checks and generate the result message
     retriever_status = get_retriever_status()
@@ -1756,6 +1801,7 @@ def prepare_game():
         pi2.exec_command('sudo pkill -f sinus_game.py')
         ssh.exec_command('sudo pkill -f status.py')
         time.sleep(5)
+        pi2.exec_command('echo "volume 25" | sudo tee /tmp/mpg123_fifo')
         ssh.exec_command('sudo -E python status.py')
         time.sleep(3)
         pi2.exec_command('sudo python sinus_game.py')
