@@ -121,12 +121,10 @@ def on_message(client, userdata, message):
         print("State changed. Updated JSON.")
     print(sensor_states)
     if check_rule("maze-sensor"):
-        task_state = check_task_state("paw-maze")
-        print(task_state)
-        if task_state == "pending":
+        if check_task_state("paw-maze") == "pending":
             solve_task("paw-maze")
-            scheduler.add_job(start_squeak, 'interval', seconds=30, id='squeakjob')
-            pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
+            #scheduler.add_job(start_squeak, 'interval', seconds=30, id='squeakjob')
+            #pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
     if check_rule("green_house_ir"):
     # Rule is satisfied, perform actions
         pi3.exec_command("raspi-gpio set 15 op dh")
@@ -149,7 +147,7 @@ def on_message(client, userdata, message):
         pi2.exec_command("mpg123 -a hw:2,0 Music/gelukt.mp3 \n raspi-gpio set 4 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 8 op dl \n raspi-gpio set 1 op dl")
         time.sleep(3)
         ssh.exec_command("raspi-gpio set 16 op dh")
-        time.sleep(7.5)
+        time.sleep(6)
         ssh.exec_command("raspi-gpio set 6 op dh")
         load_command = f'echo "load /home/pi/Music/Dogsout.mp3" | sudo tee /tmp/mpg123_fifo'
         pi2.exec_command(load_command)
@@ -1181,8 +1179,7 @@ def control_maglock():
                 time.sleep(4)
                 pi2.exec_command("mpg123 -a hw:2,0 Music/lab_intro.mp3")
                 time.sleep(4)
-                load_command = f'echo "load /home/pi/Music/Background.mp3" | sudo tee /tmp/mpg123_fifo'
-                pi2.exec_command(load_command)
+                pi2.exec_command("mpg123 -a hw:1,0 Music/Background.mp3")
                 time.sleep(1)
                 command = f'echo "volume 8" | sudo tee /tmp/mpg123_fifo'
                 stdin, stdout, stderr = pi3.exec_command(command)
@@ -1385,7 +1382,7 @@ def monitor_sensor_statuses():
                 fade_music_in()
         if sinus_status == "solved" and aborted == False:
             solve_task("sinus-game")
-            pi2.exec_command("mpg123 -a hw:1,0 Music/pentakill.mp3")
+            #pi2.exec_command("mpg123 -a hw:1,0 Music/pentakill.mp3")
         time.sleep(0.1)
 # Start a new thread for monitoring sensor statuses
 @app.route('/add_sensor', methods=['GET', 'POST'])
