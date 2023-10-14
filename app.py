@@ -122,7 +122,7 @@ def on_message(client, userdata, message):
     print(sensor_states)
     if check_rule("maze-sensor"):
         if check_task_state("paw-maze") == "pending":
-            solve_task("paw-maze")
+            #solve_task("paw-maze")
             #scheduler.add_job(start_squeak, 'interval', seconds=30, id='squeakjob')
             #pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
     if check_rule("green_house_ir"):
