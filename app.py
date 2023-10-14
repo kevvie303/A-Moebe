@@ -49,8 +49,8 @@ kraken2 = False
 kraken3 = False
 kraken4 = False
 codesCorrect = 0
-bird_job = None
-squeak_job = None
+bird_job = False
+squeak_job = False
 #logging.basicConfig(level=logging.DEBUG)  # Use appropriate log level
 active_ssh_connections = {}
 CORS(app)
@@ -170,7 +170,9 @@ def on_message(client, userdata, message):
         task_state = check_task_state("tree-lights")
         if task_state == "pending":
             solve_task("tree-lights")
-            scheduler.remove_job('birdjob')
+            if bird_job == True:
+                scheduler.remove_job('birdjob')
+                bird_job = False
             code5 = True
             print("3")
             pi3.exec_command("raspi-gpio set 23 op dh")
@@ -355,7 +357,7 @@ def retriever():
 def start_scripts():
     global should_sound_play
     #pi2.exec_command('python sensor_board.py')
-    pi2.exec_command('sudo python sinus_game.py')
+    #pi2.exec_command('sudo python sinus_game.py')
     # pi2.exec_command('python distort.py')
     #ssh.exec_command('python read.py')
     # ssh.exec_command('python keypad.py')
@@ -563,13 +565,12 @@ def pause_music():
         return 'No file selected to pause'
 @app.route('/fade_music_out', methods=['POST'])
 def fade_music_out():
-    task_state = check_task_state("squeekuence")
         # Gradually reduce the volume from 80 to 40
     for volume in range(25, 10, -1):
         # Send the volume command to the Raspberry Pi
         command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
         
-        if task_state == "solved":
+        if check_task_state("squeekuence") == "solved":
             stdin, stdout, stderr = pi2.exec_command(command)
         else:
             stdin, stdout, stderr = pi3.exec_command(command)
@@ -597,12 +598,11 @@ def fade_music_out3():
         time.sleep(0.05)  # Adjust the sleep duration as needed
 @app.route('/fade_music_in', methods=['POST'])
 def fade_music_in():
-    task_state = check_task_state("squeekuence")
         # Gradually reduce the volume from 80 to 40
     for volume in range(10, 25, 1):
         # Send the volume command to the Raspberry Pi
         command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
-        if task_state == "solved":
+        if check_task_state("squeekuence") == "solved":
             stdin, stdout, stderr = pi2.exec_command(command)
         else:
             stdin, stdout, stderr = pi3.exec_command(command)
@@ -792,6 +792,7 @@ def get_task_status():
     
 @app.route('/solve_task/<task_name>', methods=['POST'])
 def solve_task(task_name):
+    global squeak_job
     file_path = os.path.join(current_dir, 'json', 'tasks.json')
 
     try:
@@ -803,9 +804,14 @@ def solve_task(task_name):
                 task['state'] = 'solved'
         if task_name == "paw-maze":
             print(task)
-            scheduler.add_job(start_squeak, 'interval', seconds=30, id='squeakjob')
+            if squeak_job == False:
+                scheduler.add_job(start_squeak, 'interval', seconds=30, id='squeakjob')
+                squeak_job = True
             pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
-
+        elif task_name == "sinus-game":
+            pi2.exec_command("sudo pkill -f sinus_game.py")
+            time.sleep(0.5)
+            pi2.exec_command("sudo python sinus_override.py")
         with open(file_path, 'w') as file:
             json.dump(tasks, file, indent=4)
         with app.app_context():
@@ -875,7 +881,7 @@ def reset_puzzles():
     pi2.exec_command('raspi-gpio set 7 op dl')
     pi2.exec_command('raspi-gpio set 8 op dl')
     time.sleep(3)
-    pi2.exec_command('sudo python sinus_game.py')
+    #pi2.exec_command('sudo python sinus_game.py')
     #pi2.exec_command('python sensor_board.py')
     time.sleep(15)
     aborted = False
@@ -1175,15 +1181,19 @@ def control_maglock():
             retriever_status = get_retriever_status()
             print(retriever_status)
             if retriever_status == {'status': 'playing'}:
+                pi2.exec_command("sudo python sinus_game.py")
                 print("executed")
                 time.sleep(4)
                 pi2.exec_command("mpg123 -a hw:2,0 Music/lab_intro.mp3")
                 time.sleep(4)
-                pi2.exec_command("mpg123 -a hw:1,0 Music/Background.mp3")
+                load_command = f'echo "load /home/pi/Music/Background.mp3" | sudo tee /tmp/mpg123_fifo \n echo "volume 25" | sudo tee /tmp/mpg123_fifo'
+                pi2.exec_command(load_command)
                 time.sleep(1)
                 command = f'echo "volume 8" | sudo tee /tmp/mpg123_fifo'
                 stdin, stdout, stderr = pi3.exec_command(command)
-            scheduler.remove_job('squeakjob')
+            if squeak_job == True:
+                scheduler.remove_job('squeakjob')
+                squeak_job = False
             return 'exit unlocked'
     elif maglock == "sliding-door-lock":
         if action == "locked":
@@ -1609,7 +1619,9 @@ def update_timer():
 @app.route('/timer/start', methods=['POST'])
 def start_timer():
     global timer_thread, timer_value, speed, timer_running, bird_job
-    scheduler.add_job(start_bird_sounds, 'interval', minutes=1, id='birdjob')
+    if bird_job == False:
+        scheduler.add_job(start_bird_sounds, 'interval', minutes=1, id='birdjob')
+        bird_job = True
     update_retriever_status('playing')
     if timer_thread is None or not timer_thread.is_alive():
         timer_value = 3600  # Reset timer value to 60 minutes
@@ -1630,11 +1642,11 @@ def start_timer():
 def stop_timer():
     global timer_thread, timer_running, timer_value, kraken1, kraken2, kraken3, kraken4
     update_retriever_status('awake')
+    pi2.exec_command("raspi-gpio set 4 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 8 op dl \n raspi-gpio set 1 op dl")
     kraken1 = False
     kraken2 = False
     kraken3 = False
     kraken4 = False
-    pi2.exec_command("raspi-gpio set 4 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 8 op dl \n raspi-gpio set 1 op dl")
     reset_task_statuses()
     stop_music()
     if timer_thread is not None and timer_thread.is_alive():
@@ -1797,13 +1809,10 @@ def prepare_game():
         pi3.exec_command('echo "volume 65" | sudo tee /tmp/mpg123_fifo')
         pi2.exec_command('sudo pkill -f sinus_game.py')
         ssh.exec_command('sudo pkill -f status.py')
-        time.sleep(5)
-        pi2.exec_command('echo "volume 25" | sudo tee /tmp/mpg123_fifo')
-        ssh.exec_command('sudo -E python status.py')
-        time.sleep(3)
-        pi2.exec_command('sudo python sinus_game.py')
+        time.sleep(2)
+        turn_on_api()
+        pi2.exec_command('echo "volume 25" | sudo tee /tmp/mpg123_fifo \n sudo pkill -f sinus_override.py')
     time.sleep(1)
-
     print("Preparation complete.")
     if retriever_status != {'status': 'prepared'}:
         pi2.exec_command("python status.py")
