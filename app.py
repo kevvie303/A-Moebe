@@ -64,7 +64,7 @@ def turn_on_api():
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(ip1brink, username=os.getenv("SSH_USERNAME"), password=os.getenv("SSH_PASSWORD"))
-    ssh.exec_command('sudo -E python status.py')
+    #ssh.exec_command('sudo -E python status.py')
     establish_ssh_connection()
 
 def establish_ssh_connection():
@@ -1625,7 +1625,7 @@ def start_timer():
         bird_job = True
     update_retriever_status('playing')
     if timer_thread is None or not timer_thread.is_alive():
-        timer_value = 3600  # Reset timer value to 60 minutes
+        timer_value = 5400  # Reset timer value to 60 minutes
         write_timer_value(timer_value)
         timer_running = True
         timer_thread = threading.Thread(target=update_timer)
@@ -1809,7 +1809,7 @@ def prepare_game():
         codesCorrect = 0
         pi3.exec_command('echo "volume 65" | sudo tee /tmp/mpg123_fifo')
         pi2.exec_command('sudo pkill -f sinus_game.py')
-        ssh.exec_command('sudo pkill -f status.py')
+        #ssh.exec_command('sudo pkill -f status.py')
         time.sleep(2)
         turn_on_api()
         pi2.exec_command('echo "volume 25" | sudo tee /tmp/mpg123_fifo \n sudo pkill -f sinus_override.py')

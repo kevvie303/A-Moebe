@@ -55,9 +55,11 @@ landing page
 }
 .landing-page .rooms .retriever-container .controls .info {
   display: flex;
+  width: -moz-fit-content;
   width: fit-content;
 }
 .landing-page .rooms .retriever-container .controls .info a {
+  width: -moz-fit-content;
   width: fit-content;
 }
 .landing-page .rooms .media {
@@ -533,6 +535,7 @@ header .logo-container {
 
 .time-hidden .time .time-controls .reset-speed {
   display: flex;
+  width: -moz-fit-content;
   width: fit-content;
 }
 
@@ -574,6 +577,7 @@ header .logo-container {
 }
 
 .game-hidden .game-controls .game-buttons {
+  width: -moz-fit-content;
   width: fit-content;
 }
 
@@ -582,6 +586,7 @@ header .logo-container {
 }
 
 .game-hidden .game-controls .abort button {
+  width: -moz-fit-content;
   width: fit-content;
   align-self: center;
   background: var(--locked);
@@ -723,6 +728,7 @@ header .logo-container {
 }
 
 .media-selection-container form input {
+  width: -moz-fit-content;
   width: fit-content;
 }
 
@@ -733,21 +739,6 @@ header .logo-container {
   */
 main {
   overflow-x: hidden;
-}
-
-#navbar-container {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  z-index: 100; /* Make sure it's on top of other content */
-  background-color: white; /* Set the background color you prefer */
-}
-
-.important-controls {
-  position: sticky;
-  top: 0;
-  background-color: white; /* Set the background color to match the container */
-  /* Your existing CSS styles for .important-controls */
 }
 
 #nav-snooze-status {
@@ -843,6 +834,7 @@ light control
   display: flex;
   justify-content: center;
   margin: 0 20px;
+  z-index: -1;
 }
 .control-container .light-container .lights {
   position: relative;
@@ -886,10 +878,7 @@ light control
   left: 50px;
   top: 200px;
 }
-.control-container .light-container .lights .light-buttons img:nth-of-type(8) {
-  left: 5px;
-  top: 210px;
-}
+
 @media (min-width: 1200px) {
   .control-container .light-container {
     position: absolute;
@@ -961,10 +950,6 @@ light control
   .control-container .light-container .lights .light-buttons img:nth-of-type(7) {
     left: 90px;
     top: 310px;
-  }
-  .control-container .light-container .lights .light-buttons img:nth-of-type(8) {
-    left: 5px;
-    top: 330px;
   }
 }
 /*
@@ -1045,6 +1030,7 @@ preparing
   ###############
   */
 .pin-info {
+  width: -moz-fit-content;
   width: fit-content;
   align-self: center;
 }

@@ -819,6 +819,7 @@ light control
     display: flex;
     justify-content: center;
     margin: 0 20px;
+    z-index: -1;
     .lights {
       position: relative;
       width: 250px;

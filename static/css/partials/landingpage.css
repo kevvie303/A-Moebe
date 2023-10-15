@@ -55,9 +55,11 @@ landing page
 }
 .landing-page .rooms .retriever-container .controls .info {
   display: flex;
+  width: -moz-fit-content;
   width: fit-content;
 }
 .landing-page .rooms .retriever-container .controls .info a {
+  width: -moz-fit-content;
   width: fit-content;
 }
 .landing-page .rooms .media {
