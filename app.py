@@ -52,6 +52,7 @@ kraken4 = False
 codesCorrect = 0
 bird_job = False
 squeak_job = False
+should_hint_shed_play = False
 #logging.basicConfig(level=logging.DEBUG)  # Use appropriate log level
 active_ssh_connections = {}
 CORS(app)
@@ -1302,7 +1303,7 @@ def get_sensor_status_pi2(sensor_number):
 with open('json/sensor_data.json', 'r') as json_file:
     sensors = json.load(json_file)
 def monitor_sensor_statuses():
-    global sequence
+    global sequence, should_hint_shed_play
     global code1, code2, code3, code4, code5
     global codesCorrect
     global last_keypad_code
@@ -1330,9 +1331,9 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/bloemen.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect == 1 or codesCorrect == 2 or codesCorrect == 4:
+                if codesCorrect == 2 or codesCorrect == 4:
                     fade_music_in()
-                elif codesCorrect == 2:
+                elif codesCorrect == 2 or codesCorrect == 1:
                     print(codesCorrect)
                 elif code5 == False:
                     fade_music_in()
@@ -1347,9 +1348,9 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/vlieger.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect == 1 or codesCorrect == 2 or codesCorrect == 4:
+                if codesCorrect == 2 or codesCorrect == 4:
                     fade_music_in()
-                elif codesCorrect == 2:
+                elif codesCorrect == 2 or codesCorrect == 1:
                     print(codesCorrect)
                 elif code5 == False:
                     fade_music_in()
@@ -1364,9 +1365,9 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/plantenbak.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect == 1 or codesCorrect == 2 or codesCorrect == 4:
+                if codesCorrect == 2 or codesCorrect == 4:
                     fade_music_in()
-                elif codesCorrect == 2:
+                elif codesCorrect == 2 or codesCorrect == 1:
                     print(codesCorrect)
                 elif code5 == False:
                     fade_music_in()
@@ -1381,9 +1382,9 @@ def monitor_sensor_statuses():
                 pi3.exec_command('mpg123 -a hw:0,0 Music/hek.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
                 time.sleep(5)
-                if codesCorrect == 1 or codesCorrect == 2 or codesCorrect == 4:
+                if codesCorrect == 2 or codesCorrect == 4:
                     fade_music_in()
-                elif codesCorrect == 2:
+                elif codesCorrect == 2 or codesCorrect == 1:
                     print(codesCorrect)
                 elif code5 == False:
                     fade_music_in()
@@ -1405,9 +1406,15 @@ def monitor_sensor_statuses():
                 code5 = False
             if codesCorrect == 3:
                 codesCorrect += 1
-                time.sleep(7)
+                time.sleep(2)
                 pi3.exec_command('mpg123 -a hw:0,0 Music/goed_bezig.mp3')
                 time.sleep(6)
+                fade_music_in()
+            if codesCorrect == 1 and should_hint_shed_play == True:
+                should_hint_shed_play = False
+                time.sleep(2)
+                pi3.exec_command('mpg123 -a hw:0,0 Music/after1code.mp3')
+                time.sleep(4)
                 fade_music_in()
         if sinus_status == "solved" and aborted == False:
             solve_task("sinus-game")
@@ -1802,7 +1809,7 @@ def check_all_scripts():
     return results
 @app.route('/prepare', methods=['POST'])
 def prepare_game():
-    global codesCorrect, kraken1, kraken2, kraken3, kraken4
+    global codesCorrect, kraken1, kraken2, kraken3, kraken4, should_hint_shed_play
     global code1
     global code2
     global code3
@@ -1818,6 +1825,7 @@ def prepare_game():
     kraken2 = False
     kraken3 = False
     kraken4 = False
+    should_hint_shed_play = True
     pi2.exec_command("raspi-gpio set 4 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 8 op dl \n raspi-gpio set 1 op dl")
     print("Preparing game...")  # Add this line for debugging
     # Perform the checks and generate the result message
