@@ -819,7 +819,6 @@ light control
     display: flex;
     justify-content: center;
     margin: 0 20px;
-    z-index: -1;
     .lights {
       position: relative;
       width: 250px;
@@ -859,6 +858,10 @@ light control
           &:nth-of-type(7) {
             left: 50px;
             top: 200px;
+          }
+          &:nth-of-type(8) {
+            left: 5px;
+            top: 210px;
           }
         }
       }
@@ -940,6 +943,10 @@ light control
               left: 90px;
               top: 310px;
             }
+            &:nth-of-type(8) {
+              left: 5px;
+              top: 330px;
+            }
           }
         }
       }
@@ -980,6 +987,21 @@ preparing
   locks
   #####
   */
+  #navbar-container {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 100; /* Make sure it's on top of other content */
+    background-color: white; /* Set the background color you prefer */
+  }
+  
+  .important-controls {
+    position: sticky;
+    top: 0;
+    background-color: white; /* Set the background color to match the container */
+    /* Your existing CSS styles for .important-controls */
+  }
+
 
 .control-container .locks .lock {
   display: flex;
