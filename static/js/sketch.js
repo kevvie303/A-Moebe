@@ -174,7 +174,22 @@ $(document).ready(function () {
     if (maglockName === "exit-door-lock" && action === "unlocked") {
       updateAwakeStatus();
     }
+    else if (maglockName === "should-balls-drop" && action === "locked") {
+      updateBallsStatus(false);
+    }
+    else if (maglockName === "should-balls-drop" && action === "unlocked") {
+      updateBallsStatus(true);
+    }
   });
+  function updateBallsStatus(status) {
+    const statusElement = document.getElementById('balls-status');
+    if (status) {
+        statusElement.textContent = 'Balls will drop';
+    } else {
+        statusElement.textContent = "Balls won't drop";
+    }
+}
+
   function updateAwakeStatus() {
     $("#prepare-game-button").show();
   }

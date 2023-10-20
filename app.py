@@ -327,7 +327,8 @@ def trigger():
     return jsonify({'message': 'Data received successfully'})
 @app.route('/retriever')
 def retriever():
-    return render_template('retriever.html')
+    balls_drop_status = 'drop' if should_balls_drop else 'not drop'
+    return render_template('retriever.html', balls_drop_status=balls_drop_status)
 def start_scripts():
     global should_sound_play
     #pi2.exec_command('python sensor_board.py')
@@ -1185,10 +1186,10 @@ def control_maglock():
     elif maglock == "should-balls-drop":
         if action == "locked":
             should_balls_drop = False
-            return 'blacklight locked'
+            return 'balls wont drop'
         elif action == "unlocked":
             should_balls_drop = True
-            return 'blacklight unlocked'
+            return 'balls will drop'
     elif maglock == "lab-hatch-lock":
         if action == "locked":
             ssh.exec_command("raspi-gpio set 20 op dl")
