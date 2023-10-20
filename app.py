@@ -128,10 +128,6 @@ def on_message(client, userdata, message):
             print("solved")
             #scheduler.add_job(start_squeak, 'interval', seconds=30, id='squeakjob')
             #pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
-    if check_rule("green_house_ir"):
-    # Rule is satisfied, perform actions
-        pi3.exec_command("raspi-gpio set 15 op dh")
-        print("1")
     if check_rule("top_left_kraken") and kraken1 == False:
         pi2.exec_command('raspi-gpio set 4 op dh')
         kraken1 = True
@@ -1394,7 +1390,7 @@ def monitor_sensor_statuses():
                 ssh.exec_command("raspi-gpio set 12 op dl")
             if code1 and code2 and code3 and code4 and code5:
                 print("executed")
-                time.sleep(7)
+                time.sleep(2)
                 pi3.exec_command('mpg123 -a hw:0,0 Music/schuur_open.mp3')
                 time.sleep(5)
                 fade_music_in()
@@ -1836,6 +1832,7 @@ def prepare_game():
         pi3.exec_command('echo "volume 65" | sudo tee /tmp/mpg123_fifo')
         pi2.exec_command('sudo pkill -f sinus_game.py')
         ssh.exec_command('sudo pkill -f status.py')
+        pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
         time.sleep(2)
         turn_on_api()
         pi2.exec_command('echo "volume 25" | sudo tee /tmp/mpg123_fifo \n sudo pkill -f sinus_override.py')
