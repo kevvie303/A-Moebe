@@ -549,6 +549,8 @@ def fade_music_out():
         
         # Wait for a short duration between volume changes
         time.sleep(0.05)  # Adjust the sleep duration as needed
+    time.sleep(1)
+    pi3.exec_command('mpg123 -a hw:0,0 Music/prehint.mp3')
     return "Volume faded successfully"
 def fade_music_out2():
 
@@ -1326,7 +1328,7 @@ def monitor_sensor_statuses():
                 time.sleep(2)
                 pi3.exec_command('mpg123 -a hw:0,0 Music/bloemen.mp3')
                 ssh.exec_command("raspi-gpio set 1 op dl")
-                time.sleep(5)
+                time.sleep(10)
                 if codesCorrect == 2 or codesCorrect == 4:
                     fade_music_in()
                 elif codesCorrect == 2 or codesCorrect == 1:
@@ -1803,6 +1805,14 @@ def check_all_scripts():
             results[device_name][script_name] = check_scripts_running(device_ssh, script_name)
     print("Checks completed.")  # Add this line for debugging
     return results
+def start_mqtt():
+    pi2.exec_command('pkill -f mqtt.py')
+    pi3.exec_command('pkill -f mqtt.py')
+    ssh.exec_command('pkill -f mqtt.py')
+    time.sleep(2)
+    pi2.exec_command('python mqtt.py') 
+    pi3.exec_command('python mqtt.py')
+    ssh.exec_command('python mqtt.py')
 @app.route('/prepare', methods=['POST'])
 def prepare_game():
     global codesCorrect, kraken1, kraken2, kraken3, kraken4, should_hint_shed_play
@@ -1828,6 +1838,7 @@ def prepare_game():
     retriever_status = get_retriever_status()
     print(retriever_status)
     if retriever_status != {'status': 'prepared'}:
+        start_mqtt()
         codesCorrect = 0
         pi3.exec_command('echo "volume 65" | sudo tee /tmp/mpg123_fifo')
         pi2.exec_command('sudo pkill -f sinus_game.py')
