@@ -10,6 +10,11 @@
         "state": "pending"
     },
     {
+        "task": "dog-house",
+        "description": "players have used the scrabble letters to create the word M-A-X code (318)",
+        "state": "pending"
+    },
+    {
         "task": "kite-count",
         "description": "Players have counted the shapes and found the code, 7867 or 8978, and filled it in, in the keypad",
         "state": "pending"
@@ -25,18 +30,18 @@
         "state": "pending"
     },
     {
+        "task": "woef-woef",
+        "description": "woef woef woef woef",
+        "state": "pending"
+    },
+    {
         "task": "max-vacation",
-        "description": "the players have seen the pictures of max's vacations and deduced where and when he went. (code: 3612)",
+        "description": "Players have spotted and ordered the vacations in the right order code (6123)",
         "state": "pending"
     },
     {
         "task": "paw-maze",
         "description": "players have solved the maze",
-        "state": "pending"
-    },
-    {
-        "task": "squid-game",
-        "description": "players have moved the 4 squidge to the center of the track. ",
         "state": "pending"
     },
     {
@@ -50,8 +55,23 @@
         "state": "pending"
     },
     {
+        "task": "glow-wire",
+        "description": "players have solved the wires code (3456)",
+        "state": "pending"
+    },
+    {
+        "task": "mirror-see",
+        "description": "players have seen the numbers through the mirrors code (794)",
+        "state": "pending"
+    },
+    {
         "task": "bone-slide",
-        "description": "players have gotten the cyllinders out of the dogtoy. (code ####)",
+        "description": "players have gotten the cyllinders out of the dogtoy. (code 216)",
+        "state": "pending"
+    },
+    {
+        "task": "squid-game",
+        "description": "players have moved the 4 squidge to the center of the track. ",
         "state": "pending"
     }
 ]

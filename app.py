@@ -128,29 +128,29 @@ def on_message(client, userdata, message):
             print("solved")
             #scheduler.add_job(start_squeak, 'interval', seconds=30, id='squeakjob')
             #pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
-    if check_rule("top_left_kraken") and kraken1 == False:
-        pi2.exec_command('raspi-gpio set 4 op dh')
-        kraken1 = True
-    if check_rule("top_right_kraken") and kraken2 == False:
-        pi2.exec_command('raspi-gpio set 7 op dh')
-        kraken2 = True
-    if check_rule("bottom_right_kraken") and kraken3 == False:
-        pi2.exec_command('raspi-gpio set 8 op dh')
-        kraken3 = True
-    if check_rule("bottom_left_kraken") and kraken4 == False:
-        pi2.exec_command('raspi-gpio set 1 op dh')
-        kraken4 = True
-    if check_rule("top_left_light") or check_rule("top_right_light") or check_rule("bottom_left_light") or check_rule("bottom_right_light"):
-        print("not solved")
-    else:
-        pi2.exec_command("mpg123 -a hw:2,0 Music/gelukt.mp3 \n raspi-gpio set 4 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 8 op dl \n raspi-gpio set 1 op dl")
-        time.sleep(3)
-        ssh.exec_command("raspi-gpio set 16 op dh")
-        time.sleep(6)
-        if should_balls_drop == True:
-            ssh.exec_command("raspi-gpio set 6 op dh")
-        load_command = f'echo "load /home/pi/Music/Dogsout.mp3" | sudo tee /tmp/mpg123_fifo'
-        pi2.exec_command(load_command)
+    #if check_rule("top_left_kraken") and kraken1 == False:
+        #pi2.exec_command('raspi-gpio set 4 op dh')
+        #kraken1 = True
+    #if check_rule("top_right_kraken") and kraken2 == False:
+        #pi2.exec_command('raspi-gpio set 7 op dh')
+        #kraken2 = True
+    #if check_rule("bottom_right_kraken") and kraken3 == False:
+        #pi2.exec_command('raspi-gpio set 8 op dh')
+        #kraken3 = True
+    #if check_rule("bottom_left_kraken") and kraken4 == False:
+        #pi2.exec_command('raspi-gpio set 1 op dh')
+        #kraken4 = True
+    #if check_rule("top_left_light") or check_rule("top_right_light") or check_rule("bottom_left_light") or check_rule("bottom_right_light"):
+        #print("not solved")
+    #else:
+        #pi2.exec_command("mpg123 -a hw:2,0 Music/gelukt.mp3 \n raspi-gpio set 4 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 8 op dl \n raspi-gpio set 1 op dl")
+        #time.sleep(3)
+        #ssh.exec_command("raspi-gpio set 16 op dh")
+        #time.sleep(6)
+        #if should_balls_drop == True:
+            #ssh.exec_command("raspi-gpio set 6 op dh")
+        #load_command = f'echo "load /home/pi/Music/Dogsout.mp3" | sudo tee /tmp/mpg123_fifo'
+        #pi2.exec_command(load_command)
     global sequence
     if check_rule("green_house_ir") and sequence == 0:
         task_state = check_task_state("tree-lights")
@@ -569,7 +569,7 @@ def fade_music_out3():
         command = f'echo "volume {volume}" | sudo tee /tmp/mpg123_fifo'
         stdin, stdout, stderr = pi2.exec_command(command)
         # Wait for a short duration between volume changes
-        time.sleep(0.05)  # Adjust the sleep duration as needed
+        time.sleep(0.2)  # Adjust the sleep duration as needed
 @app.route('/fade_music_in', methods=['POST'])
 def fade_music_in():
         # Gradually reduce the volume from 80 to 40
@@ -768,7 +768,8 @@ def get_task_status():
 def solve_task(task_name):
     global squeak_job, bird_job, code1, code2, code3, code4, code5
     file_path = os.path.join(current_dir, 'json', 'tasks.json')
-
+    global sequence, should_hint_shed_play
+    global codesCorrect
     try:
         with open(file_path, 'r+') as file:
             tasks = json.load(file)
@@ -783,48 +784,171 @@ def solve_task(task_name):
                 scheduler.add_job(start_squeak, 'interval', seconds=30, id='squeakjob')
                 squeak_job = True
             pi3.exec_command("mpg123 -a hw:0,0 Music/squeek.mp3")
+        elif task_name == "woef-woef":
+            retriever_status = get_retriever_status()
+            if retriever_status == {'status': 'playing'}:
+                if bird_job == True:
+                    scheduler.remove_job('birdjob')
+                    bird_job = False
+                pi3.exec_command("mpg123 -a hw:0,0 Music/hok.mp3 \n raspi-gpio set 4 op dh")
+        elif task_name == "squeekuence":
+            ssh.exec_command("raspi-gpio set 20 op dh")
+            retriever_status = get_retriever_status()
+            print(retriever_status)
+            if retriever_status == {'status': 'playing'}:
+                pi2.exec_command("sudo python sinus_game.py")
+                print("executed")
+                time.sleep(4)
+                pi2.exec_command("mpg123 -a hw:2,0 Music/lab_intro.mp3")
+                time.sleep(4)
+                load_command = f'echo "load /home/pi/Music/Background.mp3" | sudo tee /tmp/mpg123_fifo \n echo "volume 25" | sudo tee /tmp/mpg123_fifo'
+                pi2.exec_command(load_command)
+                time.sleep(1)
+                command = f'echo "volume 8" | sudo tee /tmp/mpg123_fifo'
+                stdin, stdout, stderr = pi3.exec_command(command)
+            if squeak_job == True:
+                scheduler.remove_job('squeakjob')
+                squeak_job = False
+        elif task_name == "flowers":
+            code1 = True
+            codesCorrect += 1
+            ssh.exec_command("raspi-gpio set 1 op dh")
+            fade_music_out()
+            time.sleep(2)
+            pi3.exec_command('mpg123 -a hw:0,0 Music/bloemen.mp3')
+            ssh.exec_command("raspi-gpio set 1 op dl")
+            time.sleep(10)
+            if codesCorrect == 3 or codesCorrect == 4:
+                fade_music_in()
+            elif codesCorrect == 2 or codesCorrect == 1:
+                print(codesCorrect)
+            elif code5 == False:
+                fade_music_in()
+        elif task_name == "kite-count":
+            code2 = True
+            codesCorrect += 1
+            ssh.exec_command("raspi-gpio set 1 op dh")
+            fade_music_out()
+            time.sleep(2)
+            pi3.exec_command('mpg123 -a hw:0,0 Music/vlieger.mp3')
+            ssh.exec_command("raspi-gpio set 1 op dl")
+            time.sleep(5)
+            if codesCorrect == 3 or codesCorrect == 4:
+                fade_music_in()
+            elif codesCorrect == 2 or codesCorrect == 1:
+                print(codesCorrect)
+            elif code5 == False:
+                fade_music_in()
+        elif task_name == "number-feel":
+            code3 = True
+            codesCorrect += 1
+            ssh.exec_command("raspi-gpio set 1 op dh")
+            fade_music_out()
+            time.sleep(2)
+            pi3.exec_command('mpg123 -a hw:0,0 Music/plantenbak.mp3')
+            ssh.exec_command("raspi-gpio set 1 op dl")
+            time.sleep(5)
+            if codesCorrect == 3 or codesCorrect == 4:
+                fade_music_in()
+            elif codesCorrect == 2 or codesCorrect == 1:
+                print(codesCorrect)
+            elif code5 == False:
+                fade_music_in()
+        elif task_name == "fence-decrypt":
+            code4 = True
+            codesCorrect += 1
+            ssh.exec_command("raspi-gpio set 1 op dh")
+            fade_music_out()
+            time.sleep(2)
+            pi3.exec_command('mpg123 -a hw:0,0 Music/hek.mp3')
+            ssh.exec_command("raspi-gpio set 1 op dl")
+            time.sleep(5)
+            if codesCorrect == 3 or codesCorrect == 4:
+                fade_music_in()
+            elif codesCorrect == 2 or codesCorrect == 1:
+                print(codesCorrect)
+            elif code5 == False:
+                fade_music_in()
         elif task_name == "sinus-game":
             pi2.exec_command("sudo pkill -f sinus_game.py")
             time.sleep(0.5)
             pi2.exec_command("sudo python sinus_override.py")
+        elif task_name == "squid-game":
+            retriever_status = get_retriever_status()
+            if retriever_status == {'status': 'playing'}:
+                pi2.exec_command("raspi-gpio set 4 op dh \n raspi-gpio set 7 op dh \n raspi-gpio set 8 op dh \n raspi-gpio set 1 op dh \n mpg123 -a hw:2,0 Music/gelukt.mp3")
+                time.sleep(3)
+                ssh.exec_command("raspi-gpio set 16 op dh")
+                time.sleep(6)
+                if should_balls_drop == True:
+                    ssh.exec_command("raspi-gpio set 6 op dh")
+                load_command = f'echo "load /home/pi/Music/Dogsout.mp3" | sudo tee /tmp/mpg123_fifo'
+                pi2.exec_command(load_command)
         elif task_name == "tree-lights":
             if bird_job == True:
                 scheduler.remove_job('birdjob')
                 bird_job = False
-            code5 = True
-            print("3")
-            pi3.exec_command("raspi-gpio set 23 op dh")
-            fade_out_thread = threading.Thread(target=fade_music_out)
-            fade_out_thread.start()
-            time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
-            time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
-            time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
-            time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
-            time.sleep(1)
-            pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
-            sequence = 0
-            time.sleep(1)
-            pi3.exec_command("mpg123 -a hw:0,0 Music/boom.mp3")
-            time.sleep(7)
-            if code1 and code2 and code3 and code4 and code5:
-                print("executed")
+            retriever_status = get_retriever_status()
+            if retriever_status == {'status': 'playing'}:
+                code5 = True
+                print("3")
+                pi3.exec_command("raspi-gpio set 23 op dh")
+                fade_out_thread = threading.Thread(target=fade_music_out)
+                fade_out_thread.start()
+                time.sleep(1)
+                pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+                time.sleep(1)
+                pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
+                time.sleep(1)
+                pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+                time.sleep(1)
+                pi3.exec_command("raspi-gpio set 23 op dh \n raspi-gpio set 21 op dh \n raspi-gpio set 15 op dh")
+                time.sleep(1)
+                pi3.exec_command("raspi-gpio set 23 op dl \n raspi-gpio set 21 op dl \n raspi-gpio set 15 op dl")
+                sequence = 0
+                time.sleep(1)
+                pi3.exec_command("mpg123 -a hw:0,0 Music/boom.mp3")
                 time.sleep(7)
-                pi3.exec_command('mpg123 -a hw:0,0 Music/schuur_open.mp3')
-                time.sleep(5)
-                fade_music_in()
-                pi3.exec_command('raspi-gpio set 16 op dh')
-                code1 = False
-                code2 = False
-                code3 = False
-                code4 = False
-                code5 = False
-            else:
-                fade_in_thread = threading.Thread(target=fade_music_in)
-                fade_in_thread.start()
+                if code1 and code2 and code3 and code4 and code5:
+                    print("executed")
+                    time.sleep(7)
+                    pi3.exec_command('mpg123 -a hw:0,0 Music/schuur_open.mp3')
+                    time.sleep(5)
+                    fade_music_in()
+                    pi3.exec_command('raspi-gpio set 16 op dh')
+                    code1 = False
+                    code2 = False
+                    code3 = False
+                    code4 = False
+                    code5 = False
+                else:
+                    fade_in_thread = threading.Thread(target=fade_music_in)
+                    fade_in_thread.start()
+        if code1 and code2 and code3 and code4 and code5:
+            print("executed")
+            time.sleep(2)
+            pi3.exec_command('mpg123 -a hw:0,0 Music/schuur_open.mp3')
+            time.sleep(5)
+            fade_music_in()
+            pi3.exec_command('raspi-gpio set 16 op dh')
+            code1 = False
+            code2 = False
+            code3 = False
+            code4 = False
+            code5 = False
+        if codesCorrect == 2:
+            codesCorrect += 1
+            time.sleep(2)
+            pi3.exec_command('mpg123 -a hw:0,0 Music/goed_bezig.mp3')
+            time.sleep(6)
+            fade_music_in()
+        if codesCorrect == 1 and should_hint_shed_play == True:
+            should_hint_shed_play = False
+            time.sleep(2)
+            pi3.exec_command('mpg123 -a hw:0,0 Music/after1code.mp3')
+            time.sleep(4)
+            fade_music_in()
+        print(code1, code2, code3, code4, code5)
         with app.app_context():
             return jsonify({'message': 'Task updated successfully'})
     except (FileNotFoundError, json.JSONDecodeError):
@@ -1153,9 +1277,6 @@ def control_maglock():
             return 'Maglock doghouse-lock is now locked'
         elif action == "unlocked":
             pi3.exec_command("raspi-gpio set 4 op dh")
-            retriever_status = get_retriever_status()
-            if retriever_status == {'status': 'playing'}:
-                pi3.exec_command("mpg123 -a hw:0,0 Music/hok.mp3")
             return 'Maglock doghouse-lock is now unlocked'
     elif maglock == "shed-door-lock":
         if action == "locked":
@@ -1195,23 +1316,6 @@ def control_maglock():
             return 'labhatch locked'
         elif action == "unlocked":
             ssh.exec_command("raspi-gpio set 20 op dh")
-            solve_task("squeekuence")
-            retriever_status = get_retriever_status()
-            print(retriever_status)
-            if retriever_status == {'status': 'playing'}:
-                pi2.exec_command("sudo python sinus_game.py")
-                print("executed")
-                time.sleep(4)
-                pi2.exec_command("mpg123 -a hw:2,0 Music/lab_intro.mp3")
-                time.sleep(4)
-                load_command = f'echo "load /home/pi/Music/Background.mp3" | sudo tee /tmp/mpg123_fifo \n echo "volume 25" | sudo tee /tmp/mpg123_fifo'
-                pi2.exec_command(load_command)
-                time.sleep(1)
-                command = f'echo "volume 8" | sudo tee /tmp/mpg123_fifo'
-                stdin, stdout, stderr = pi3.exec_command(command)
-            if squeak_job == True:
-                scheduler.remove_job('squeakjob')
-                squeak_job = False
             return 'exit unlocked'
     elif maglock == "sliding-door-lock":
         if action == "locked":
@@ -1319,101 +1423,21 @@ def monitor_sensor_statuses():
         if last_used_keypad_code != last_keypad_code:
             last_keypad_code = last_used_keypad_code  # Update the last keypad code
             if last_used_keypad_code == "1528" and code1 == False:
-                solve_task("flowers")
                 code1 = True
-                print(code1)
-                codesCorrect += 1
-                ssh.exec_command("raspi-gpio set 1 op dh")
-                fade_music_out()
-                time.sleep(2)
-                pi3.exec_command('mpg123 -a hw:0,0 Music/bloemen.mp3')
-                ssh.exec_command("raspi-gpio set 1 op dl")
-                time.sleep(10)
-                if codesCorrect == 2 or codesCorrect == 4:
-                    fade_music_in()
-                elif codesCorrect == 2 or codesCorrect == 1:
-                    print(codesCorrect)
-                elif code5 == False:
-                    fade_music_in()
+                solve_task("flowers")
             elif (last_used_keypad_code == "7867" or last_used_keypad_code == "8978") and code2 == False:
-                solve_task("kite-count")
                 code2 = True
-                codesCorrect += 1
-                print(code1)
-                ssh.exec_command("raspi-gpio set 1 op dh")
-                fade_music_out()
-                time.sleep(2)
-                pi3.exec_command('mpg123 -a hw:0,0 Music/vlieger.mp3')
-                ssh.exec_command("raspi-gpio set 1 op dl")
-                time.sleep(5)
-                if codesCorrect == 2 or codesCorrect == 4:
-                    fade_music_in()
-                elif codesCorrect == 2 or codesCorrect == 1:
-                    print(codesCorrect)
-                elif code5 == False:
-                    fade_music_in()
+                solve_task("kite-count")
             elif last_used_keypad_code == "0128" and code3 == False:
-                solve_task("number-feel")
                 code3 = True
-                codesCorrect += 1
-                print(code1)
-                ssh.exec_command("raspi-gpio set 1 op dh")
-                fade_music_out()
-                time.sleep(2)
-                pi3.exec_command('mpg123 -a hw:0,0 Music/plantenbak.mp3')
-                ssh.exec_command("raspi-gpio set 1 op dl")
-                time.sleep(5)
-                if codesCorrect == 2 or codesCorrect == 4:
-                    fade_music_in()
-                elif codesCorrect == 2 or codesCorrect == 1:
-                    print(codesCorrect)
-                elif code5 == False:
-                    fade_music_in()
+                solve_task("number-feel")
             elif last_used_keypad_code == "5038" and code4 == False:
-                solve_task("fence-decrypt")
                 code4 = True
-                print(code1)
-                codesCorrect += 1
-                ssh.exec_command("raspi-gpio set 1 op dh")
-                fade_music_out()
-                time.sleep(2)
-                pi3.exec_command('mpg123 -a hw:0,0 Music/hek.mp3')
-                ssh.exec_command("raspi-gpio set 1 op dl")
-                time.sleep(5)
-                if codesCorrect == 2 or codesCorrect == 4:
-                    fade_music_in()
-                elif codesCorrect == 2 or codesCorrect == 1:
-                    print(codesCorrect)
-                elif code5 == False:
-                    fade_music_in()
+                solve_task("fence-decrypt")
             else:
                 ssh.exec_command("raspi-gpio set 12 op dh")
                 time.sleep(1)
                 ssh.exec_command("raspi-gpio set 12 op dl")
-            if code1 and code2 and code3 and code4 and code5:
-                print("executed")
-                time.sleep(2)
-                pi3.exec_command('mpg123 -a hw:0,0 Music/schuur_open.mp3')
-                time.sleep(5)
-                fade_music_in()
-                pi3.exec_command('raspi-gpio set 16 op dh')
-                code1 = False
-                code2 = False
-                code3 = False
-                code4 = False
-                code5 = False
-            if codesCorrect == 3:
-                codesCorrect += 1
-                time.sleep(2)
-                pi3.exec_command('mpg123 -a hw:0,0 Music/goed_bezig.mp3')
-                time.sleep(6)
-                fade_music_in()
-            if codesCorrect == 1 and should_hint_shed_play == True:
-                should_hint_shed_play = False
-                time.sleep(2)
-                pi3.exec_command('mpg123 -a hw:0,0 Music/after1code.mp3')
-                time.sleep(4)
-                fade_music_in()
         if sinus_status == "solved" and aborted == False:
             solve_task("sinus-game")
             #pi2.exec_command("mpg123 -a hw:1,0 Music/pentakill.mp3")
@@ -1664,13 +1688,16 @@ def start_timer():
 
 @app.route('/timer/stop', methods=['POST'])
 def stop_timer():
-    global timer_thread, timer_running, timer_value, kraken1, kraken2, kraken3, kraken4
+    global timer_thread, timer_running, timer_value, kraken1, kraken2, kraken3, kraken4, bird_job
     update_retriever_status('awake')
     pi2.exec_command("raspi-gpio set 4 op dl \n raspi-gpio set 7 op dl \n raspi-gpio set 8 op dl \n raspi-gpio set 1 op dl")
     kraken1 = False
     kraken2 = False
     kraken3 = False
     kraken4 = False
+    if bird_job == True:
+        scheduler.remove_job('birdjob')
+        bird_job = False
     reset_task_statuses()
     stop_music()
     if timer_thread is not None and timer_thread.is_alive():
@@ -1851,7 +1878,7 @@ def prepare_game():
     print("Preparation complete.")
     if retriever_status != {'status': 'prepared'}:
         pi2.exec_command("nohup python status.py > /dev/null 2>&1 &")
-        load_command = f'echo "load /home/pi/Music/Lounge.mp3" | sudo tee /tmp/mpg123_fifo'
+        load_command = f'echo "load /home/pi/Music/Lounge.mp3" | sudo tee /tmp/mpg123_fifo \n echo "volume 65" | sudo tee /tmp/mpg123_fifo'
         pi3.exec_command(load_command)
     results = check_all_scripts()
     

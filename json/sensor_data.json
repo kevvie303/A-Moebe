@@ -32,14 +32,14 @@
         "type": "Sensor",
         "pin": 23,
         "pi": "middle-pi",
-        "state": "Triggered"
+        "state": "Not Triggered"
     },
     {
         "name": "top_right_kraken",
         "type": "Sensor",
         "pin": 20,
         "pi": "middle-pi",
-        "state": "Triggered"
+        "state": "Not Triggered"
     },
     {
         "name": "light-1-garden",
@@ -102,14 +102,14 @@
         "type": "Sensor",
         "pin": 16,
         "pi": "middle-pi",
-        "state": "Triggered"
+        "state": "Not Triggered"
     },
     {
         "name": "maze-sensor",
         "type": "Sensor",
         "pin": 18,
         "pi": "middle-pi",
-        "state": "Not Triggered"
+        "state": "Triggered"
     },
     {
         "name": "top_left_light",
@@ -123,20 +123,20 @@
         "type": "light",
         "pin": 7,
         "pi": "middle-pi",
-        "state": "Off"
+        "state": "On"
     },
     {
         "name": "bottom_right_light",
         "type": "light",
         "pin": 8,
         "pi": "middle-pi",
-        "state": "Off"
+        "state": "On"
     },
     {
         "name": "bottom_left_light",
         "type": "light",
         "pin": 1,
         "pi": "middle-pi",
-        "state": "Off"
+        "state": "On"
     }
 ]
