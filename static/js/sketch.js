@@ -155,20 +155,20 @@ function sendLightControlRequest(lightName) {
 }
 $(document).ready(function () {
   // Handle button click for both turning on and off
-  $(".lock-buttons button").click(function () {
+  $(".cb").change(function () {
     var maglockName = $(this).closest(".lock").find("p").text();
-    var action = $(this).hasClass("turn-on-button") ? "locked" : "unlocked";
+    var action = this.checked ? "locked" : "unlocked";
 
     $.ajax({
-      type: "POST",
-      url: "/control_maglock",
-      data: { maglock: maglockName, action: action },
-      success: function (response) {
-        console.log(response);
-      },
-      error: function (error) {
-        console.log(error);
-      },
+        type: "POST",
+        url: "/control_maglock",
+        data: { maglock: maglockName, action: action },
+        success: function (response) {
+            console.log(response);
+        },
+        error: function (error) {
+            console.log(error);
+        },
     });
     console.log(maglockName + action);
     if (maglockName === "exit-door-lock" && action === "unlocked") {
