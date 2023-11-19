@@ -813,6 +813,8 @@ def solve_task(task_name):
             code1 = True
             codesCorrect += 1
             ssh.exec_command("raspi-gpio set 1 op dh")
+            pi3.exec_command("mpg123 -a hw:0,0 Music/correct-effect.mp3")
+            time.sleep(1)
             fade_music_out()
             time.sleep(2)
             pi3.exec_command('mpg123 -a hw:0,0 Music/bloemen.mp3')
@@ -828,6 +830,8 @@ def solve_task(task_name):
             code2 = True
             codesCorrect += 1
             ssh.exec_command("raspi-gpio set 1 op dh")
+            pi3.exec_command("mpg123 -a hw:0,0 Music/correct-effect.mp3")
+            time.sleep(1)
             fade_music_out()
             time.sleep(2)
             pi3.exec_command('mpg123 -a hw:0,0 Music/vlieger.mp3')
@@ -843,6 +847,8 @@ def solve_task(task_name):
             code3 = True
             codesCorrect += 1
             ssh.exec_command("raspi-gpio set 1 op dh")
+            pi3.exec_command("mpg123 -a hw:0,0 Music/correct-effect.mp3")
+            time.sleep(1)
             fade_music_out()
             time.sleep(2)
             pi3.exec_command('mpg123 -a hw:0,0 Music/plantenbak.mp3')
@@ -858,6 +864,8 @@ def solve_task(task_name):
             code4 = True
             codesCorrect += 1
             ssh.exec_command("raspi-gpio set 1 op dh")
+            pi3.exec_command("mpg123 -a hw:0,0 Music/correct-effect.mp3")
+            time.sleep(1)
             fade_music_out()
             time.sleep(2)
             pi3.exec_command('mpg123 -a hw:0,0 Music/hek.mp3')
@@ -890,6 +898,8 @@ def solve_task(task_name):
                 bird_job = False
             retriever_status = get_retriever_status()
             if retriever_status == {'status': 'playing'}:
+                pi3.exec_command("mpg123 -a hw:0,0 Music/correct-effect.mp3")
+                time.sleep(1)
                 code5 = True
                 print("3")
                 pi3.exec_command("raspi-gpio set 23 op dh")
