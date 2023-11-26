@@ -1,0 +1,361 @@
+@import "../helpers/_variables";
+
+/*
+  #######
+  pop ups
+  #######
+  */
+
+.media-hidden,
+.time-hidden,
+.pi-hidden,
+.game-hidden,
+.tasks-hidden {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.media-hidden .media,
+.time-hidden .time,
+.pi-hidden .pi,
+.game-hidden .game-controls,
+.tasks-hidden .task-control {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  border-radius: 15px;
+  padding: 30px;
+  background: var(--secondary-background-color);
+  align-items: center;
+  margin: 20px;
+  position: relative;
+  max-width: 500px;
+}
+
+.close {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+/*
+    #####
+    media
+    #####
+    */
+
+.media-hidden .media div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+  align-items: center;
+  width: 100%;
+}
+
+.media-hidden .media div button,
+.media-hidden .media div a {
+  width: 150px;
+}
+
+/*
+    ####
+    time
+    ####
+    */
+
+.time-hidden .time .time-display {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.time-hidden .time .time-display .timer p,
+.time-hidden .time .time-display .speed-display p {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.time-hidden .time .time-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.time-hidden .time .time-controls .speed-up-slow-down {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+}
+
+.time-hidden .time .time-controls .speed-up-slow-down button,
+.time-hidden .time .time-controls .reset-speed button {
+  width: 150px;
+}
+
+.time-hidden .time .time-controls .reset-speed {
+  display: flex;
+  width: fit-content;
+}
+
+/*
+    ##
+    pi
+    ##
+    */
+
+.pi-hidden .pi .reboot,
+.pi-hidden .pi .backup {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pi-hidden .pi .pies {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pi-hidden .pi .pi-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/*
+    ####
+    game
+    ####
+    */
+
+.game-hidden .game-controls .game-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.game-hidden .game-controls .game-buttons {
+  width: fit-content;
+}
+
+.game-hidden .game-controls .abort p {
+  text-align: center;
+}
+
+.game-hidden .game-controls .abort button {
+  width: fit-content;
+  align-self: center;
+  background: var(--locked);
+}
+
+.message-shown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/*
+    #####
+    tasks
+    #####
+    */
+
+.tasks-hidden .task-control .task-control-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 70%;
+}
+
+.tasks-hidden .task-control .task-control-container .current-state {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.tasks-hidden .task-control .task-control-container .button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.tasks-hidden .task-control .task-control-container .button-container button {
+  width: 100%;
+}
+
+.tasks-hidden
+  .task-control
+  .task-control-container
+  .button-container
+  button.solved-button {
+  background: var(--unlocked);
+}
+
+.tasks-hidden
+  .task-control
+  .task-control-container
+  .button-container
+  button.overdue-button {
+  background: var(--locked);
+}
+
+/*
+    #############
+    media queries
+    #############
+    */
+
+@media (min-width: 576px) {
+  .media-hidden .media,
+  .time-hidden .time,
+  .pi-hidden .pi,
+  .game-hidden .game-controls,
+  .tasks-hidden .task-control {
+    width: 400px;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .media-hidden .media,
+  .time-hidden .time,
+  .pi-hidden .pi,
+  .game-hidden .game-controls,
+  .tasks-hidden .task-control {
+    width: 500px;
+    margin-top: 20px;
+    padding: 30px 40px;
+  }
+}
+
+/*
+    ############################
+    file selection/media control
+    ############################
+    */
+
+.selection-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 20px;
+}
+
+.file-selection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  list-style-type: none;
+}
+
+/*
+    ##############
+    file selection
+    ##############
+    */
+
+.file-selection-container .file-selection-list .file-select {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+}
+
+.file-selection-container .file-selection-list .file-select .button-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 5px;
+}
+
+.file-selection-container
+  .file-selection-list
+  .file-select
+  .button-container
+  button {
+  width: 100%;
+  font-size: 14px;
+}
+
+/*
+    #############
+    media control
+    #############
+    */
+
+.media-selection-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.media-selection-container form select {
+  border: none;
+  padding: 5px;
+  font-family: "Averia Serif Libre";
+  border-radius: 3px;
+  width: 100%;
+}
+
+.media-selection-container form input {
+  width: fit-content;
+}
+
+.control-container .locks,
+.control-container .lock-status,
+.control-container .tasks,
+.control-container #prepare-result {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+  margin: 0 20px;
+  max-width: 500px;
+  /* width: 80%; */
+  border-radius: 15px;
+  padding: 20px 30px;
+  background: var(--secondary-background-color);
+}
+
+/*
+#########
+preparing
+#########
+*/
+
+.control-container {
+  #prepare-result {
+    #results-section {
+      #device-status {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        #prepare-status-container {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+      }
+    }
+  }
+}

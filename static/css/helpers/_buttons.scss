@@ -1,0 +1,50 @@
+@import "_variables";
+
+/*
+  #######
+  buttons
+  #######
+  */
+
+button {
+  background: none;
+  border: none;
+}
+
+.button-style {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  color: var(--secondary-text-color);
+  align-items: center;
+  cursor: pointer;
+  background: var(--button-color);
+  text-align: center;
+}
+
+.button-style:hover {
+  background: var(--button-color-hover);
+}
+
+.icon {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/*
+    #############
+    button states
+    #############
+    */
+
+button:active {
+  border: 1px solid black;
+}
+
+button:focus {
+  border: 2px dotted black;
+  outline: none;
+}
