@@ -24,13 +24,13 @@ First update the pi with the following commands:
 `sudo reboot`  
 Reconnect to the pi and enter the following commands:  
 
-`git config --global user.email "kvbaar@hotmail.nl"`  
+`git config --global user.email "[myemail]"`  
 `git config --global user.name "Kevin"`  
-`ssh-keygen -t ed25519 -C "kvbaar@hotmail.nl"`  
+`ssh-keygen -t ed25519 -C "[myemail]"`  
 Then press enter 3 times.  
 `eval "$(ssh-agent -s)"`  
 `ssh-add ~/.ssh/id_ed25519`  
 `cat ~/.ssh/id_ed25519.pub`  
-Now you copy everything that it gives as a return, for example: "ssh-ed25519 fiuhewhiufheuifrehriufersugiegierbugsbibisigb kvbaar@hotmail.nl"  
+Now you copy everything that it gives as a return, for example: "ssh-ed25519 fiuhewhiufheuifrehriufersugiegierbugsbibisigb [myemail]"  
 `git remote set-url origin git@github.com:kevvie303/[pi].git`, where [pi] needs to be replaced entirely by the name of the right pi, look above for the names.  
 
