@@ -817,6 +817,41 @@ main {
   gap: 20px;
 }
 
+section.control-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+section.control-container section.control {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+  margin: 0 20px;
+  max-width: 500px;
+  /* width: 80%; */
+  border-radius: 15px;
+  padding: 20px 30px;
+  background: var(--secondary-background-color);
+}
+section.control-container section.control ul#reset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+section.control-container section.control ul#reset-list li {
+  display: flex;
+  align-items: center;
+}
+section.control-container section.control ul#reset-list li input[type=checkbox] {
+  margin-right: 10px;
+}
+
 .control-container .locks,
 .control-container .lock-status,
 .control-container .tasks,
