@@ -20,12 +20,12 @@ load_dotenv()
 app = Flask(__name__)
 socketio = SocketIO(app)
 #command = 'python relay_control.py'
-loadMqtt = False
+loadMqtt = True
 ssh = None
 stdin = None
 pi2 = None
 pi3 = None
-romy = True
+romy = False
 last_keypad_code = None
 aborted = False
 fade_duration = 3  # Fade-out duration in seconds
@@ -344,10 +344,10 @@ def lock_route():
 def execute_lock_command(task):
     try:
         # Add logic to map tasks to corresponding SSH commands for locking
-        if task == "Doe de entree deur dicht":
-            print("locked")
-            #command = "raspi-gpio set 25 op dl"
-            #stdin, stdout, stderr = pi3.exec_command(command)
+        if task == "Leg het laatste puzzelstuk in de schuur in de eerste kamer en doe de schuur dicht":
+            print("unlocked")
+            command = "raspi-gpio set 16 op dl"
+            stdin, stdout, stderr = pi3.exec_command(command)
             # You can handle the command execution results if needed
         # Add more mappings as needed
     except Exception as e:
@@ -356,10 +356,10 @@ def execute_lock_command(task):
 def execute_unlock_command(task):
     try:
         # Add logic to map tasks to corresponding SSH commands for unlocking
-        if task == "Doe de entree deur dicht":
+        if task == "Leg het laatste puzzelstuk in de schuur in de eerste kamer en doe de schuur dicht":
             print("unlocked")
-            #command = "raspi-gpio set 25 op u"
-            #stdin, stdout, stderr = pi3.exec_command(command)
+            command = "raspi-gpio set 16 op dh"
+            stdin, stdout, stderr = pi3.exec_command(command)
             # You can handle the command execution results if needed
         # Add more mappings as needed
     except Exception as e:
@@ -380,6 +380,24 @@ def update_checklist(task, is_checked):
             json.dump(checklist_data, file, indent=2)
     except Exception as e:
         print(f"Error updating checklist: {str(e)}")
+@app.route('/reset-checklist', methods=['POST'])
+def reset_checklist():
+    try:
+        # Read the current checklist data
+        with open(CHECKLIST_FILE, 'r') as file:
+            checklist_data = json.load(file)
+
+        # Reset the completed status of all tasks
+        for item in checklist_data:
+            item['completed'] = False
+
+        # Write the updated data back to the file
+        with open(CHECKLIST_FILE, 'w') as file:
+            json.dump(checklist_data, file, indent=2)
+        socketio.emit('checklist_update', "message", room="all_clients")
+    except Exception as e:
+        print(f"Error resetting checklist: {str(e)}")
+    return jsonify({'success': True, 'message': 'Checklist reset successfully'})
 @app.route('/get-checklist', methods=['GET'])
 def get_checklist_route():
     try:

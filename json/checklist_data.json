@@ -1,42 +1,66 @@
 [
   {
-    "task": "Doe de entree deur dicht",
+    "task": "Trek de 4 planten uit de plantenbak en zet 4 random planten terug",
     "completed": false
   },
   {
-    "task": "Reset de cijfercode op het slot",
+    "task": "Zet de overgebleven planten in de hoekjes van de kamer",
     "completed": false
   },
   {
-    "task": "Plaats de ontbrekende sleutel terug in de kluis",
+    "task": "Doe de plank van de voelpuzzel terug",
     "completed": false
   },
   {
-    "task": "Sluit het geheime luik",
+    "task": "Leg de letter M achter 1 van de planten",
     "completed": false
   },
   {
-    "task": "Herstel de oorspronkelijke staat van de boekenkast",
+    "task": "Leg de letter A onder het witte hondentouw in het midden van de kamer",
     "completed": false
   },
   {
-    "task": "Zet alle puzzelstukken terug op hun oorspronkelijke plek",
+    "task": "Leg de letter X achter het voerbakje naast Max' hok",
     "completed": false
   },
   {
-    "task": "Reset de piano naar de standaardtoonladder",
+    "task": "Leg het gereedschap verspreid terug in de schuur",
     "completed": false
   },
   {
-    "task": "Vouw de kaart met aanwijzingen terug op de juiste manier",
+    "task": "Leg de golfbal voor de boom op de grond",
     "completed": false
   },
   {
-    "task": "Schakel het alarmsysteem opnieuw in",
+    "task": "Controleer of de text \"woef woef\" nog in de deur vast zit",
     "completed": false
   },
   {
-    "task": "Berg alle hints en aanwijzingen op",
+    "task": "Breng de magneet die in het doolhof zit weer terug naar het startpunt",
+    "completed": false
+  },
+  {
+    "task": "Sluit het bord van het doolhof en leg de sleutel in een van de houten vierkantjes in de vakantiekamer",
+    "completed": false
+  },
+  {
+    "task": "Pak het rode kistje en doe hier de blauwe en groene bal in, dan op slot met code 6123",
+    "completed": false
+  },
+  {
+    "task": "Plaats rode kistje en de foto van Denemarken en zet deze onderin de schuur",
+    "completed": false
+  },
+  {
+    "task": "Zet de rest van de foto's op willekeurige volgorde op de plankjes in de vakanatiekamer",
+    "completed": false
+  },
+  {
+    "task": "Haal alle puzzelsstukken uit het frame en verspreid er 5 door deze kamer",
+    "completed": false
+  },
+  {
+    "task": "Leg het laatste puzzelstuk in de schuur in de eerste kamer en doe de schuur dicht",
     "completed": false
   }
 ]
